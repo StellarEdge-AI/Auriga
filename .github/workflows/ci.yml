@@ -15,6 +15,11 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg bubblewrap util-linux python3 libc-bin libstdc++6 ripgrep
+      # The Codex sandbox and its tests use unprivileged user namespaces, which Ubuntu runners restrict via AppArmor.
+      - run: |
+          if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
+            sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          fi
       - run: python -m pip install -r requirements.lock.txt
       - run: npm ci --prefix web
       - run: python -m unittest discover -s tests
