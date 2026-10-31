@@ -1,0 +1,8 @@
+{
+  "transport_format": "webp",
+  "webp_quality": 85,
+  "webp_method": 4,
+  "jpeg_quality": 95,
+  "storage_jpeg_quality": 95,
+  "reuse_exact_images": true
+}

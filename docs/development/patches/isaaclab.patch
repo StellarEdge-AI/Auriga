@@ -1,0 +1,34 @@
+diff --git a/source/isaaclab/isaaclab/app/app_launcher.py b/source/isaaclab/isaaclab/app/app_launcher.py
+index 8e0f5c3..d795032 100644
+--- a/source/isaaclab/isaaclab/app/app_launcher.py
++++ b/source/isaaclab/isaaclab/app/app_launcher.py
+@@ -709,6 +709,16 @@ class AppLauncher:
+         # as the active_gpu device. Setting physics_gpu explicitly may result in a different device to be used.
+         launcher_args["physics_gpu"] = self.device_id
+         launcher_args["active_gpu"] = self.device_id
++        # CUDA_VISIBLE_DEVICES does not remap Vulkan renderer device indices.
++        # RoboDojo can keep CUDA/PhysX on logical 0 while selecting its render GPU.
++        render_gpu = os.environ.get("ROBODOJO_RENDER_GPU")
++        if render_gpu is not None:
++            render_gpu = int(render_gpu)
++            if render_gpu < 0:
++                raise ValueError("ROBODOJO_RENDER_GPU must be a nonnegative Vulkan device index")
++            launcher_args["active_gpu"] = render_gpu
++            launcher_args["multi_gpu"] = False
++            print(f"[INFO][AppLauncher]: CUDA GPU {self.device_id}; Vulkan render GPU {render_gpu}")
+ 
+         print(f"[INFO][AppLauncher]: Using device: {device}")
+ 
+diff --git a/source/isaaclab/setup.py b/source/isaaclab/setup.py
+index 369bf5b..4e3001f 100644
+--- a/source/isaaclab/setup.py
++++ b/source/isaaclab/setup.py
+@@ -37,7 +37,7 @@ INSTALL_REQUIRES = [
+     # make sure this is consistent with isaac sim version
+     "pillow==11.3.0",
+     # livestream
+-    "starlette==0.49.1",
++    "starlette==0.45.3",  # Isaac Sim 5.1 fastapi requires starlette<0.46
+     # testing
+     "pytest",
+     "pytest-mock",

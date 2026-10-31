@@ -1,0 +1,255 @@
+{
+  "schema_version": "0.1",
+  "data_origin": "synthetic_fixture",
+  "description": "Offline supplied analytic geometry, not RGB reconstruction or physical prediction.",
+  "artifacts": [
+    {
+      "artifact_id": "83c1c13a32583e56e33eafaf162e210ddbdbc5da02399f8a0a0cafa636392a86",
+      "kind": "rgb",
+      "mime_type": "image/x-portable-pixmap",
+      "byte_size": 49,
+      "sha256": "83c1c13a32583e56e33eafaf162e210ddbdbc5da02399f8a0a0cafa636392a86",
+      "storage_key": "scene_rgb.ppm",
+      "access_scope": "actor",
+      "data_origin": "synthetic_fixture"
+    },
+    {
+      "artifact_id": "ca2391088e39874e8da3b7d9a1118dc3576a236bc675698d358503d0905b7729",
+      "kind": "robot_state",
+      "mime_type": "application/json",
+      "byte_size": 360,
+      "sha256": "ca2391088e39874e8da3b7d9a1118dc3576a236bc675698d358503d0905b7729",
+      "storage_key": "scene_robot_state.json",
+      "access_scope": "actor",
+      "data_origin": "synthetic_fixture"
+    },
+    {
+      "artifact_id": "9c2fe7740025611920b8e0ee56dfb408425730343c63b03262ba732597fe4d60",
+      "kind": "calibration",
+      "mime_type": "application/json",
+      "byte_size": 482,
+      "sha256": "9c2fe7740025611920b8e0ee56dfb408425730343c63b03262ba732597fe4d60",
+      "storage_key": "scene_calibration.json",
+      "access_scope": "actor",
+      "data_origin": "synthetic_fixture"
+    }
+  ],
+  "observations": [
+    {
+      "schema_version": "0.1",
+      "run_id": "run-scene-fixture",
+      "episode_id": "episode-1",
+      "env_instance_id": "scene-fixture",
+      "env_generation": 1,
+      "world_kind": "observed",
+      "data_origin": "synthetic_fixture",
+      "observation_id": "obs-scene-0",
+      "sim_step": 0,
+      "step_domain": "adapter_control_step",
+      "sim_time_s": null,
+      "clock_domain": "scene-fixture/generation-1",
+      "observation_profile": "rgb_proprio_calibrated_synthetic_v1",
+      "robot_model_id": "synthetic-geometry-only-v1",
+      "calibration_id": "synthetic-calibration-1",
+      "cameras": [
+        {
+          "camera_id": "fixture_camera",
+          "frame_id": "frame-scene-0",
+          "rgb_ref": "artifact:83c1c13a32583e56e33eafaf162e210ddbdbc5da02399f8a0a0cafa636392a86",
+          "width": 2,
+          "height": 2,
+          "pixel_transform": "identity",
+          "calibration_ref": "artifact:9c2fe7740025611920b8e0ee56dfb408425730343c63b03262ba732597fe4d60",
+          "pose_sample_ref": null,
+          "capture_time_ref": null
+        }
+      ],
+      "robot_state_ref": "artifact:ca2391088e39874e8da3b7d9a1118dc3576a236bc675698d358503d0905b7729",
+      "last_action_id": null
+    },
+    {
+      "schema_version": "0.1",
+      "run_id": "run-scene-fixture",
+      "episode_id": "episode-1",
+      "env_instance_id": "scene-fixture",
+      "env_generation": 1,
+      "world_kind": "observed",
+      "data_origin": "synthetic_fixture",
+      "observation_id": "obs-scene-1",
+      "sim_step": 1,
+      "step_domain": "adapter_control_step",
+      "sim_time_s": null,
+      "clock_domain": "scene-fixture/generation-1",
+      "observation_profile": "rgb_proprio_calibrated_synthetic_v1",
+      "robot_model_id": "synthetic-geometry-only-v1",
+      "calibration_id": "synthetic-calibration-1",
+      "cameras": [
+        {
+          "camera_id": "fixture_camera",
+          "frame_id": "frame-scene-1",
+          "rgb_ref": "artifact:83c1c13a32583e56e33eafaf162e210ddbdbc5da02399f8a0a0cafa636392a86",
+          "width": 2,
+          "height": 2,
+          "pixel_transform": "identity",
+          "calibration_ref": "artifact:9c2fe7740025611920b8e0ee56dfb408425730343c63b03262ba732597fe4d60",
+          "pose_sample_ref": null,
+          "capture_time_ref": null
+        }
+      ],
+      "robot_state_ref": "artifact:ca2391088e39874e8da3b7d9a1118dc3576a236bc675698d358503d0905b7729",
+      "last_action_id": null
+    }
+  ],
+  "patches": [
+    {
+      "schema_version": "0.1",
+      "run_id": "run-scene-fixture",
+      "episode_id": "episode-1",
+      "env_instance_id": "scene-fixture",
+      "env_generation": 1,
+      "world_kind": "internal",
+      "data_origin": "synthetic_fixture",
+      "base_scene_version": 0,
+      "observation_ids": [
+        "obs-scene-0"
+      ],
+      "builder_digest": "de61079204c1c6410b5af7e851f46384dc42d2db3f426e98464294ad5048799f",
+      "frame_id": "robot_base",
+      "operations": [
+        {
+          "op": "upsert_geometry",
+          "entity_id": "table",
+          "geometry": {
+            "kind": "plane",
+            "origin_m": [
+              0,
+              0,
+              0
+            ],
+            "axis_u": [
+              1,
+              0,
+              0
+            ],
+            "axis_v": [
+              0,
+              1,
+              0
+            ],
+            "bounds_uv_m": [
+              [
+                -1,
+                1
+              ],
+              [
+                -1,
+                1
+              ]
+            ]
+          },
+          "source_kind": "explicit_prior",
+          "assumptions": [
+            "Analytic fixture supplies the finite plane; not inferred from RGB."
+          ],
+          "uncertainty": "exact_synthetic_geometry"
+        },
+        {
+          "op": "upsert_geometry",
+          "entity_id": "box",
+          "geometry": {
+            "kind": "box",
+            "min_m": [
+              0.2,
+              0.2,
+              0.0
+            ],
+            "max_m": [
+              0.4,
+              0.4,
+              0.2
+            ]
+          },
+          "source_kind": "explicit_prior",
+          "assumptions": [
+            "Analytic fixture supplies all box faces; back faces are not observed."
+          ],
+          "uncertainty": "exact_synthetic_geometry"
+        },
+        {
+          "op": "mark_unknown",
+          "region": "outside_supplied_proxy_support",
+          "reason": "No observation supports other geometry or occupancy.",
+          "source_kind": "observation_inference"
+        }
+      ]
+    }
+  ],
+  "queries": [
+    {
+      "run_id": "run-scene-fixture",
+      "episode_id": "episode-1",
+      "env_instance_id": "scene-fixture",
+      "env_generation": 1,
+      "scene_version": 1,
+      "kind": "ray_surface",
+      "entity_id": "table",
+      "origin_m": [
+        0,
+        0,
+        1
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    {
+      "run_id": "run-scene-fixture",
+      "episode_id": "episode-1",
+      "env_instance_id": "scene-fixture",
+      "env_generation": 1,
+      "scene_version": 1,
+      "kind": "distance",
+      "entity_id": "box",
+      "point_m": [
+        0.5,
+        0.3,
+        0.1
+      ]
+    },
+    {
+      "run_id": "run-scene-fixture",
+      "episode_id": "episode-1",
+      "env_instance_id": "scene-fixture",
+      "env_generation": 1,
+      "scene_version": 1,
+      "kind": "ray_surface",
+      "entity_id": "table",
+      "origin_m": [
+        2,
+        0,
+        1
+      ],
+      "direction": [
+        0,
+        0,
+        -1
+      ]
+    }
+  ],
+  "expected": {
+    "query_statuses": [
+      "conditional",
+      "conditional",
+      "unknown"
+    ],
+    "ray_point_m": [
+      0,
+      0,
+      0
+    ],
+    "box_distance_m": 0.1
+  },
+  "fixture_digest": "4500e557c929112891b8a07d31abb95f88338b0432efd35bbce60336d4e5bdf0"
+}

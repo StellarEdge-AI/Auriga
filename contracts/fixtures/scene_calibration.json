@@ -1,0 +1,30 @@
+{
+  "schema_version": "0.1",
+  "data_origin": "synthetic_fixture",
+  "calibration_id": "synthetic-calibration-1",
+  "camera_id": "fixture_camera",
+  "width": 2,
+  "height": 2,
+  "K": [
+    [
+      1.0,
+      0.0,
+      0.5
+    ],
+    [
+      0.0,
+      1.0,
+      0.5
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "distortion_model": "none",
+  "optical_frame_axes": "x right, y down, z forward",
+  "limitations": [
+    "No pixel geometry query in this milestone."
+  ]
+}

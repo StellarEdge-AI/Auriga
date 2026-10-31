@@ -1,0 +1,17 @@
+{
+  "group_id": "robodojo-42-15",
+  "partition_id": "partition-2",
+  "tasks": [
+    "pack_objects_into_box",
+    "stack_bowls",
+    "fold_clothes",
+    "pour_balls_into_vase",
+    "plug_in_charger",
+    "play_stacking_toy",
+    "fill_egg_holder",
+    "imitate_sorting_sequence",
+    "swap_T",
+    "pick_from_conveyor_by_image",
+    "general_pickup"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "model": {
+    "name": "gpt-6.1-sol",
+    "effort": "high",
+    "native_memories": true
+  },
+  "features": {
+    "grasp_memory_dir": "~/.local/share/auriga/grasp-memory"
+  }
+}

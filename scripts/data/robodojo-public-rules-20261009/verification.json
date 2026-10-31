@@ -1,0 +1,520 @@
+{
+  "source_basis": "42 live official task pages; all HTTP 200; no archived fallback",
+  "fetched_at_first": "2026-10-09T06:14:33.402581+00:00",
+  "fetched_at_last": "2026-10-09T06:14:33.731583+00:00",
+  "source_page_count": 42,
+  "runtime_task_count": 54,
+  "random_variant_count": 12,
+  "scoring_rows_including_headers": 189,
+  "scoring_cells": 378,
+  "task_info_cells": 172,
+  "verification": "Independent regex cell extraction matches every catalog section and scoring cell; deterministic HTMLParser rebuild matches catalog.",
+  "pages": [
+    {
+      "task": "align_blocks",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 4,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "arrange_largest_number",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Comment",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 8,
+      "task_info_cells": 6,
+      "scoring_cells": 16,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "build_tower",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 5,
+      "task_info_cells": 4,
+      "scoring_cells": 10,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "classify_objects",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 5,
+      "task_info_cells": 4,
+      "scoring_cells": 10,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "classify_objects_by_language",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 5,
+      "task_info_cells": 4,
+      "scoring_cells": 10,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "cover_blocks",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 6,
+      "task_info_cells": 4,
+      "scoring_cells": 12,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "deposit_coin",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 4,
+      "task_info_cells": 4,
+      "scoring_cells": 8,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "fasten_screws",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 5,
+      "task_info_cells": 4,
+      "scoring_cells": 10,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "fill_egg_holder",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 7,
+      "task_info_cells": 4,
+      "scoring_cells": 14,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "fill_pen_holder",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 7,
+      "task_info_cells": 4,
+      "scoring_cells": 14,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "fold_clothes",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 4,
+      "task_info_cells": 4,
+      "scoring_cells": 8,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "general_pickup",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 4,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "hang_mugs",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 5,
+      "task_info_cells": 4,
+      "scoring_cells": 10,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "imitate_sorting_sequence",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 7,
+      "task_info_cells": 4,
+      "scoring_cells": 14,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "insert_key",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 4,
+      "task_info_cells": 4,
+      "scoring_cells": 8,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "insert_tubes",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 5,
+      "task_info_cells": 4,
+      "scoring_cells": 10,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "make_kong",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 4,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "make_toast",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 5,
+      "task_info_cells": 4,
+      "scoring_cells": 10,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "match_and_pick_from_conveyor",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 4,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "organize_table",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 6,
+      "task_info_cells": 4,
+      "scoring_cells": 12,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "pack_objects_into_box",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 6,
+      "task_info_cells": 4,
+      "scoring_cells": 12,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "pick_from_conveyor_by_image",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 4,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "play_Xylophone",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 4,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "play_stacking_toy",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 6,
+      "task_info_cells": 4,
+      "scoring_cells": 12,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "play_tic_tac_toe",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 7,
+      "task_info_cells": 4,
+      "scoring_cells": 14,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "plug_in_charger",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 4,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "pour_balls_into_vase",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 4,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "pour_by_language",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 5,
+      "task_info_cells": 4,
+      "scoring_cells": 10,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "pour_liquid_into_cup",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 4,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "press_by_number",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 4,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "push_T",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 4,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "put_bottles_into_dustbin",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 6,
+      "task_info_cells": 4,
+      "scoring_cells": 12,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "solve_equation",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Comment",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 6,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "sort_nesting_dolls_by_size",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 4,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "stack_blocks",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 4,
+      "task_info_cells": 4,
+      "scoring_cells": 8,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "stack_blocks_by_language",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 4,
+      "task_info_cells": 4,
+      "scoring_cells": 8,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "stack_bowls",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 4,
+      "task_info_cells": 4,
+      "scoring_cells": 8,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "store_laptop_and_headphones",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 5,
+      "task_info_cells": 4,
+      "scoring_cells": 10,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "store_tools_in_toolbox",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 6,
+      "task_info_cells": 4,
+      "scoring_cells": 12,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "swap_T",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 4,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "swap_blocks",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 4,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    },
+    {
+      "task": "sweep_blocks",
+      "sections": [
+        "Instruction",
+        "Description",
+        "Scoring"
+      ],
+      "scoring_rows_including_header": 3,
+      "task_info_cells": 4,
+      "scoring_cells": 6,
+      "html_matches_20261004_snapshot": true
+    }
+  ]
+}

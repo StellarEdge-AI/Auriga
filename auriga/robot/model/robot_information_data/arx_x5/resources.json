@@ -1,0 +1,32 @@
+[
+  {
+    "resource_id": "geometry_model",
+    "name": "Current robot geometry and assembly",
+    "format": "ZIP",
+    "description": "Native assembly and every referenced mesh of the simulated arm: base, links, modified fingers, wrist camera and bracket. Preserve the relative directories when parsing. The two arms share this geometry; current camera/base calibration is provided separately."
+  },
+  {
+    "resource_id": "base_step",
+    "name": "Base component",
+    "format": "STEP AP203",
+    "description": "Single solid base component in STEP AP203 format. A component reference, not a complete arm assembly. Standard finger shapes do not represent the modified simulated fingers; use the physical reference for installed geometry. Not a native editable CAD project."
+  },
+  {
+    "resource_id": "end_step",
+    "name": "End assembly component",
+    "format": "STEP AP203",
+    "description": "End component with three solid bodies in STEP AP203 format. A component reference, not a complete arm assembly. Standard finger shapes do not represent the modified simulated fingers; use the physical reference for installed geometry. Not a native editable CAD project."
+  },
+  {
+    "resource_id": "gripper_1_step",
+    "name": "Standard finger component 1",
+    "format": "STEP AP203",
+    "description": "Single solid standard finger component in STEP AP203 format. A component reference, not a complete arm assembly. Standard finger shapes do not represent the modified simulated fingers; use the physical reference for installed geometry. Not a native editable CAD project."
+  },
+  {
+    "resource_id": "gripper_2_step",
+    "name": "Standard finger component 2",
+    "format": "STEP AP203",
+    "description": "Single solid standard finger component in STEP AP203 format. A component reference, not a complete arm assembly. Standard finger shapes do not represent the modified simulated fingers; use the physical reference for installed geometry. Not a native editable CAD project."
+  }
+]

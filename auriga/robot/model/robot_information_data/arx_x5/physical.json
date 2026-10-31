@@ -1,0 +1,2738 @@
+{
+  "identity": {
+    "name": "ARX X5",
+    "physical_model": "X5A with modified fingers and wrist cameras",
+    "arms": 2,
+    "fixed_bases": true,
+    "independently_controlled": true,
+    "revolute_joints_per_arm": 6,
+    "prismatic_finger_joints_per_arm": 2,
+    "gripper_commands_per_arm": 1,
+    "native_action_dimensions": 14,
+    "hardware_variant": "Exact product variant is not established. Other X5 variants have different geometry and limits."
+  },
+  "kinematics": {
+    "frame_convention": "Joint origins are parent-to-joint transforms: parent-frame translation, then fixed rotation, then joint motion about the local joint axis. Axis signs are not world directions.",
+    "joints": [
+      {
+        "name": "joint1",
+        "type": "revolute",
+        "parent": "base_link",
+        "child": "link1",
+        "origin": {
+          "xyz_m": [
+            0.0,
+            0.0,
+            0.0605
+          ],
+          "rpy_rad": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "axis": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "declared_limits": {
+          "lower": -10.0,
+          "upper": 10.0,
+          "effort": 100.0,
+          "velocity": 1000.0
+        },
+        "limit_units": {
+          "position": "rad",
+          "velocity": "rad/s",
+          "effort": "N m"
+        }
+      },
+      {
+        "name": "joint2",
+        "type": "revolute",
+        "parent": "link1",
+        "child": "link2",
+        "origin": {
+          "xyz_m": [
+            0.02,
+            0.0,
+            0.04
+          ],
+          "rpy_rad": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "declared_limits": {
+          "lower": -10.0,
+          "upper": 10.0,
+          "effort": 100.0,
+          "velocity": 1000.0
+        },
+        "limit_units": {
+          "position": "rad",
+          "velocity": "rad/s",
+          "effort": "N m"
+        }
+      },
+      {
+        "name": "joint3",
+        "type": "revolute",
+        "parent": "link2",
+        "child": "link3",
+        "origin": {
+          "xyz_m": [
+            -0.264,
+            0.0,
+            0.0
+          ],
+          "rpy_rad": [
+            3.1416,
+            0.0,
+            0.0
+          ]
+        },
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "declared_limits": {
+          "lower": -10.0,
+          "upper": 10.0,
+          "effort": 100.0,
+          "velocity": 1000.0
+        },
+        "limit_units": {
+          "position": "rad",
+          "velocity": "rad/s",
+          "effort": "N m"
+        }
+      },
+      {
+        "name": "joint4",
+        "type": "revolute",
+        "parent": "link3",
+        "child": "link4",
+        "origin": {
+          "xyz_m": [
+            0.245,
+            0.0,
+            -0.056
+          ],
+          "rpy_rad": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "declared_limits": {
+          "lower": -10.0,
+          "upper": 10.0,
+          "effort": 100.0,
+          "velocity": 1000.0
+        },
+        "limit_units": {
+          "position": "rad",
+          "velocity": "rad/s",
+          "effort": "N m"
+        }
+      },
+      {
+        "name": "joint5",
+        "type": "revolute",
+        "parent": "link4",
+        "child": "link5",
+        "origin": {
+          "xyz_m": [
+            0.06775,
+            0.0005,
+            -0.0865
+          ],
+          "rpy_rad": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "axis": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "declared_limits": {
+          "lower": -10.0,
+          "upper": 10.0,
+          "effort": 100.0,
+          "velocity": 1000.0
+        },
+        "limit_units": {
+          "position": "rad",
+          "velocity": "rad/s",
+          "effort": "N m"
+        }
+      },
+      {
+        "name": "joint6",
+        "type": "revolute",
+        "parent": "link5",
+        "child": "link6",
+        "origin": {
+          "xyz_m": [
+            0.02895,
+            0.0,
+            0.0865
+          ],
+          "rpy_rad": [
+            -3.1416,
+            0.0,
+            0.0
+          ]
+        },
+        "axis": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "declared_limits": {
+          "lower": -3.14,
+          "upper": 3.14,
+          "effort": 100.0,
+          "velocity": 1000.0
+        },
+        "limit_units": {
+          "position": "rad",
+          "velocity": "rad/s",
+          "effort": "N m"
+        }
+      },
+      {
+        "name": "hand_to_camera_mount",
+        "type": "fixed",
+        "parent": "link6",
+        "child": "camera_base",
+        "origin": {
+          "xyz_m": [
+            0.057,
+            0.0,
+            0.0
+          ],
+          "rpy_rad": [
+            0.0,
+            0.0,
+            -3.1416
+          ]
+        }
+      },
+      {
+        "name": "camera_joint",
+        "type": "fixed",
+        "parent": "camera_base",
+        "child": "camera",
+        "origin": {
+          "xyz_m": [
+            -0.0275,
+            0.0,
+            0.05
+          ],
+          "rpy_rad": [
+            0.0,
+            0.3491,
+            3.141592653589793
+          ]
+        }
+      },
+      {
+        "name": "joint7",
+        "type": "prismatic",
+        "parent": "link6",
+        "child": "link7",
+        "origin": {
+          "xyz_m": [
+            0.08657,
+            0.024896,
+            -0.0002436
+          ],
+          "rpy_rad": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "axis": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "declared_limits": {
+          "lower": 0.0,
+          "upper": 0.044,
+          "effort": 100.0,
+          "velocity": 1000.0
+        },
+        "limit_units": {
+          "position": "m",
+          "velocity": "m/s",
+          "effort": "N"
+        }
+      },
+      {
+        "name": "joint8",
+        "type": "prismatic",
+        "parent": "link6",
+        "child": "link8",
+        "origin": {
+          "xyz_m": [
+            0.08657,
+            -0.0249,
+            -0.00024366
+          ],
+          "rpy_rad": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "axis": [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        "declared_limits": {
+          "lower": 0.0,
+          "upper": 0.044,
+          "effort": 100.0,
+          "velocity": 1000.0
+        },
+        "limit_units": {
+          "position": "m",
+          "velocity": "m/s",
+          "effort": "N"
+        }
+      }
+    ],
+    "base_link": "base_link",
+    "end_effector_link": "link6",
+    "end_effector_joint": "joint6",
+    "arm_joint_order": [
+      "joint1",
+      "joint2",
+      "joint3",
+      "joint4",
+      "joint5",
+      "joint6"
+    ],
+    "gripper_joint_order": [
+      "joint7",
+      "joint8"
+    ],
+    "saved_joint_order": [
+      "joint1",
+      "joint2",
+      "joint3",
+      "joint4",
+      "joint5",
+      "joint6",
+      "joint7",
+      "joint8"
+    ],
+    "default_mounts": [
+      {
+        "arm": "left",
+        "position_environment_m": [
+          -0.3,
+          -0.45,
+          0.765
+        ],
+        "quaternion_wxyz": [
+          0.707,
+          0,
+          0,
+          0.707
+        ],
+        "coupled": false,
+        "grasp_direction": "top_down_little_right"
+      },
+      {
+        "arm": "right",
+        "position_environment_m": [
+          0.3,
+          -0.45,
+          0.765
+        ],
+        "quaternion_wxyz": [
+          0.707,
+          0,
+          0,
+          0.707
+        ],
+        "coupled": false,
+        "grasp_direction": "top_down_little_left"
+      }
+    ],
+    "mount_separation_m": 0.6,
+    "mount_warning": "Configuration defaults are not current measured T_world_base. Environment and world frames can differ.",
+    "pose_interface": {
+      "pose_units": "position m; quaternion_xyzw; named angles_deg relative to the top-down reference, not world Euler angles",
+      "tool_axis_link6": [
+        1,
+        0,
+        0
+      ],
+      "pad_center_offset_m": 0.1501,
+      "grasp_contact_offsets_m": {
+        "pad_center": 0.1501,
+        "finger_middle": 0.1226,
+        "fingertip": 0.1576
+      },
+      "grasp_contact_offset_rule": "offset_m = 0.1501 - contact_depth_m",
+      "native_gripper_command": "qcmd7 = qcmd8 = -0.01 + 0.054*g, g in [0,1]",
+      "gripper_warning": "Commands, measured joint displacements, and mesh surface gap are distinct. qcmd at g=0 is below the authored joint lower bound.",
+      "home_warning": "Episode home is the saved initial measured state, not necessarily the all-zero spawn configuration."
+    },
+    "native_frame_matrices": {
+      "delta_matrix": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          1
+        ]
+      ],
+      "global_trans_matrix": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          -1,
+          0
+        ],
+        [
+          0,
+          0,
+          -1
+        ]
+      ]
+    },
+    "planner_tool_frames": [
+      "link6"
+    ],
+    "planner_frame_bias": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "geometry": {
+    "units": "m",
+    "up_axis": "Z",
+    "meters_per_unit": 1.0,
+    "links": [
+      {
+        "name": "base_link",
+        "visual_and_collision": [
+          {
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "origin": {
+              "xyz_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rpy_rad": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "mesh_local_min_m": [
+              -0.029969792813062668,
+              -0.029999999329447746,
+              -1.6987323769868112e-09
+            ],
+            "mesh_local_max_m": [
+              0.029969792813062668,
+              0.029999999329447746,
+              0.0625
+            ]
+          }
+        ]
+      },
+      {
+        "name": "link1",
+        "visual_and_collision": [
+          {
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "origin": {
+              "xyz_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rpy_rad": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "mesh_local_min_m": [
+              -0.02191178686916828,
+              -0.039250001311302185,
+              -8.572109133631045e-10
+            ],
+            "mesh_local_max_m": [
+              0.03745974227786064,
+              0.039250001311302185,
+              0.05748478323221207
+            ]
+          }
+        ]
+      },
+      {
+        "name": "link2",
+        "visual_and_collision": [
+          {
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "origin": {
+              "xyz_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rpy_rad": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "mesh_local_min_m": [
+              -0.2919999957084656,
+              -0.030249999836087227,
+              -0.02800000086426735
+            ],
+            "mesh_local_max_m": [
+              0.02800000086426735,
+              0.036250002682209015,
+              0.02800000086426735
+            ]
+          }
+        ]
+      },
+      {
+        "name": "link3",
+        "visual_and_collision": [
+          {
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "origin": {
+              "xyz_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rpy_rad": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "mesh_local_min_m": [
+              -0.017500000074505806,
+              -0.03824999928474426,
+              -0.08457363396883011
+            ],
+            "mesh_local_max_m": [
+              0.2735999822616577,
+              0.03824999928474426,
+              0.017500000074505806
+            ]
+          }
+        ]
+      },
+      {
+        "name": "link4",
+        "visual_and_collision": [
+          {
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "origin": {
+              "xyz_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rpy_rad": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "mesh_local_min_m": [
+              -0.01738167181611061,
+              -0.03125,
+              -0.08649999648332596
+            ],
+            "mesh_local_max_m": [
+              0.09875000268220901,
+              0.03147206827998161,
+              0.017500000074505806
+            ]
+          }
+        ]
+      },
+      {
+        "name": "link5",
+        "visual_and_collision": [
+          {
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "origin": {
+              "xyz_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rpy_rad": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "mesh_local_min_m": [
+              -0.030950156971812248,
+              -0.03090592660009861,
+              0.001999999862164259
+            ],
+            "mesh_local_max_m": [
+              0.031950000673532486,
+              0.030997827649116516,
+              0.11509999632835388
+            ]
+          }
+        ]
+      },
+      {
+        "name": "link6",
+        "visual_and_collision": [
+          {
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "origin": {
+              "xyz_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rpy_rad": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "mesh_local_min_m": [
+              -9.499911968191554e-11,
+              -0.08699999749660492,
+              -0.029999999329447746
+            ],
+            "mesh_local_max_m": [
+              0.08399999886751175,
+              0.08699999749660492,
+              0.030304791405797005
+            ]
+          }
+        ]
+      },
+      {
+        "name": "camera_base",
+        "visual": [
+          {
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "origin": {
+              "xyz_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rpy_rad": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          }
+        ],
+        "collision": []
+      },
+      {
+        "name": "camera",
+        "visual": [
+          {
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "origin": {
+              "xyz_m": [
+                0.0,
+                0.0,
+                -0.0
+              ],
+              "rpy_rad": [
+                0.0,
+                0.0,
+                -1.5707963267948966
+              ]
+            }
+          }
+        ],
+        "collision": []
+      },
+      {
+        "name": "link7",
+        "visual_and_collision": [
+          {
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "origin": {
+              "xyz_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rpy_rad": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "mesh_local_min_m": [
+              -0.014999999664723873,
+              -0.024494417011737823,
+              -0.030396483838558197
+            ],
+            "mesh_local_max_m": [
+              0.07100000232458115,
+              0.012855581939220428,
+              0.030603516846895218
+            ]
+          }
+        ]
+      },
+      {
+        "name": "link8",
+        "visual_and_collision": [
+          {
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "origin": {
+              "xyz_m": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rpy_rad": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "mesh_local_min_m": [
+              -0.014999999664723873,
+              -0.012855581939220428,
+              -0.030396481975913048
+            ],
+            "mesh_local_max_m": [
+              0.07100000232458115,
+              0.024494417011737823,
+              0.030603518709540367
+            ]
+          }
+        ]
+      }
+    ],
+    "distal_flat_pad_gap": {
+      "faces": {
+        "link7": {
+          "inner_plane_y_link_m": -0.024494417011737823,
+          "face_min_m": [
+            0.0560000017285347,
+            -0.024494417011737823,
+            -0.010360768996179104
+          ],
+          "face_max_m": [
+            0.07100000232458115,
+            -0.024494417011737823,
+            0.007967153564095497
+          ]
+        },
+        "link8": {
+          "inner_plane_y_link_m": 0.024494417011737823,
+          "face_min_m": [
+            0.0560000017285347,
+            0.024494417011737823,
+            -0.01036076806485653
+          ],
+          "face_max_m": [
+            0.07100000232458115,
+            0.024494417011737823,
+            0.007967153564095497
+          ]
+        }
+      },
+      "formula_m": "gap = 0.00080716597652435 + q7 + q8",
+      "q7_q8_units": "m; actual physical joint positions, not normalized commands",
+      "gap_q7_q8_zero_m": 0.000807165976524353,
+      "gap_q7_q8_0_044_m": 0.08880716597652435,
+      "warning": "robot asset surface distance, not manufacturer hardware jaw-width rating; rigid geometry only, no contact deformation or solver tolerance. Normalized command mapping qcmd=-.01+.054*g extends below URDF/USD lower bound; do not treat qcmd as achieved q.",
+      "collision_scope": "The same inward support planes bound the ideal convex hulls. Filling concavities may increase contact extent elsewhere. Actual cooked contact boundaries, contact/rest offsets and dynamic solver separation are unmeasured; this is not an exact contact-onset distance."
+    },
+    "finger_geometry": {
+      "link7": {
+        "mesh_to_link_matrix_row_vector": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "authored_link_to_link6_matrix_row_vector": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.08656999468803406,
+            0.024895999813452363,
+            -0.00024360418319702148,
+            1.0
+          ]
+        ],
+        "link_local_bounds_m": {
+          "min": [
+            -0.014999999664723873,
+            -0.024494417011737823,
+            -0.030396483838558197
+          ],
+          "max": [
+            0.07100000232458115,
+            0.012855581939220428,
+            0.030603516846895218
+          ]
+        }
+      },
+      "link8": {
+        "mesh_to_link_matrix_row_vector": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "authored_link_to_link6_matrix_row_vector": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.08656999468803406,
+            -0.024900000309571624,
+            -0.00024366378784179688,
+            1.0
+          ]
+        ],
+        "link_local_bounds_m": {
+          "min": [
+            -0.014999999664723873,
+            -0.012855581939220428,
+            -0.030396481975913048
+          ],
+          "max": [
+            0.07100000232458115,
+            0.024494417011737823,
+            0.030603518709540367
+          ]
+        }
+      }
+    },
+    "finger_shape": "Modified jaws have sloped inner shanks and distal flat pads of length 0.015 m; clearance varies with insertion depth. Visual and collision finger meshes have the same rigid-link geometry.",
+    "collision_approximations": {
+      "base_link": {
+        "approximation": "convexHull"
+      },
+      "link1": {
+        "approximation": "convexHull"
+      },
+      "link2": {
+        "approximation": "convexHull"
+      },
+      "link3": {
+        "approximation": "convexDecomposition"
+      },
+      "link4": {
+        "approximation": "convexHull"
+      },
+      "link5": {
+        "approximation": "convexHull"
+      },
+      "link6": {
+        "approximation": "convexHull"
+      },
+      "camera_base": {
+        "approximation": "convexHull",
+        "enabled": true
+      },
+      "camera": {
+        "approximation": "convexHull",
+        "enabled": true
+      },
+      "link7": {
+        "approximation": "convexHull"
+      },
+      "link8": {
+        "approximation": "convexHull"
+      }
+    },
+    "planning_collision": {
+      "sphere_frame": "Each named link local frame; sphere center and radius in metres.",
+      "collision_link_names": [
+        "base_link",
+        "link1",
+        "link2",
+        "link3",
+        "link4",
+        "link5",
+        "link6",
+        "camera_base",
+        "camera"
+      ],
+      "collision_sphere_buffer_m": 0.0,
+      "collision_spheres": {
+        "base_link": [
+          {
+            "center": [
+              8.346007234649733e-05,
+              0.0024923665914684534,
+              0.03616911917924881
+            ],
+            "radius": 0.043082091957330704
+          },
+          {
+            "center": [
+              -0.02503315545618534,
+              -0.025806229561567307,
+              0.0018038087291643023
+            ],
+            "radius": 0.005196040030568838
+          },
+          {
+            "center": [
+              0.017773358151316643,
+              -0.01964821107685566,
+              0.008334856480360031
+            ],
+            "radius": 0.0034979945048689842
+          }
+        ],
+        "camera": [
+          {
+            "center": [
+              -0.01317999791353941,
+              -0.028435340151190758,
+              -0.0009364344296045601
+            ],
+            "radius": 0.016916539520025253
+          },
+          {
+            "center": [
+              -0.01305167842656374,
+              0.025482432916760445,
+              -0.00010003178613260388
+            ],
+            "radius": 0.01834218017756939
+          },
+          {
+            "center": [
+              -0.013171510770916939,
+              -0.0037254653871059418,
+              -0.0005986897158436477
+            ],
+            "radius": 0.015736469998955727
+          }
+        ],
+        "camera_base": [
+          {
+            "center": [
+              -0.0012511389795690775,
+              -0.012796622700989246,
+              0.059102967381477356
+            ],
+            "radius": 0.01980697363615036
+          },
+          {
+            "center": [
+              0.00581218721345067,
+              -0.019597092643380165,
+              0.03236857056617737
+            ],
+            "radius": 0.016758430749177933
+          },
+          {
+            "center": [
+              0.003995982464402914,
+              0.01921285316348076,
+              0.03284812718629837
+            ],
+            "radius": 0.01744714193046093
+          },
+          {
+            "center": [
+              -0.001164821907877922,
+              0.020404132083058357,
+              0.05998089537024498
+            ],
+            "radius": 0.013653906062245369
+          },
+          {
+            "center": [
+              0.0044545335695147514,
+              -0.02942351996898651,
+              0.009005412459373474
+            ],
+            "radius": 0.008092133328318596
+          },
+          {
+            "center": [
+              0.0044204131700098515,
+              0.03100823052227497,
+              0.008427376858890057
+            ],
+            "radius": 0.008560881949961185
+          }
+        ],
+        "link1": [
+          {
+            "center": [
+              -0.011338670738041401,
+              -0.03525000065565109,
+              0.021852971985936165
+            ],
+            "radius": 0.0020000000949949026
+          },
+          {
+            "center": [
+              0.014780936762690544,
+              -0.03143661469221115,
+              0.0007823383202776313
+            ],
+            "radius": 0.0020000000949949026
+          },
+          {
+            "center": [
+              0.0033663564827293158,
+              0.013487777672708035,
+              -8.572109133631045e-10
+            ],
+            "radius": 0.0020000000949949026
+          },
+          {
+            "center": [
+              0.003229736117646098,
+              -0.03091486170887947,
+              0.044791482388973236
+            ],
+            "radius": 0.0020000000949949026
+          },
+          {
+            "center": [
+              0.007825823500752449,
+              0.037462662905454636,
+              0.0510447733104229
+            ],
+            "radius": 0.0020000000949949026
+          },
+          {
+            "center": [
+              0.03328796476125717,
+              0.03757011517882347,
+              0.05137252435088158
+            ],
+            "radius": 0.0020000000949949026
+          },
+          {
+            "center": [
+              0.027040831744670868,
+              0.039250001311302185,
+              0.02515990659594536
+            ],
+            "radius": 0.0020000000949949026
+          },
+          {
+            "center": [
+              -0.01937657594680786,
+              0.0005066121811978519,
+              0.008500001393258572
+            ],
+            "radius": 0.0020000000949949026
+          },
+          {
+            "center": [
+              0.010759271681308746,
+              0.039250001311302185,
+              0.00039692921563982964
+            ],
+            "radius": 0.0020000000949949026
+          },
+          {
+            "center": [
+              0.01898682303726673,
+              -0.008586637675762177,
+              0.006885643117129803
+            ],
+            "radius": 0.0020000000949949026
+          },
+          {
+            "center": [
+              -0.019938824698328972,
+              0.036108728498220444,
+              0.01260607223957777
+            ],
+            "radius": 0.0020000000949949026
+          },
+          {
+            "center": [
+              -0.01372755877673626,
+              -0.022322237491607666,
+              0.004500000737607479
+            ],
+            "radius": 0.0020000000949949026
+          },
+          {
+            "center": [
+              0.02791634202003479,
+              -0.03469869866967201,
+              0.02678811363875866
+            ],
+            "radius": 0.0020000000949949026
+          }
+        ],
+        "link2": [
+          {
+            "center": [
+              -0.00045155250700190663,
+              0.005536473821848631,
+              -0.000575829588342458
+            ],
+            "radius": 0.04127619415521622
+          },
+          {
+            "center": [
+              -0.2784727215766907,
+              -0.018066678196191788,
+              -0.010438531637191772
+            ],
+            "radius": 0.011186943389475346
+          },
+          {
+            "center": [
+              0.017687257379293442,
+              -0.009691417217254639,
+              0.006230376195162535
+            ],
+            "radius": 0.016221771016716957
+          },
+          {
+            "center": [
+              -0.26555144786834717,
+              0.009334082715213299,
+              -0.00017678682343102992
+            ],
+            "radius": 0.028041725978255272
+          },
+          {
+            "center": [
+              -0.06578123569488525,
+              0.004809386562556028,
+              0.0022639851085841656
+            ],
+            "radius": 0.03097250871360302
+          },
+          {
+            "center": [
+              -0.13045114278793335,
+              -0.0032394409645348787,
+              -0.0017560996348038316
+            ],
+            "radius": 0.03579423949122429
+          },
+          {
+            "center": [
+              -0.09672468155622482,
+              -0.010739214718341827,
+              -0.005550778470933437
+            ],
+            "radius": 0.029529627412557602
+          },
+          {
+            "center": [
+              -0.031208910048007965,
+              -0.005265875719487667,
+              -0.00443650409579277
+            ],
+            "radius": 0.030552873387932777
+          },
+          {
+            "center": [
+              -0.2688177824020386,
+              -0.020207708701491356,
+              0.014661403372883797
+            ],
+            "radius": 0.018999354913830757
+          },
+          {
+            "center": [
+              -0.26119542121887207,
+              -0.0036079692654311657,
+              0.00028789497446268797
+            ],
+            "radius": 0.03539131581783295
+          },
+          {
+            "center": [
+              -0.21480578184127808,
+              0.000550553435459733,
+              0.0018995078280568123
+            ],
+            "radius": 0.03313276171684265
+          },
+          {
+            "center": [
+              -0.17242586612701416,
+              -0.0003037959395442158,
+              0.0032703049946576357
+            ],
+            "radius": 0.03317686915397644
+          }
+        ],
+        "link3": [
+          {
+            "center": [
+              0.19412994384765625,
+              -0.000498547509778291,
+              -0.05474166199564934
+            ],
+            "radius": 0.03093218244612217
+          },
+          {
+            "center": [
+              0.25258851051330566,
+              0.0008036504150368273,
+              -0.05396634340286255
+            ],
+            "radius": 0.0287338737398386
+          },
+          {
+            "center": [
+              0.14544183015823364,
+              0.0032996751833707094,
+              -0.05727789178490639
+            ],
+            "radius": 0.028356904163956642
+          },
+          {
+            "center": [
+              0.23836533725261688,
+              -0.002549115801230073,
+              -0.056698743253946304
+            ],
+            "radius": 0.0353117473423481
+          },
+          {
+            "center": [
+              0.05368328467011452,
+              0.0059557813219726086,
+              -0.053961653262376785
+            ],
+            "radius": 0.027611197903752327
+          },
+          {
+            "center": [
+              0.10672508180141449,
+              -0.0014725003857165575,
+              -0.055638667196035385
+            ],
+            "radius": 0.03202077001333237
+          },
+          {
+            "center": [
+              0.00043173786252737045,
+              0.03432760015130043,
+              -0.004481328185647726
+            ],
+            "radius": 0.020012550055980682
+          },
+          {
+            "center": [
+              0.023361070081591606,
+              -0.03511347994208336,
+              -0.03180684894323349
+            ],
+            "radius": 0.006953526753932238
+          },
+          {
+            "center": [
+              0.053949419409036636,
+              -0.014530174434185028,
+              -0.05053860321640968
+            ],
+            "radius": 0.030788982287049294
+          },
+          {
+            "center": [
+              -0.003077669069170952,
+              -0.03590691089630127,
+              0.008674037642776966
+            ],
+            "radius": 0.008613204583525658
+          },
+          {
+            "center": [
+              0.021764010190963745,
+              0.03168994560837746,
+              -0.042026765644550323
+            ],
+            "radius": 0.008605843409895897
+          },
+          {
+            "center": [
+              0.03939489275217056,
+              0.03618794307112694,
+              -0.02002812549471855
+            ],
+            "radius": 0.011066244915127754
+          },
+          {
+            "center": [
+              -0.0009454016108065844,
+              -0.03576585277915001,
+              -0.01692950539290905
+            ],
+            "radius": 0.014245472848415375
+          }
+        ],
+        "link4": [
+          {
+            "center": [
+              0.023880619555711746,
+              0.00010892873251577839,
+              -0.015049031935632229
+            ],
+            "radius": 0.041883405297994614
+          },
+          {
+            "center": [
+              0.06103905662894249,
+              0.00047649547923356295,
+              -0.056337714195251465
+            ],
+            "radius": 0.04363815486431122
+          },
+          {
+            "center": [
+              -0.006041796412318945,
+              0.019964268431067467,
+              0.0028054616414010525
+            ],
+            "radius": 0.013687443919479847
+          },
+          {
+            "center": [
+              -0.00489339092746377,
+              -0.021233022212982178,
+              0.003056908491998911
+            ],
+            "radius": 0.01288679614663124
+          }
+        ],
+        "link5": [
+          {
+            "center": [
+              -6.787434540456161e-05,
+              0.0006102607003413141,
+              0.028084713965654373
+            ],
+            "radius": 0.03487956523895264
+          },
+          {
+            "center": [
+              0.0030785277485847473,
+              -0.0005060291150584817,
+              0.06197658181190491
+            ],
+            "radius": 0.0328005887567997
+          },
+          {
+            "center": [
+              0.0057771229185163975,
+              0.001351781073026359,
+              0.09236344695091248
+            ],
+            "radius": 0.031003231182694435
+          }
+        ],
+        "link6": [
+          {
+            "center": [
+              0.026898229494690895,
+              -0.0010559548391029239,
+              -0.00045778320054523647
+            ],
+            "radius": 0.03559989482164383
+          },
+          {
+            "center": [
+              0.055194154381752014,
+              0.0025618798099458218,
+              0.005630136001855135
+            ],
+            "radius": 0.03432246297597885
+          },
+          {
+            "center": [
+              0.07220351696014404,
+              -0.040948424488306046,
+              -0.0006645632674917579
+            ],
+            "radius": 0.011396314017474651
+          },
+          {
+            "center": [
+              0.07441435009241104,
+              0.043331410735845566,
+              0.001150847296230495
+            ],
+            "radius": 0.005775773897767067
+          },
+          {
+            "center": [
+              0.07436501234769821,
+              0.06045348197221756,
+              -0.0012442216975614429
+            ],
+            "radius": 0.005614869762212038
+          },
+          {
+            "center": [
+              0.06802260875701904,
+              0.078272245824337,
+              -0.0010303815361112356
+            ],
+            "radius": 0.01009052898734808
+          },
+          {
+            "center": [
+              0.06987104564905167,
+              -0.0779685527086258,
+              0.0008458700613118708
+            ],
+            "radius": 0.010558896698057652
+          },
+          {
+            "center": [
+              0.07441305369138718,
+              -0.06259656697511673,
+              4.4574884668691084e-05
+            ],
+            "radius": 0.00409065093845129
+          }
+        ]
+      },
+      "self_collision_buffer_m": {
+        "base_link": -0.01,
+        "camera": -0.01,
+        "camera_base": -0.01,
+        "link1": -0.01,
+        "link2": -0.01,
+        "link3": -0.01,
+        "link4": -0.01,
+        "link5": -0.01,
+        "link6": -0.01
+      },
+      "self_collision_ignore": {
+        "base_link": [
+          "link1",
+          "link2"
+        ],
+        "camera": [
+          "camera_base"
+        ],
+        "camera_base": [
+          "link6",
+          "camera"
+        ],
+        "link1": [
+          "base_link",
+          "link2"
+        ],
+        "link2": [
+          "link1",
+          "link3",
+          "link4"
+        ],
+        "link3": [
+          "link2",
+          "link4"
+        ],
+        "link4": [
+          "link3",
+          "link5",
+          "camera"
+        ],
+        "link5": [
+          "link4",
+          "link6",
+          "camera_base",
+          "camera"
+        ],
+        "link6": [
+          "link5",
+          "camera_base",
+          "camera"
+        ]
+      },
+      "add_object_link": false,
+      "extra_collision_spheres": null,
+      "extra_links": {},
+      "grasp_contact_link_names": null,
+      "load_meshes": false,
+      "mesh_link_names": [
+        "base_link",
+        "link1",
+        "link2",
+        "link3",
+        "link4",
+        "link5",
+        "link6",
+        "camera_base",
+        "camera"
+      ],
+      "load_tool_frames_with_mesh": false
+    },
+    "cameras": [
+      {
+        "link": "camera",
+        "name": "cam_wrist",
+        "type": "d435",
+        "mesh": "pinhole",
+        "pos": [
+          0,
+          0,
+          0.001
+        ],
+        "ori": [
+          0,
+          -80,
+          -90
+        ]
+      }
+    ],
+    "grasp_camera_reference_axis": [
+      1,
+      0,
+      0
+    ],
+    "interpretation": "Visual meshes, PhysX collision approximations, planner spheres and harness finger bounds serve different purposes. Sampled previews cannot establish continuous clearance or physical contact. The wrist cameras and other arm also occupy space.",
+    "native_model": {
+      "resource_id": "geometry_model",
+      "archive_format": "ZIP",
+      "assembly_member": "X5A.urdf",
+      "mesh_formats": [
+        "STL",
+        "GLB"
+      ],
+      "coordinates": "Use the assembly relative paths, visual origins/scales and joint transforms, plus GLB mesh-node transforms. Mesh coordinates are in metres; do not add an axis conversion."
+    }
+  },
+  "dynamics": {
+    "declared_links": [
+      {
+        "name": "base_link",
+        "inertial": {
+          "mass_kg": 0.43995,
+          "origin": {
+            "xyz_m": [
+              -3.0001e-05,
+              3.0589e-05,
+              0.027324
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "inertia_kg_m2": {
+            "ixx": 0.00017,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.00017,
+            "iyz": 0.0,
+            "izz": 0.00016
+          }
+        }
+      },
+      {
+        "name": "link1",
+        "inertial": {
+          "mass_kg": 0.066982,
+          "origin": {
+            "xyz_m": [
+              0.0054231,
+              -0.0080289,
+              0.017086
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "inertia_kg_m2": {
+            "ixx": 8e-05,
+            "ixy": 0.0,
+            "ixz": 1e-05,
+            "iyy": 3e-05,
+            "iyz": 0.0,
+            "izz": 8e-05
+          }
+        }
+      },
+      {
+        "name": "link2",
+        "inertial": {
+          "mass_kg": 1.0795,
+          "origin": {
+            "xyz_m": [
+              -0.13237,
+              0.0020852,
+              0.00010549
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "inertia_kg_m2": {
+            "ixx": 0.00051,
+            "ixy": 1e-05,
+            "ixz": -4e-05,
+            "iyy": 0.01599,
+            "iyz": 0.0,
+            "izz": 0.01605
+          }
+        }
+      },
+      {
+        "name": "link3",
+        "inertial": {
+          "mass_kg": 0.54534,
+          "origin": {
+            "xyz_m": [
+              0.18531,
+              0.00068376,
+              -0.051638
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "inertia_kg_m2": {
+            "ixx": 0.00036,
+            "ixy": -3e-05,
+            "ixz": -0.00039,
+            "iyy": 0.00423,
+            "iyz": 1e-05,
+            "izz": 0.0042
+          }
+        }
+      },
+      {
+        "name": "link4",
+        "inertial": {
+          "mass_kg": 0.11714,
+          "origin": {
+            "xyz_m": [
+              0.040231,
+              0.0044807,
+              -0.035335
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "inertia_kg_m2": {
+            "ixx": 0.00019,
+            "ixy": -2e-05,
+            "ixz": -9e-05,
+            "iyy": 0.00023,
+            "iyz": 2e-05,
+            "izz": 0.00014
+          }
+        }
+      },
+      {
+        "name": "link5",
+        "inertial": {
+          "mass_kg": 0.63488,
+          "origin": {
+            "xyz_m": [
+              0.003612,
+              -1.5455e-05,
+              0.055214
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "inertia_kg_m2": {
+            "ixx": 0.00083,
+            "ixy": 0.0,
+            "ixz": 7e-05,
+            "iyy": 0.00082,
+            "iyz": 0.0,
+            "izz": 0.00026
+          }
+        }
+      },
+      {
+        "name": "link6",
+        "inertial": {
+          "mass_kg": 0.44089,
+          "origin": {
+            "xyz_m": [
+              0.041697,
+              2.4368e-05,
+              0.00014464
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "inertia_kg_m2": {
+            "ixx": 0.00038,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.00028,
+            "iyz": 0.0,
+            "izz": 0.0005
+          }
+        }
+      },
+      {
+        "name": "camera_base",
+        "inertial": null
+      },
+      {
+        "name": "camera",
+        "inertial": null
+      },
+      {
+        "name": "link7",
+        "inertial": {
+          "mass_kg": 0.064798,
+          "origin": {
+            "xyz_m": [
+              -0.00035522,
+              -0.007827,
+              -0.0029883
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "inertia_kg_m2": {
+            "ixx": 2e-05,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 3e-05,
+            "iyz": 0.0,
+            "izz": 3e-05
+          }
+        }
+      },
+      {
+        "name": "link8",
+        "inertial": {
+          "mass_kg": 0.064798,
+          "origin": {
+            "xyz_m": [
+              -0.00035522,
+              0.0078277,
+              0.0024201
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "inertia_kg_m2": {
+            "ixx": 2e-05,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 3e-05,
+            "iyz": 0.0,
+            "izz": 3e-05
+          }
+        }
+      }
+    ],
+    "sum_declared_mass_kg": 3.454278,
+    "camera_masses_missing": true,
+    "mass_interpretation": "Model inertia inputs, not measured product weight or payload. Camera masses are unspecified.",
+    "authored_rigid_bodies": {
+      "base_link": {
+        "center_of_mass_m": [
+          -3.0000999686308205e-05,
+          3.0588998924940825e-05,
+          0.027324000373482704
+        ],
+        "diagonal_inertia_kg_m2": [
+          0.00016999999934341758,
+          0.00016999999934341758,
+          0.00015999999595806003
+        ],
+        "mass_kg": 0.43994998931884766,
+        "principal_axes_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "link1": {
+        "center_of_mass_m": [
+          0.00542310019955039,
+          -0.008028900250792503,
+          0.017085999250411987
+        ],
+        "diagonal_inertia_kg_m2": [
+          6.999999459367245e-05,
+          2.9999999242136255e-05,
+          9.000000136438757e-05
+        ],
+        "mass_kg": 0.06698200106620789,
+        "principal_axes_wxyz": [
+          0.9238795638084412,
+          0.0,
+          0.3826834261417389,
+          0.0
+        ]
+      },
+      "link2": {
+        "center_of_mass_m": [
+          -0.1323699951171875,
+          0.0020852000452578068,
+          0.00010548999853199348
+        ],
+        "diagonal_inertia_kg_m2": [
+          0.0005098905530758202,
+          0.015990005806088448,
+          0.016050104051828384
+        ],
+        "mass_kg": 1.0794999599456787,
+        "principal_axes_wxyz": [
+          0.9999991059303284,
+          0.0002145761245628819,
+          -0.0012870579957962036,
+          -0.0003227181441616267
+        ]
+      },
+      "link3": {
+        "center_of_mass_m": [
+          0.1853100061416626,
+          0.0006837599794380367,
+          -0.05163799971342087
+        ],
+        "diagonal_inertia_kg_m2": [
+          0.00032057808130048215,
+          0.004221001639962196,
+          0.004248420242220163
+        ],
+        "mass_kg": 0.5453400015830994,
+        "principal_axes_wxyz": [
+          0.9513426423072815,
+          -0.3040183484554291,
+          -0.048814110457897186,
+          -0.011721059679985046
+        ]
+      },
+      "link4": {
+        "center_of_mass_m": [
+          0.04023100063204765,
+          0.004480700008571148,
+          -0.0353350006043911
+        ],
+        "diagonal_inertia_kg_m2": [
+          0.0002756425237748772,
+          0.00021285978436935693,
+          7.149771408876404e-05
+        ],
+        "mass_kg": 0.11714000254869461,
+        "principal_axes_wxyz": [
+          0.9112878441810608,
+          -0.07515320181846619,
+          0.30868953466415405,
+          -0.26194921135902405
+        ]
+      },
+      "link5": {
+        "center_of_mass_m": [
+          0.0036120000295341015,
+          -1.5454999811481684e-05,
+          0.05521399900317192
+        ],
+        "diagonal_inertia_kg_m2": [
+          0.0008384705288335681,
+          0.0008200000156648457,
+          0.0002515293890610337
+        ],
+        "mass_kg": 0.634880006313324,
+        "principal_axes_wxyz": [
+          0.9981878399848938,
+          0.0,
+          -0.060175247490406036,
+          0.0
+        ]
+      },
+      "link6": {
+        "center_of_mass_m": [
+          0.041696999222040176,
+          2.436800059513189e-05,
+          0.00014463999832514673
+        ],
+        "diagonal_inertia_kg_m2": [
+          0.0003800000122282654,
+          0.0002800000074785203,
+          0.0005000000237487257
+        ],
+        "mass_kg": 0.44089001417160034,
+        "principal_axes_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "camera_base": {
+        "diagonal_inertia_kg_m2": [
+          9.999999747378752e-05,
+          9.999999747378752e-05,
+          9.999999747378752e-05
+        ]
+      },
+      "camera": {
+        "diagonal_inertia_kg_m2": [
+          9.999999747378752e-05,
+          9.999999747378752e-05,
+          9.999999747378752e-05
+        ]
+      },
+      "link7": {
+        "center_of_mass_m": [
+          -0.00035521999234333634,
+          -0.007826999761164188,
+          -0.0029883000534027815
+        ],
+        "diagonal_inertia_kg_m2": [
+          1.9999999494757503e-05,
+          2.9999999242136255e-05,
+          2.9999999242136255e-05
+        ],
+        "mass_kg": 0.06479799747467041,
+        "principal_axes_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "link8": {
+        "center_of_mass_m": [
+          -0.00035521999234333634,
+          0.0078277001157403,
+          0.0024200999177992344
+        ],
+        "diagonal_inertia_kg_m2": [
+          1.9999999494757503e-05,
+          2.9999999242136255e-05,
+          2.9999999242136255e-05
+        ],
+        "mass_kg": 0.06479799747467041,
+        "principal_axes_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "authored_articulation_defaults": {
+      "enabled_self_collisions": false,
+      "solver_position_iteration_count": 32,
+      "solver_velocity_iteration_count": 1
+    },
+    "authored_joints": {
+      "joint1": {
+        "type": "revolute",
+        "parent": "base_link",
+        "child": "link1",
+        "axis": "Z",
+        "break_force_N": 3.4028234663852886e+38,
+        "break_torque_N_m": 3.4028234663852886e+38,
+        "equivalent_inertia": 0.000932966242544353,
+        "parent_joint_position_m": [
+          0.0,
+          0.0,
+          0.060499999672174454
+        ],
+        "child_joint_position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "parent_joint_rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "child_joint_rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lower_limit_deg": -572.957763671875,
+        "upper_limit_deg": 572.957763671875,
+        "max_velocity_deg_s": 57295.77734375,
+        "position_drive": {
+          "damping": 0.01745329238474369,
+          "max_force": 100.0,
+          "stiffness": 1.7453292608261108,
+          "target_position_deg": 0.0,
+          "type": "force",
+          "coordinate_units": "deg",
+          "effort_units": "N m"
+        }
+      },
+      "joint2": {
+        "type": "revolute",
+        "parent": "link1",
+        "child": "link2",
+        "axis": "Y",
+        "break_force_N": 3.4028234663852886e+38,
+        "break_torque_N_m": 3.4028234663852886e+38,
+        "equivalent_inertia": 0.0038189326878637075,
+        "parent_joint_position_m": [
+          0.019999999552965164,
+          0.0,
+          0.03999999910593033
+        ],
+        "child_joint_position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "parent_joint_rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "child_joint_rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lower_limit_deg": -572.957763671875,
+        "upper_limit_deg": 572.957763671875,
+        "max_velocity_deg_s": 57295.77734375,
+        "position_drive": {
+          "damping": 0.01745329238474369,
+          "max_force": 100.0,
+          "stiffness": 1.7453292608261108,
+          "target_position_deg": 0.0,
+          "type": "force",
+          "coordinate_units": "deg",
+          "effort_units": "N m"
+        }
+      },
+      "joint3": {
+        "type": "revolute",
+        "parent": "link2",
+        "child": "link3",
+        "axis": "Y",
+        "break_force_N": 3.4028234663852886e+38,
+        "break_torque_N_m": 3.4028234663852886e+38,
+        "equivalent_inertia": 0.027670901268720627,
+        "parent_joint_position_m": [
+          -0.2639999985694885,
+          0.0,
+          0.0
+        ],
+        "child_joint_position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "parent_joint_rotation_wxyz": [
+          -3.6199901387590216e-06,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "child_joint_rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lower_limit_deg": -572.957763671875,
+        "upper_limit_deg": 572.957763671875,
+        "max_velocity_deg_s": 57295.77734375,
+        "position_drive": {
+          "damping": 0.01745329238474369,
+          "max_force": 100.0,
+          "stiffness": 1.7453292608261108,
+          "target_position_deg": 0.0,
+          "type": "force",
+          "coordinate_units": "deg",
+          "effort_units": "N m"
+        }
+      },
+      "joint4": {
+        "type": "revolute",
+        "parent": "link3",
+        "child": "link4",
+        "axis": "Y",
+        "break_force_N": 3.4028234663852886e+38,
+        "break_torque_N_m": 3.4028234663852886e+38,
+        "equivalent_inertia": 0.05421372130513191,
+        "parent_joint_position_m": [
+          0.24500000476837158,
+          0.0,
+          -0.0560000017285347
+        ],
+        "child_joint_position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "parent_joint_rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "child_joint_rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lower_limit_deg": -572.957763671875,
+        "upper_limit_deg": 572.957763671875,
+        "max_velocity_deg_s": 57295.77734375,
+        "position_drive": {
+          "damping": 0.01745329238474369,
+          "max_force": 100.0,
+          "stiffness": 1.7453292608261108,
+          "target_position_deg": 0.0,
+          "type": "force",
+          "coordinate_units": "deg",
+          "effort_units": "N m"
+        }
+      },
+      "joint5": {
+        "type": "revolute",
+        "parent": "link4",
+        "child": "link5",
+        "axis": "Z",
+        "break_force_N": 3.4028234663852886e+38,
+        "break_torque_N_m": 3.4028234663852886e+38,
+        "equivalent_inertia": 0.021463805809617043,
+        "parent_joint_position_m": [
+          0.0677499994635582,
+          0.0005000000237487257,
+          -0.08649999648332596
+        ],
+        "child_joint_position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "parent_joint_rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "child_joint_rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lower_limit_deg": -572.957763671875,
+        "upper_limit_deg": 572.957763671875,
+        "max_velocity_deg_s": 57295.77734375,
+        "position_drive": {
+          "damping": 0.01745329238474369,
+          "max_force": 100.0,
+          "stiffness": 1.7453292608261108,
+          "target_position_deg": 0.0,
+          "type": "force",
+          "coordinate_units": "deg",
+          "effort_units": "N m"
+        }
+      },
+      "joint6": {
+        "type": "revolute",
+        "parent": "link5",
+        "child": "link6",
+        "axis": "X",
+        "break_force_N": 3.4028234663852886e+38,
+        "break_torque_N_m": 3.4028234663852886e+38,
+        "equivalent_inertia": 0.011667349375784397,
+        "parent_joint_position_m": [
+          0.028950000181794167,
+          0.0,
+          0.08649999648332596
+        ],
+        "child_joint_position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "parent_joint_rotation_wxyz": [
+          -3.6199901387590216e-06,
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "child_joint_rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lower_limit_deg": -179.9087371826172,
+        "upper_limit_deg": 179.9087371826172,
+        "max_velocity_deg_s": 57295.77734375,
+        "position_drive": {
+          "damping": 0.01745329238474369,
+          "max_force": 100.0,
+          "stiffness": 1.7453292608261108,
+          "target_position_deg": 0.0,
+          "type": "force",
+          "coordinate_units": "deg",
+          "effort_units": "N m"
+        }
+      },
+      "hand_to_camera_mount": {
+        "type": "fixed",
+        "parent": "link6",
+        "child": "camera_base",
+        "break_force_N": 3.4028234663852886e+38,
+        "break_torque_N_m": 3.4028234663852886e+38,
+        "equivalent_inertia": 0.0,
+        "parent_joint_position_m": [
+          0.05700000002980232,
+          0.0,
+          0.0
+        ],
+        "child_joint_position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "parent_joint_rotation_wxyz": [
+          -3.6199901387590216e-06,
+          0.0,
+          -0.0,
+          -1.0
+        ],
+        "child_joint_rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "camera_joint": {
+        "type": "fixed",
+        "parent": "camera_base",
+        "child": "camera",
+        "break_force_N": 3.4028234663852886e+38,
+        "break_torque_N_m": 3.4028234663852886e+38,
+        "equivalent_inertia": 0.0,
+        "parent_joint_position_m": [
+          -0.027499999850988388,
+          0.0,
+          0.05000000074505806
+        ],
+        "child_joint_position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "parent_joint_rotation_wxyz": [
+          -4.30471871482041e-08,
+          -0.17366498708724976,
+          -7.591137496376632e-09,
+          0.9848048090934753
+        ],
+        "child_joint_rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "joint7": {
+        "type": "prismatic",
+        "parent": "link6",
+        "child": "link7",
+        "axis": "Y",
+        "break_force_N": 3.4028234663852886e+38,
+        "break_torque_N_m": 3.4028234663852886e+38,
+        "equivalent_inertia": 0.0007498681079596281,
+        "parent_joint_position_m": [
+          0.08657000213861465,
+          0.02489599958062172,
+          -0.00024360000679735094
+        ],
+        "child_joint_position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "parent_joint_rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "child_joint_rotation_wxyz": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "lower_limit_m": 0.0,
+        "upper_limit_m": 0.04399999976158142,
+        "max_velocity_m_s": 1000.0,
+        "position_drive": {
+          "damping": 1.0,
+          "max_force": 100.0,
+          "stiffness": 100.0,
+          "target_position_m": 0.0,
+          "type": "force",
+          "coordinate_units": "m",
+          "effort_units": "N"
+        }
+      },
+      "joint8": {
+        "type": "prismatic",
+        "parent": "link6",
+        "child": "link8",
+        "axis": "Y",
+        "break_force_N": 3.4028234663852886e+38,
+        "break_torque_N_m": 3.4028234663852886e+38,
+        "equivalent_inertia": 0.0007493637967854738,
+        "parent_joint_position_m": [
+          0.08657000213861465,
+          -0.024900000542402267,
+          -0.0002436600043438375
+        ],
+        "child_joint_position_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "parent_joint_rotation_wxyz": [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "child_joint_rotation_wxyz": [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        "lower_limit_m": 0.0,
+        "upper_limit_m": 0.04399999976158142,
+        "max_velocity_m_s": 1000.0,
+        "position_drive": {
+          "damping": 1.0,
+          "max_force": 100.0,
+          "stiffness": 100.0,
+          "target_position_m": 0.0,
+          "type": "force",
+          "coordinate_units": "m",
+          "effort_units": "N"
+        }
+      }
+    },
+    "configured_actuators_and_physics": {
+      "arm": {
+        "joints": "joint[1-6]",
+        "implicit_drive": true,
+        "effort_limit_sim": 100.0,
+        "velocity_limit_sim": 5.0,
+        "stiffness": 4400.0,
+        "damping": 40.0,
+        "armature": 0.01
+      },
+      "gripper": {
+        "joints": [
+          "joint7",
+          "joint8"
+        ],
+        "implicit_drive": true,
+        "effort_limit_sim": 100.0,
+        "stiffness": 2300.0,
+        "damping": 100.0,
+        "velocity_limit_sim": "not overridden; USD authored 1000 m/s"
+      },
+      "disable_gravity": true,
+      "fix_root_link": true,
+      "enabled_self_collisions": true,
+      "solver_position_iteration_count": 8,
+      "solver_velocity_iteration_count": 0,
+      "max_depenetration_velocity": 5.0
+    },
+    "precedence": "Configured actuator and articulation settings override authored settings where specified. Neither set certifies hardware ratings or current achieved motion. Robot gravity is disabled by configuration; objects may still have gravity.",
+    "authored_drive_units": "Revolute authored drive coordinates are degrees (stiffness and damping per degree); prismatic coordinates are metres. Configured arm drive gains use radians. Equivalent inertia values retain the joint quantity and must not be interpreted as a product payload rating."
+  },
+  "control": {
+    "gripper": {
+      "normalized_command_range": [
+        0,
+        1
+      ],
+      "zero": "requests closing",
+      "one": "requests opening",
+      "native_joint_target_m": "qcmd7 = qcmd8 = -0.01 + 0.054*g",
+      "native_target_endpoints_m": [
+        -0.01,
+        0.044
+      ],
+      "mimic": {
+        "base": "joint7",
+        "sign": 1.0,
+        "mimic": [
+          "joint8",
+          1.0,
+          0.0
+        ]
+      },
+      "native_gripper_bias_m": 0.145,
+      "native_bias_warning": "Native internal bias is distinct from the harness pad_center contact offset of 0.1501 m; do not add both.",
+      "measured_position_warning": "Commands, measured joint displacements, and mesh surface gap are distinct. qcmd at g=0 is below the authored joint lower bound."
+    },
+    "default_simulation": {
+      "decimation": 1,
+      "dt": 0.004,
+      "render_interval": 10,
+      "scene": {
+        "num_envs": 10,
+        "env_spacing": 7
+      }
+    },
+    "default_harness": {
+      "physics_dt_s": 0.004,
+      "native_control_hz": 25.0,
+      "physics_ticks_per_action": 10,
+      "default_max_command_delta_per_joint_rad": 0.05,
+      "default_resampled_command_rate_bound_rad_s": 1.25,
+      "speed_scale_range": [
+        0.25,
+        2.0
+      ],
+      "gripper_normalized_step_limit": 0.25,
+      "eef_gripper_dwell_step": 0.18,
+      "tool_offset_m": 0.1501,
+      "interpretation": "Static configuration defaults. Current robot_capabilities, action_speed and measured q/qdot take precedence; effective runtime overrides are not established here."
+    },
+    "default_spawn_joint_positions": {
+      "joint1": 0.0,
+      "joint2": 0.0,
+      "joint3": 0.0,
+      "joint4": 0.0,
+      "joint5": 0.0,
+      "joint6": 0.0,
+      "joint7": 0.044,
+      "joint8": 0.044,
+      "warning": "spawn/default pose only; Harness home_check captures episode initial measured link6 pose instead"
+    },
+    "planner_joint_space": {
+      "acceleration_scale": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "cspace_distance_weight": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "default_joint_position": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.02199999988079071,
+        0.02199999988079071
+      ],
+      "jerk_scale": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "joint_names": [
+        "joint1",
+        "joint2",
+        "joint3",
+        "joint4",
+        "joint5",
+        "joint6",
+        "joint8",
+        "joint7"
+      ],
+      "max_acceleration": [
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0
+      ],
+      "max_jerk": [
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ],
+      "null_space_maximum_distance": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "null_space_weight": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "position_limit_clip": 0.0,
+      "velocity_scale": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "planner_joint_space_units": "By joint_names order: revolute positions in rad, finger positions in m; corresponding acceleration and jerk units per second squared and cubed. Planning bounds are not measured tracking rates.",
+    "planner_lock_joints": null,
+    "planner_use_global_cumul": true,
+    "preview_gripper_mapping": {
+      "preview_command_to_joint_m": "0.044*g",
+      "native_command_to_joint_m": "-0.01 + 0.054*g",
+      "interpretation": "Forecast finger clearance is approximate. Use measured finger joint positions for current geometric opening."
+    },
+    "execution": "Cartesian tools select joint trajectories and position drives track them. Tracking may lag or stall; speed presets adjust command timing and do not guarantee physical speed. Paused simulation advances through actions and supported robot_wait, not wall-clock reasoning.",
+    "motion_evidence": "Requested targets, plans, commands, measured achieved poses, contact, retained grasp and release are distinct. A successful plan is not proof of execution or retention. Episode home is the initial measured state, not necessarily the default spawn pose."
+  },
+  "limitations": [
+    "Static robot knowledge, not live episode state or a manufacturer safety specification. Runtime robot_capabilities, measured proprioception and current tool contracts take precedence.",
+    "A fully constrained pose generally leaves no free elbow degree of freedom on a 6R arm. IK branches, joint limits and singularities affect feasibility. Local solver failure does not establish global unreachability.",
+    "A clear contact-point trajectory does not establish clearance of the full arm, wrist camera, other arm or held object. Wrist rotation requires flange translation to hold an offset contact point fixed.",
+    "Reliable payload, friction, force/torque curves, grip force, backlash, compliance, repeatability and validated stopping response are not established."
+  ]
+}

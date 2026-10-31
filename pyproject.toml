@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "auriga-harness"
+version = "0.2.0"
+description = "Agent harness for embodied manipulation: a model-led Codex session with one robot execution gateway"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+dependencies = ["aiohttp==3.13.2", "openai-codex==0.160.0", "numpy==2.5.3", "scipy==1.18.1", "opencv-python-headless==5.0.0.93", "jsonschema==4.26.0", "Pillow==12.1.1"]
+
+[project.scripts]
+auriga = "auriga.apps.gateway.cli:main"
+auriga-queue = "auriga.apps.evaluation.queue:main"
+auriga-report = "auriga.apps.evaluation.report:main"
+auriga-audit = "auriga.apps.evaluation.audit:main"
+
+[tool.setuptools.packages.find]
+include = ["auriga", "auriga.*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+auriga = ["web_assets/*", "reference_sources/**/*"]
+"auriga.core" = ["default_config.json"]
+"auriga.cortex.session" = ["codex_responses.json", "codex_models.json"]
+"auriga.cortex.context" = ["robodojo_task_rules.json", "task_instruction_overrides.json"]
+"auriga.apps.library" = ["experiment_group_relations.json"]
+"auriga.robot.model" = ["robot_information_data/*/*.json", "robot_information_data/*/*.txt", "robot_information_data/*/*.png", "robot_information_data/*/*.zip", "robot_information_data/*/cad/*.STEP"]
+"auriga.runtime.policy.policy_workers" = ["*.json"]

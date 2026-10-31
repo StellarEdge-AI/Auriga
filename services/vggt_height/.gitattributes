@@ -1,0 +1,4 @@
+# scripts and pinned lists are read on Linux: keep LF even in Windows checkouts
+*.txt text eol=lf
+*.sha256 text eol=lf
+*.jpg binary

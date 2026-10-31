@@ -1,0 +1,51 @@
+case_id,task,dimension,variant,eval_seed,layout_id,reset_seed,simulator_initial_seed,policy_rng_seed,max_control_steps,control_dt_s,native_instruction
+organize_table__standard__g0__l0,organize_table,Long-Horizon,standard,0,0,0,0,0,1000,0.04,"Place the mouse on the mouse pad, push the keyboard into the frame, put the figurine on the stand, place the alarm clock on the drawer, then open the drawer and put all remaining miscellaneous items inside."
+organize_table__standard__g0__l1,organize_table,Long-Horizon,standard,0,1,1,0,0,1000,0.04,"Place the mouse on the mouse pad, push the keyboard into the frame, put the figurine on the stand, place the alarm clock on the drawer, then open the drawer and put all remaining miscellaneous items inside."
+organize_table__standard__g0__l2,organize_table,Long-Horizon,standard,0,2,2,0,0,1000,0.04,"Place the mouse on the mouse pad, push the keyboard into the frame, put the figurine on the stand, place the alarm clock on the drawer, then open the drawer and put all remaining miscellaneous items inside."
+organize_table__standard__g0__l3,organize_table,Long-Horizon,standard,0,3,3,0,0,1000,0.04,"Place the mouse on the mouse pad, push the keyboard into the frame, put the figurine on the stand, place the alarm clock on the drawer, then open the drawer and put all remaining miscellaneous items inside."
+organize_table__standard__g0__l4,organize_table,Long-Horizon,standard,0,4,4,0,0,1000,0.04,"Place the mouse on the mouse pad, push the keyboard into the frame, put the figurine on the stand, place the alarm clock on the drawer, then open the drawer and put all remaining miscellaneous items inside."
+classify_objects_by_language__standard__g0__l0,classify_objects_by_language,Open,standard,0,0,0,0,0,1100,0.04,"Put car objects into the left basket, watch objects into the middle basket, and wooden_toy objects into the right basket, then reset the robot arm."
+classify_objects_by_language__standard__g0__l1,classify_objects_by_language,Open,standard,0,1,1,0,0,1100,0.04,"Put car objects into the left basket, watch objects into the middle basket, and chocolate_bar objects into the right basket, then reset the robot arm."
+classify_objects_by_language__standard__g0__l2,classify_objects_by_language,Open,standard,0,2,2,0,0,1100,0.04,"Put chocolate_bar objects into the left basket, watch objects into the middle basket, and wooden_toy objects into the right basket, then reset the robot arm."
+classify_objects_by_language__standard__g0__l3,classify_objects_by_language,Open,standard,0,3,3,0,0,1100,0.04,"Put wooden_toy objects into the left basket, car objects into the middle basket, and watch objects into the right basket, then reset the robot arm."
+classify_objects_by_language__standard__g0__l4,classify_objects_by_language,Open,standard,0,4,4,0,0,1100,0.04,"Put wooden_toy objects into the left basket, chocolate_bar objects into the middle basket, and pepper objects into the right basket, then reset the robot arm."
+imitate_sorting_sequence__standard__g0__l0,imitate_sorting_sequence,Memory,standard,0,0,0,0,0,1600,0.04,"Observe the object placement order, remember it, then place the corresponding objects into the basket in the same order."
+imitate_sorting_sequence__standard__g0__l1,imitate_sorting_sequence,Memory,standard,0,1,1,0,0,1600,0.04,"Observe the object placement order, remember it, then place the corresponding objects into the basket in the same order."
+imitate_sorting_sequence__standard__g0__l2,imitate_sorting_sequence,Memory,standard,0,2,2,0,0,1600,0.04,"Observe the object placement order, remember it, then place the corresponding objects into the basket in the same order."
+imitate_sorting_sequence__standard__g0__l3,imitate_sorting_sequence,Memory,standard,0,3,3,0,0,1600,0.04,"Observe the object placement order, remember it, then place the corresponding objects into the basket in the same order."
+imitate_sorting_sequence__standard__g0__l4,imitate_sorting_sequence,Memory,standard,0,4,4,0,0,1600,0.04,"Observe the object placement order, remember it, then place the corresponding objects into the basket in the same order."
+arrange_largest_number__standard__g0__l0,arrange_largest_number,Generalization,standard,0,0,0,0,0,1050,0.04,"Arrange the numbers from left to right to form the largest possible number, and place them on the pad."
+arrange_largest_number__standard__g0__l1,arrange_largest_number,Generalization,standard,0,1,1,0,0,1050,0.04,"Arrange the numbers from left to right to form the largest possible number, and place them on the pad."
+arrange_largest_number__random__g0__l0,arrange_largest_number,Generalization,random,0,0,0,0,0,1050,0.04,"Arrange the numbers from left to right to form the largest possible number, and place them on the pad."
+arrange_largest_number__random__g0__l1,arrange_largest_number,Generalization,random,0,1,1,0,0,1050,0.04,"Arrange the numbers from left to right to form the largest possible number, and place them on the pad."
+arrange_largest_number__random__g0__l2,arrange_largest_number,Generalization,random,0,2,2,0,0,1050,0.04,"Arrange the numbers from left to right to form the largest possible number, and place them on the pad."
+pack_objects_into_box__standard__g0__l0,pack_objects_into_box,Generalization,standard,0,0,0,0,0,1300,0.04,Place all the objects into the box with their front sides facing left.
+pack_objects_into_box__standard__g0__l1,pack_objects_into_box,Generalization,standard,0,1,1,0,0,1300,0.04,Place all the objects into the box with their front sides facing left.
+pack_objects_into_box__random__g0__l0,pack_objects_into_box,Generalization,random,0,0,0,0,0,1300,0.04,Place all the objects into the box with their front sides facing left.
+pack_objects_into_box__random__g0__l1,pack_objects_into_box,Generalization,random,0,1,1,0,0,1300,0.04,Place all the objects into the box with their front sides facing left.
+pack_objects_into_box__random__g0__l2,pack_objects_into_box,Generalization,random,0,2,2,0,0,1300,0.04,Place all the objects into the box with their front sides facing left.
+classify_objects__standard__g0__l0,classify_objects,Long-Horizon,standard,0,0,0,0,0,1100,0.04,Sort the objects by category into the three baskets.
+classify_objects__standard__g0__l1,classify_objects,Long-Horizon,standard,0,1,1,0,0,1100,0.04,Sort the objects by category into the three baskets.
+classify_objects__standard__g0__l2,classify_objects,Long-Horizon,standard,0,2,2,0,0,1100,0.04,Sort the objects by category into the three baskets.
+classify_objects__standard__g0__l3,classify_objects,Long-Horizon,standard,0,3,3,0,0,1100,0.04,Sort the objects by category into the three baskets.
+classify_objects__standard__g0__l4,classify_objects,Long-Horizon,standard,0,4,4,0,0,1100,0.04,Sort the objects by category into the three baskets.
+build_tower__standard__g0__l0,build_tower,Precision,standard,0,0,0,0,0,1050,0.04,Build a tower using the wooden blocks and wooden boards.
+build_tower__standard__g0__l1,build_tower,Precision,standard,0,1,1,0,0,1050,0.04,Build a tower using the wooden blocks and wooden boards.
+build_tower__standard__g0__l2,build_tower,Precision,standard,0,2,2,0,0,1050,0.04,Build a tower using the wooden blocks and wooden boards.
+build_tower__standard__g0__l3,build_tower,Precision,standard,0,3,3,0,0,1050,0.04,Build a tower using the wooden blocks and wooden boards.
+build_tower__standard__g0__l4,build_tower,Precision,standard,0,4,4,0,0,1050,0.04,Build a tower using the wooden blocks and wooden boards.
+make_kong__standard__g0__l0,make_kong,Long-Horizon,standard,0,0,0,0,0,600,0.04,"Wait for the opponent to discard a tile, then declare a kong with the matching tiles."
+make_kong__standard__g0__l1,make_kong,Long-Horizon,standard,0,1,1,0,0,600,0.04,"Wait for the opponent to discard a tile, then declare a kong with the matching tiles."
+make_kong__standard__g0__l2,make_kong,Long-Horizon,standard,0,2,2,0,0,600,0.04,"Wait for the opponent to discard a tile, then declare a kong with the matching tiles."
+make_kong__standard__g0__l3,make_kong,Long-Horizon,standard,0,3,3,0,0,600,0.04,"Wait for the opponent to discard a tile, then declare a kong with the matching tiles."
+make_kong__standard__g0__l4,make_kong,Long-Horizon,standard,0,4,4,0,0,600,0.04,"Wait for the opponent to discard a tile, then declare a kong with the matching tiles."
+fold_clothes__standard__g0__l0,fold_clothes,Generalization,standard,0,0,0,0,0,500,0.04,Fold the clothes neatly.
+fold_clothes__standard__g0__l1,fold_clothes,Generalization,standard,0,1,1,0,0,500,0.04,Fold the clothes neatly.
+fold_clothes__random__g0__l0,fold_clothes,Generalization,random,0,0,0,0,0,500,0.04,Fold the clothes neatly.
+fold_clothes__random__g0__l1,fold_clothes,Generalization,random,0,1,1,0,0,500,0.04,Fold the clothes neatly.
+fold_clothes__random__g0__l2,fold_clothes,Generalization,random,0,2,2,0,0,500,0.04,Fold the clothes neatly.
+put_bottles_into_dustbin__standard__g0__l0,put_bottles_into_dustbin,Long-Horizon,standard,0,0,0,0,0,700,0.04,"Pick up the bottles and throw them into the dustbin, using handover when needed."
+put_bottles_into_dustbin__standard__g0__l1,put_bottles_into_dustbin,Long-Horizon,standard,0,1,1,0,0,700,0.04,"Pick up the bottles and throw them into the dustbin, using handover when needed."
+put_bottles_into_dustbin__standard__g0__l2,put_bottles_into_dustbin,Long-Horizon,standard,0,2,2,0,0,700,0.04,"Pick up the bottles and throw them into the dustbin, using handover when needed."
+put_bottles_into_dustbin__standard__g0__l3,put_bottles_into_dustbin,Long-Horizon,standard,0,3,3,0,0,700,0.04,"Pick up the bottles and throw them into the dustbin, using handover when needed."
+put_bottles_into_dustbin__standard__g0__l4,put_bottles_into_dustbin,Long-Horizon,standard,0,4,4,0,0,700,0.04,"Pick up the bottles and throw them into the dustbin, using handover when needed."

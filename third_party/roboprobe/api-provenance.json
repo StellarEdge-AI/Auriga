@@ -1,0 +1,225 @@
+{
+  "repository": "https://github.com/RoboProbe/RoboProbe",
+  "commit": "9ffacc54f372beef6479d61711bf4945e31ae4ce",
+  "license": "Apache-2.0",
+  "vendored_root": "third_party/roboprobe/source",
+  "files": {
+    "utils/openai_responses.py": {
+      "sha256": "ad93cfdf51fa913e43998677ef415ea29bd26719884286ea9b3660c6ccf7e849",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/utils/openai_responses.py"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/__init__.py": {
+      "sha256": "5f041dd6c7f909fe2bfac0c1780def92b7200ae63fa61507cacb708744dfe177",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/__init__.py"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/policy.py": {
+      "sha256": "bafbf55593591e0e620db554f955130688721ad14f23406764b38fff55b0684e",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/policy.py"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/types.py": {
+      "sha256": "04ced75138f90a9200bec9de2a0bed9f79de119648db55cccd793b890aff26f4",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/types.py"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/trace.py": {
+      "sha256": "6948a049ddfdac84b7f223fe7fe4cf157521230b9a0b9030733d20b68314bd8e",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/trace.py"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/prior_attempt.py": {
+      "sha256": "02e55ecfc493c7ed60a746ecf2459e47e3990e1c06f7ac49ca7e1fe9da2c05bb",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/prior_attempt.py"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/embodiment_docs.py": {
+      "sha256": "412e160a42123985e3e825a130119a36f0839e6df1e5fe51a467e86c5588a60e",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/embodiment_docs.py"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect_EEF/__init__.py": {
+      "sha256": "a0d46791a7f68f63d86634656f4d863a4e3430963f4144189715becb333db424",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect_EEF/__init__.py"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect_EEF/policy.py": {
+      "sha256": "2a9369fcf2b0ee70e27c74566ed250f4eb67c330b18512cead7d790ec56817ce",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect_EEF/policy.py"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect_EEF/pose.py": {
+      "sha256": "e9c8248bb4a6170557a2588be7202ba1afde440c45b0c539829c6ccaf17f3df1",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect_EEF/pose.py"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect_EEF/docs.py": {
+      "sha256": "f0ccb7a1a0072936877f81542a2d8a245d177584b663e05ac8fc6cdc76746a43",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect_EEF/docs.py"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/pour_liquid_into_cup.md": {
+      "sha256": "c050da3884455eb2eaffa47eb7457e70aa1736c51f4c80efacf382f580dfebec",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/pour_liquid_into_cup.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/play_Xylophone.md": {
+      "sha256": "5080922fffa994571b6455088226490232e42142b451f8adb75d2c22ce4cc9ea",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/play_Xylophone.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/insert_tubes.md": {
+      "sha256": "4828d8e10ae6d43b3ec2d61035ee8ce2d2670b80018d02ac6b5a0348d8b770ae",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/insert_tubes.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/pour_balls_into_vase.md": {
+      "sha256": "cd9f12f920863ddc9e825c5689251e3d68a39bdfa4e7e30adbfb751933257d14",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/pour_balls_into_vase.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/match_and_pick_from_conveyor.md": {
+      "sha256": "77da76a4ed0dde958d2b0417815b25e5c8e2c56844a956486920271f7f0657dd",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/match_and_pick_from_conveyor.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/fasten_screws.md": {
+      "sha256": "afb2434ff932d9166062065e1e0e1a6680cb51c3a6888ec27aac465085c0a94e",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/fasten_screws.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/swap_blocks.md": {
+      "sha256": "da0264522daf6e79ec0b76260ab2366347cd3d2e5feb3e20072ec9fd0cc66302",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/swap_blocks.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/play_stacking_toy.md": {
+      "sha256": "93baff4355c3828a567568bcde7b99a725a94d04def99bd21a8dc16e76a68b8a",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/play_stacking_toy.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/pour_by_language.md": {
+      "sha256": "c704bc325b2a16c1840e92f674f9d406d497ba3ac336dd1236c4b16a350400b5",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/pour_by_language.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/swap_T.md": {
+      "sha256": "85625ae8e2352da32b72424bf05f97be29371bcf2fef9c3c51facdd13203b866",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/swap_T.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/hang_mugs.md": {
+      "sha256": "31e253ff6a5240ae87f6ecd30d07b9cee553e695175649bb87965ab9230dd8d8",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/hang_mugs.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/__init__.py": {
+      "sha256": "6bfaa98e86f96ceafb2eeaa214ad7430c397780036251c99116acf813d871cd6",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/__init__.py"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/store_laptop_and_headphones.md": {
+      "sha256": "3133bf03129ea5d464f25202f347184f52438bb42395bb769c7234d1805b588f",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/store_laptop_and_headphones.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/sort_nesting_dolls_by_size.md": {
+      "sha256": "9e8267af65ed8053b00536607d312a40f2ca39dec19977818ac1ce74beb50c09",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/sort_nesting_dolls_by_size.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/classify_objects_by_language.md": {
+      "sha256": "3530200227ed6e177bc17d5f6c91da02f49f587953e22b890d3fe53c7a43b11e",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/classify_objects_by_language.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/plug_in_charger.md": {
+      "sha256": "2f270f252ed3e68ccab6c70e982b8e8e361f51a9fbb8b93a1bb3c66066a4515c",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/plug_in_charger.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/deposit_coin.md": {
+      "sha256": "7c987081bff9fb534e6f75470892e3eaed9c7549bd474d8d8cd922c8df686bbb",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/deposit_coin.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/general_pickup.md": {
+      "sha256": "2d2b2d499f1ebc8b2effc947ee1983ed857626c29aa185643b0e9333b587dcda",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/general_pickup.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/store_tools_in_toolbox.md": {
+      "sha256": "8324a2df80e45e0aae9bc9aa4034ac1b132633630ea87e01fd629d22b75986d4",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/store_tools_in_toolbox.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/build_tower.md": {
+      "sha256": "24b704d4742fd33cdb9def2d8ffc8e4dd5967e54f89af77c4c0481b613275d35",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/build_tower.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/align_blocks.md": {
+      "sha256": "4d00257cabdbd93d5d05b03fd2ad996aff11705e963ba9856f8e554b28e9f7f6",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/align_blocks.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/fill_pen_holder.md": {
+      "sha256": "e551211d80274e3fd22f60fbbc2ed7f01f2f7eb5d5e0ffb7229beb50b36bdbdd",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/fill_pen_holder.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/fold_clothes.md": {
+      "sha256": "70c8fec2c73f6b6cfb583532e7070b86151e755ef7194079757e60e5496644ff",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/fold_clothes.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/stack_blocks_by_language.md": {
+      "sha256": "272d640a7c3d896240a60b3ab09f4ef436406e086e550a8f6a1c8cf9c087ae2c",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/stack_blocks_by_language.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/pack_objects_into_box.md": {
+      "sha256": "32243dc60718e392d11ed0dfe11a558684bc0864ac36571ecb33a6aba9150df7",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/pack_objects_into_box.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/push_T.md": {
+      "sha256": "2ac3bf768070cbad322b8deead6e894158648dbb9ecfafc3fee58d28820acad7",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/push_T.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/make_kong.md": {
+      "sha256": "3569b1cf8d3fbfe30d2432e4d7a891b0b170ee478318996f0f7908f099634dcb",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/make_kong.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/sweep_blocks.md": {
+      "sha256": "200de7d6ff589ae8add6be59c41ba43df809eae0ef553074e6a4ff20729666cc",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/sweep_blocks.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/play_tic_tac_toe.md": {
+      "sha256": "828ff07a28af5c08f7b9ff8359bfd5794db2a07b6c201160f7baca787fac3e8a",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/play_tic_tac_toe.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/put_bottles_into_dustbin.md": {
+      "sha256": "5044fbecbe0996592a8f63c2a3721dcd6753ea1255f2f757601f7b1ea1edc8ea",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/put_bottles_into_dustbin.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/organize_table.md": {
+      "sha256": "c5c50cac36596e616ee4a5380fef3d353b665b249435f0cdb665bf34f9dec048",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/organize_table.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/press_by_number.md": {
+      "sha256": "c58d619ee807ce0028ee987cb1bd0f8576a1d02302396f0973df1f6aed3852f6",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/press_by_number.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/classify_objects.md": {
+      "sha256": "96134dc3decd5cc5e252c54937755deddb13eb6aa880d97ad05d2fdf8fad28f9",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/classify_objects.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/arrange_largest_number.md": {
+      "sha256": "ba4b417f7c7a1bc342e6cfd58db5959ec1b60032f51369366c612ba51bfd0869",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/arrange_largest_number.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/imitate_sorting_sequence.md": {
+      "sha256": "be26ff704e4dab7baec30aee02565fc6a22445ff72a025c19feb2f5d0b1f0e96",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/imitate_sorting_sequence.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/pick_from_conveyor_by_image.md": {
+      "sha256": "0c695e538f9d8b4323a0bc9e8844b6ee76ded2ad5d305d20d73d660883a6bcf7",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/pick_from_conveyor_by_image.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/cover_blocks.md": {
+      "sha256": "4b698369883233a66ad2b011fde1854b17e88560351138ad6e930b49b1dc374b",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/cover_blocks.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/solve_equation.md": {
+      "sha256": "d7f8a48b4d9aff4fd2192012262b31bc8535b86e8dea15caebc00e0f537b3694",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/solve_equation.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/stack_bowls.md": {
+      "sha256": "abfc287ed9db110cf08b76dc20fd77f20808807b207a615ae1f475af74a0d0fa",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/stack_bowls.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/fill_egg_holder.md": {
+      "sha256": "a59a52424f0a835dc2c8c9267fa45fc393e8802c857737cce7f375c4f47438de",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/fill_egg_holder.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/make_toast.md": {
+      "sha256": "77dfd5e30b778d1774325ef38f649ef4311ba1872dbeb680619e303a842b5a0d",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/make_toast.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/insert_key.md": {
+      "sha256": "2552829d48617e98da8a3159e1ccc814da67b4abb0f9da1d4285a092512166f6",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/insert_key.md"
+    },
+    "policy/RoboDojo_Agent_L3_Inspect/recipes/stack_blocks.md": {
+      "sha256": "b4800dcacd62530e450120ebe5d094a973793cbf73bb0fe2e66ece1bdfab1ed6",
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect/recipes/stack_blocks.md"
+    }
+  },
+  "scope": "Byte-for-byte API actor policy, prompts, EEF tools/pose, recipes and Responses converters. Auriga subclasses only the physical execution boundary; transport, single-arm timing and budgets are disclosed adaptations."
+}

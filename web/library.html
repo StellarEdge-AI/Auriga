@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-Hans"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Auriga · 实验库</title><link rel="stylesheet" href="/assets/styles.css"><link rel="stylesheet" href="/assets/library.css"><script type="module" src="/assets/library.js"></script></head>
+<body class="library-page">
+<header><div><strong>Auriga</strong><span>实验库</span></div><span id="library-connection" role="status">正在连接实验库</span></header>
+<main>
+<div class="library-intro"><div><p class="eyebrow">EXPERIMENT WORKSPACE</p><h1>方案、对照与每次改进</h1><p>一个方向的全部方案和对照，在同一张表里看分数、录像与运行时间。</p></div><button id="refresh-library" type="button">刷新数据</button></div>
+<nav class="workspace-tabs" aria-label="实验库视图"><button type="button" data-library-view="compare" aria-pressed="true">实验对比</button><button type="button" data-library-view="runs" aria-pressed="false">全部运行</button></nav>
+<section id="comparison-workspace" aria-label="实验组对比">
+  <aside class="group-sidebar" aria-label="选择实验组">
+    <div class="group-sidebar-heading"><h2>实验方向与方案</h2><span id="group-count"></span></div>
+    <label for="group-search">搜索方案<input id="group-search" type="search" placeholder="例如：夹爪、几何、任务计划"></label>
+    <label for="benchmark-filter">评测协议<select id="benchmark-filter"><option value="">全部协议</option></select></label>
+    <p class="muted small">选择方向或方案，自动列出本方向全部版本和各自对照。也可勾选跨方向比较，不限方案数量。</p>
+    <div id="group-list"></div>
+  </aside>
+  <div class="comparison-main">
+    <p id="comparison-status" role="status">正在读取实验组与配对关系…</p>
+    <div id="comparison-content" hidden>
+      <section class="comparison-section group-overview">
+        <div class="section-heading"><div><p class="eyebrow" id="group-protocol"></p><h2 id="group-title"></h2></div><span id="group-iteration" class="iteration-badge"></span></div>
+        <div id="group-relations" class="group-relations"></div>
+        <div id="group-metrics" class="group-metrics"></div>
+        <details id="group-provenance"><summary>实验条件、对照依据与执行记录</summary><div></div></details>
+      </section>
+      <section class="comparison-section video-comparison" aria-label="整组视频对比表">
+        <div class="section-heading"><div><p class="eyebrow">ALL EXPERIMENTS</p><h2 id="video-grid-title">整组视频对比表</h2><p class="muted small">每行一个场景，每列一个方案。时间统一为北京时间（UTC+8），精确到秒；开始、结束、登记和导入时间分别标注。</p></div><label class="inline-field" for="comparison-camera">统一视角<select id="comparison-camera"><option value="head">头部摄像机</option><option value="left">左腕摄像机</option><option value="right">右腕摄像机</option></select></label></div>
+        <div class="case-filters"><label for="case-search">任务<input id="case-search" type="search" placeholder="搜索任务…"></label><label for="case-filter">查看<select id="case-filter"><option value="all">全部场景</option><option value="regressions">相比基准下降</option><option value="improvements">相比基准提升</option><option value="unscored">存在未评分或缺失</option></select></label></div>
+        <p id="case-count" class="muted small"></p>
+        <div class="grid-playback-heading"><strong id="comparison-case-title">选择一行同步播放</strong><span id="comparison-case-meta" class="muted small"></span></div>
+        <div class="comparison-playback"><button id="comparison-prev-case" type="button">← 上一场景</button><button id="comparison-next-case" type="button">下一场景 →</button><button id="comparison-play" type="button">播放当前行</button><button id="comparison-pause" type="button">全部暂停</button><button id="comparison-reset" type="button">本行回到开头</button><label for="comparison-speed" class="inline-field">速度<select id="comparison-speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label><output id="comparison-position">0.0 s</output></div>
+        <label class="seek-label" for="comparison-seek">本行录像时间<input id="comparison-seek" type="range" min="0" max="0" value="0" step="0.1" disabled></label>
+        <p id="comparison-playback-status" class="muted small" role="status">可横向查看全部方案、纵向查看全部场景。画面外的录像按需加载；同步播放按录像起点对齐。</p>
+        <div class="table-scroll video-table-scroll" tabindex="0" role="region" aria-label="全部场景与方案录像，可横向和纵向滚动"><table id="case-table"><thead></thead><tbody id="comparison-videos"></tbody></table></div>
+        <p id="case-empty" class="muted small" hidden>没有符合条件的场景。</p>
+      </section>
+      <section class="comparison-section" aria-label="方案迭代">
+        <div class="section-heading"><div><p class="eyebrow">ITERATIONS</p><h2>迭代脉络</h2></div><span class="muted small">只连接已记录的迭代关系</span></div>
+        <div id="iteration-list" class="iteration-list"></div>
+      </section>
+      <section class="comparison-section" aria-label="组间分数对比">
+        <div class="section-heading"><div><p class="eyebrow">SCORE COMPARISON</p><h2>分数对照</h2></div><label class="inline-field" for="reference-group">比较基准<select id="reference-group"></select></label></div>
+        <p class="muted small">均分以 100 分显示；差值仅计算双方均有正式评分的相同场景。成功数保留整组预定局数。</p>
+        <div class="table-scroll"><table id="score-comparison"><thead><tr><th scope="col">实验组</th><th scope="col">整组均分 / 100</th><th scope="col">成功 / 预定</th><th scope="col">已评分 / 预定</th><th scope="col">配对场景</th><th scope="col">配对分差</th></tr></thead><tbody></tbody></table></div>
+        <p id="comparison-notes" class="muted small"></p>
+      </section>
+    </div>
+  </div>
+</section>
+<section id="runs-workspace" aria-label="全部运行记录" hidden>
+<form id="library-filters" class="library-filters" aria-label="筛选实验">
+<label class="search-field" for="q">搜索<input id="q" name="q" type="search" placeholder="名称、运行 ID、任务或标签"></label>
+<label for="category">分类<select id="category" name="category"><option value="">全部分类</option></select></label>
+<label for="status">状态<select id="status" name="status"><option value="">全部状态</option></select></label>
+<label for="task">任务<input id="task" name="task" list="task-choices" placeholder="全部任务"><datalist id="task-choices"></datalist></label>
+<label for="tag">标签<input id="tag" name="tag" list="tag-choices" placeholder="全部标签"><datalist id="tag-choices"></datalist></label>
+<label for="date_from">开始日期<input id="date_from" name="date_from" type="date"></label>
+<label for="date_to">结束日期<input id="date_to" name="date_to" type="date"></label>
+<label for="sort">排序<select id="sort" name="sort"><option value="active">活动优先</option><option value="newest">运行开始：新到旧</option><option value="oldest">运行开始：旧到新</option><option value="updated">最近更新</option></select></label>
+<div class="filter-buttons"><button type="submit">应用筛选</button><button id="reset-filters" type="button">清空</button></div></form>
+<p id="library-errors" class="library-warning" role="status" hidden></p>
+<div class="library-layout"><section class="experiment-list-panel" aria-label="实验列表"><div class="panel-bar"><h2>运行记录</h2><span id="result-count" role="status">正在读取</span><button id="library-show-filters" type="button" hidden>筛选与搜索 ↑</button></div><ol id="experiment-list"></ol><p id="empty-library" class="empty-library" hidden>没有匹配的实验。调整筛选条件后再试。</p><nav class="library-pagination" aria-label="实验分页"><button id="previous-page" type="button" disabled>上一页</button><span id="page-count">第 1 页</span><button id="next-page" type="button" disabled>下一页</button><label for="limit">每页<select id="limit"><option value="20">20</option><option value="50">50</option><option value="100">100</option></select></label></nav></section>
+<aside id="experiment-detail" class="experiment-detail" aria-label="实验详情"><div class="panel-bar"><h2 id="detail-title">选择一个实验</h2><button id="close-detail" type="button" hidden>收起</button></div><p id="detail-placeholder">从左侧选择实验，直接播放头部主视角与腕部辅助视角录像，并查看评测结果。</p><div id="detail-content" hidden><div id="detail-context" class="experiment-context" aria-label="环境与任务"></div><p id="detail-state" class="detail-state"></p><p id="detail-meta" class="meta"></p><p id="detail-metrics" class="detail-metrics"></p><div id="detail-links" class="detail-links"></div><section id="detail-media" aria-label="实验摄像机录像"></section><section id="detail-task-review" class="task-review" aria-label="任务要求与评分"></section><p id="detail-capabilities" class="meta"></p><div id="detail-reports"></div><details id="detail-raw"><summary>原始摘要与运行信息</summary><pre></pre></details></div></aside></div>
+</section></main></body></html>

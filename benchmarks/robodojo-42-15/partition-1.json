@@ -1,0 +1,17 @@
+{
+  "group_id": "robodojo-42-15",
+  "partition_id": "partition-1",
+  "tasks": [
+    "make_toast",
+    "store_laptop_and_headphones",
+    "pour_liquid_into_cup",
+    "build_tower",
+    "deposit_coin",
+    "fill_pen_holder",
+    "put_bottles_into_dustbin",
+    "match_and_pick_from_conveyor",
+    "swap_blocks",
+    "pour_by_language",
+    "solve_equation"
+  ]
+}

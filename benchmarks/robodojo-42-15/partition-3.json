@@ -1,0 +1,16 @@
+{
+  "group_id": "robodojo-42-15",
+  "partition_id": "partition-3",
+  "tasks": [
+    "arrange_largest_number",
+    "sweep_blocks",
+    "stack_blocks",
+    "insert_tubes",
+    "play_Xylophone",
+    "classify_objects",
+    "organize_table",
+    "cover_blocks",
+    "classify_objects_by_language",
+    "stack_blocks_by_language"
+  ]
+}

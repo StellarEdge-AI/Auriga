@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "features": {
+    "observation_profile": "rgbd_proprio_calibrated_v1",
+    "depth_auto_feedback": true,
+    "depth_skills": false,
+    "depth_event_payload": false
+  }
+}

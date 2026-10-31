@@ -1,0 +1,71 @@
+{
+ "description": "RoboDojo simulator head-camera frame (task organize_table, standard layout 0), 640x480; K and T_world_camera (OpenCV camera-to-world) are the simulator calibration; support_z_m = table top height. pixels = one point on each of the four task objects (mouse, alarm clock, keyboard, garage).",
+ "image": "organize_table_head.jpg",
+ "K": [
+  [
+   288.13254096884566,
+   0.0,
+   320.0
+  ],
+  [
+   0.0,
+   288.13254096884566,
+   240.0
+  ],
+  [
+   0.0,
+   0.0,
+   1.0
+  ]
+ ],
+ "T_world_camera": [
+  [
+   1.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  [
+   0.0,
+   -0.8660254037844387,
+   0.49999999999999994,
+   -0.41
+  ],
+  [
+   0.0,
+   -0.49999999999999994,
+   -0.8660254037844387,
+   1.308
+  ],
+  [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ]
+ ],
+ "support_z_m": 0.765,
+ "pixels": [
+  [
+   475,
+   226
+  ],
+  [
+   254,
+   191
+  ],
+  [
+   329,
+   272
+  ],
+  [
+   100,
+   259
+  ]
+ ],
+ "labels": [
+  "computer mouse",
+  "alarm clock",
+  "keyboard"
+ ]
+}

@@ -1,0 +1,42 @@
+{
+  "version": "openai-astra-sol-standard-2026-10-02",
+  "source": "https://developers.openai.com/api/docs/models/gpt-6-astra; https://developers.openai.com/api/docs/models/gpt-6.1-sol",
+  "currency": "USD",
+  "billing_basis": "OpenAI published Standard reference for <=272000 input tokens per request. Applied to custom-provider usage as an estimate, not its paid invoice or verified service tier. Nonzero or unknown cache writes remain unavailable in this adapter.",
+  "official_snapshots": [
+    {
+      "model": "gpt-6-astra",
+      "url": "https://developers.openai.com/api/docs/models/gpt-6-astra",
+      "sha256": "29cca10119c4aa1a53c903b7051914b4e929f8038539bb83df7b6d514116b2e0",
+      "retrieved_at": "2026-10-02T11:57:04.904549+00:00"
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "url": "https://developers.openai.com/api/docs/models/gpt-6.1-sol",
+      "sha256": "0ccad5bb774f869c359c8a585f8969405e6449ed7a194f5f205adeeeb8329de8",
+      "retrieved_at": "2026-10-02T11:57:04.904930+00:00"
+    }
+  ],
+  "cache_write_reference_per_million": {
+    "gpt-6-astra": "12.50",
+    "gpt-6.1-sol": "2.50"
+  },
+  "rates": [
+    {
+      "provider": "custom",
+      "model": "gpt-6-astra",
+      "uncached_input_per_million": "10",
+      "cached_input_per_million": "1",
+      "output_per_million": "50",
+      "max_input_tokens": 272000
+    },
+    {
+      "provider": "custom",
+      "model": "gpt-6.1-sol",
+      "uncached_input_per_million": "2",
+      "cached_input_per_million": "0.10",
+      "output_per_million": "10",
+      "max_input_tokens": 272000
+    }
+  ]
+}

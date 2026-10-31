@@ -1,0 +1,10 @@
+name: Auriga
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12.14
+  - pip=26.2.1
+  - ffmpeg=8.0.1
+  - pip:
+      - -r requirements.lock.txt
+      - -e .

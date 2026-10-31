@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "group_id": "robodojo-42-15",
+  "checked_on": "2026-10-09",
+  "cases_file": "cases.csv",
+  "cases_sha256": "dbabcc7ac6998278781606fca0ae83b67c09656b1383b3743410beb52ef4274d",
+  "cases_per_method": 630,
+  "tasks": [
+    "stack_bowls",
+    "push_T",
+    "pack_objects_into_box",
+    "fold_clothes",
+    "hang_mugs",
+    "sweep_blocks",
+    "pour_liquid_into_cup",
+    "make_toast",
+    "arrange_largest_number",
+    "sort_nesting_dolls_by_size",
+    "store_laptop_and_headphones",
+    "stack_blocks",
+    "fasten_screws",
+    "plug_in_charger",
+    "insert_tubes",
+    "pour_balls_into_vase",
+    "play_Xylophone",
+    "deposit_coin",
+    "insert_key",
+    "build_tower",
+    "put_bottles_into_dustbin",
+    "fill_pen_holder",
+    "classify_objects",
+    "play_tic_tac_toe",
+    "fill_egg_holder",
+    "organize_table",
+    "make_kong",
+    "play_stacking_toy",
+    "cover_blocks",
+    "match_and_pick_from_conveyor",
+    "swap_blocks",
+    "swap_T",
+    "press_by_number",
+    "imitate_sorting_sequence",
+    "align_blocks",
+    "general_pickup",
+    "stack_blocks_by_language",
+    "solve_equation",
+    "classify_objects_by_language",
+    "pick_from_conveyor_by_image",
+    "store_tools_in_toolbox",
+    "pour_by_language"
+  ],
+  "episodes_per_task": 15,
+  "sources": {
+    "repository": "https://github.com/RoboDojo-Benchmark/RoboDojo",
+    "commit": "726e9aabfaa642203722eb126f5eaf0f37f3e1ad",
+    "files": {
+      "README.md": "ba2f00cac3131e52937d8d8fe9dbde76990cc09baa17caf7a80e1ec48faa8d72",
+      "scripts/internal/summarize_result.py": "9ec361af587e1788d83d3cf8670e05b817ff252d33c33829a6337dc16ae370d2",
+      "env_cfg/arx_x5.yml": "7691350159fdeca92fd1b0b2da36913464ccdea3f3251eefb0176aa51db0807f",
+      "task/RoboDojo/tasks/stack_bowls.py": "022c129ec3493183b1a26688a0402f5a00a1546ae011999e9c19f4c0029e2b7d",
+      "task/RoboDojo/tasks/push_T.py": "a01d753bc320ffbf492ccc29e5f7ab3b39e6c7d255cd25804db1934a30fa5b41",
+      "task/RoboDojo/tasks/pack_objects_into_box.py": "84a1cf1dd5e166f36291130f9d8cb5dfe4b3f4732a46674bef6374a7ea2d66be",
+      "task/RoboDojo/tasks/fold_clothes.py": "ecea9c287d0579605330168e6f36734704fb14a6b1e5dec82b6f2ee3a56ec20a",
+      "task/RoboDojo/tasks/hang_mugs.py": "4bc6586bd87de030b9c580fea2a45e7977c3b6a4d75cf3c43b546d349d42e906",
+      "task/RoboDojo/tasks/sweep_blocks.py": "65786217e199c1e2b26ec8e2c232bf98ecb304a20939d0908fe12bc41e990614",
+      "task/RoboDojo/tasks/pour_liquid_into_cup.py": "73f8c91b57c352fdc1e7ba3fe5354b3c10e4156d8e5ba777762ad0fa1aff5663",
+      "task/RoboDojo/tasks/make_toast.py": "1047f484a73d1f92304393879b51f87e33d661b6ad7937198352fe37a0d3233d",
+      "task/RoboDojo/tasks/arrange_largest_number.py": "277acd20ae4345dc71267762e588b7b0343387c71685183890f044a4808b7a20",
+      "task/RoboDojo/tasks/sort_nesting_dolls_by_size.py": "1838fa6b515bad3796895cb5c1883c6a42789b7dada5434765764600e70beb49",
+      "task/RoboDojo/tasks/store_laptop_and_headphones.py": "2bee4e31f0594900629fe7f43266e16fecb310b152930ce51524507136809a92",
+      "task/RoboDojo/tasks/stack_blocks.py": "50bd388f9e47002966fbb0146742467a820295b8686e0f86379f0efbcfffcc1b",
+      "task/RoboDojo/tasks/fasten_screws.py": "2e187a28e33e44efb87baae6463b3ec35264ccd41e35c21a1be44f6361675185",
+      "task/RoboDojo/tasks/plug_in_charger.py": "aaa59ade46dc54f430e1148e3f6fae487970cd29eb2c07b5ff7b4045edb831b6",
+      "task/RoboDojo/tasks/insert_tubes.py": "9a68795ddbd0b816ffd7627e673390ecd83594c0e9d374d4e3abf3435ad439e1",
+      "task/RoboDojo/tasks/pour_balls_into_vase.py": "eae388b93ec196c401f76bbab3b0119cb2164f90bece0225d4fb925d3f2b73ab",
+      "task/RoboDojo/tasks/play_Xylophone.py": "b7a4b0bc0457bcf55d714ca1867476fc4aabc53084adfc78d3ff5d1437bf7847",
+      "task/RoboDojo/tasks/deposit_coin.py": "f9868ef827ec17b8db6c4650cc5d9a9e593d20d00ee822e2212ce229ec01fb61",
+      "task/RoboDojo/tasks/insert_key.py": "180978a2915744f0596fbca4ea0ad6dcb47dce005d43f06807249bc8b4d1a828",
+      "task/RoboDojo/tasks/build_tower.py": "814cf6ffb459871e5cf49f4e127903dbfbc30926f33db71de0b84a71ab235d6e",
+      "task/RoboDojo/tasks/put_bottles_into_dustbin.py": "3ba6e19df0c5ff19ba961092f031ce14e91e72a9a4a5934eece6000a1ffa1c48",
+      "task/RoboDojo/tasks/fill_pen_holder.py": "8706dce239487e078b21af0b95bcc5cd4eabdcdadcdcbc6400d6b138d982f1e6",
+      "task/RoboDojo/tasks/classify_objects.py": "aef4333c088766375e21a928d53a9a93aaee285fecae41e22385acdc74dd11ac",
+      "task/RoboDojo/tasks/play_tic_tac_toe.py": "8f75ebfe55c997ad9bd3b342db46e843e87397db94356f31cadcbe0cb483bca7",
+      "task/RoboDojo/tasks/fill_egg_holder.py": "506dfb772f8882ae53966e3580affde19c3c0f11591c78cc5f5b1d997ba04f7e",
+      "task/RoboDojo/tasks/organize_table.py": "9e3057e70b8ad0b8cb553be6dec00d2b71fada6f4087edcb38fc56508f572dbd",
+      "task/RoboDojo/tasks/make_kong.py": "b9266689d65f9213b05219ad952344f9fd63be8892097ec0103af99791b245d5",
+      "task/RoboDojo/tasks/play_stacking_toy.py": "23361329ee7efe330da1f1c241415205bafed2b6c082a913659d868a80d338c3",
+      "task/RoboDojo/tasks/cover_blocks.py": "9d14931b16842b93bea8abf9a07991a93a7e663b93c5fd1695108c8b922ab862",
+      "task/RoboDojo/tasks/match_and_pick_from_conveyor.py": "53110b8a0c971bd3ae8878bfb7d0dcd9626bd9b610d4e7fc91772313b435a5c0",
+      "task/RoboDojo/tasks/swap_blocks.py": "08ed24ae9dff27f4e5c850161a02f62ce237859c096d9b06a853a7890e0ad4ed",
+      "task/RoboDojo/tasks/swap_T.py": "57fc289b3957caa454e1d8e005e3a57c973d6ab40121845c94799e61e4bfafdf",
+      "task/RoboDojo/tasks/press_by_number.py": "006f969087c00c417a63875a9de153f698c52d1f1ca0caf0aa16076aa15059c5",
+      "task/RoboDojo/tasks/imitate_sorting_sequence.py": "18400cb3c5f5103492819df2dcdf05a77916106e8a503cb62b4ee6cdbaa9305b",
+      "task/RoboDojo/tasks/align_blocks.py": "c8597e96132cd7c9d30f3ae101f7bbe8ac28597b629599d75d442bbea4c6e74c",
+      "task/RoboDojo/tasks/general_pickup.py": "1a9eef7fe518f9d2c6805ad1a8f97c1045fa83726f84b9c63f67ffdfabbc40a7",
+      "task/RoboDojo/tasks/stack_blocks_by_language.py": "36a83925f35c7a4caac5add328dd35cb1d346bad833d3064f455d88221e7a41e",
+      "task/RoboDojo/tasks/solve_equation.py": "e287a2f36b82b28e8ca7824f63b1b723b02972ea6dfc115ff32b2882729751f7",
+      "task/RoboDojo/tasks/classify_objects_by_language.py": "242a8f048f487eb174ef246be78613bbb5f153549ee11a2650412718cf3b36c9",
+      "task/RoboDojo/tasks/pick_from_conveyor_by_image.py": "a0d29576d0aab8232d2fd3ebcc8c510e81c70b4cc04602a5be3e99ee2275e01d",
+      "task/RoboDojo/tasks/store_tools_in_toolbox.py": "2969fc3eb171560b3c0bcea62b9f38b8b35f3aecc9bcc7085c3b1cec365b48fc",
+      "task/RoboDojo/tasks/pour_by_language.py": "f7a15a7fca2c649a7918d68960ede27e667f409a339b668dd9876db890724cfb"
+    }
+  },
+  "reference_protocol": {
+    "robot": "arx_x5",
+    "official_eval_seeds": [
+      0,
+      1,
+      2
+    ],
+    "official_episodes_per_seed": 50,
+    "official_generalization_per_seed": {
+      "standard": 25,
+      "random": 25
+    },
+    "selected_episodes_per_seed": 15,
+    "selection": "Use eval_seed=0 only. Generalization task index i in tasks order uses standard layouts 0..7 and random layouts 0..6 when i is even, otherwise standard 0..6 and random 0..7. Other tasks use standard layouts 0..14. Each task has 15 distinct (variant, layout_id) scenes, each run once.",
+    "generalization_total": {
+      "standard": 90,
+      "random": 90
+    },
+    "selected_eval_seeds": [
+      0
+    ]
+  },
+  "reporting": {
+    "success_rate_denominator": 630,
+    "per_task_denominator": 15,
+    "partition_denominator": "len(protocol_cases) in the generated partition manifest",
+    "missing_score": "retain null; report valid score count separately; never remove missing cases from success denominator"
+  },
+  "auriga_adapter": {
+    "comparison_scope": "official_task_suite_single_seed_15_scene_subset",
+    "applied_fields": [
+      "task",
+      "variant",
+      "eval_seed",
+      "layout_id",
+      "reset_seed"
+    ],
+    "reference_only_fields": [
+      "simulator_initial_seed",
+      "policy_rng_seed",
+      "max_control_steps",
+      "control_dt_s"
+    ],
+    "known_differences": [
+      "Reduced 15-case panel, not the official 150-case-per-task leaderboard protocol.",
+      "Model, effort, observation, tool and memory settings come from the evaluated Auriga config.",
+      "policy_rng_seed=0 is reference metadata only; no policy RNG or model sampling seed is enforced.",
+      "Native task limits, control frequency, assets and source revision must be verified on the execution machine."
+    ],
+    "method_settings": {
+      "model": "use the evaluated Auriga configuration",
+      "reasoning_effort": "use the evaluated Auriga configuration; do not override"
+    }
+  }
+}

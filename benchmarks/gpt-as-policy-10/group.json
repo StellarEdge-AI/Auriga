@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "group_id": "gpt-as-policy-10",
+  "checked_on": "2026-10-02",
+  "cases_file": "cases.csv",
+  "cases_sha256": "504ec542b351f9d4e230b72a440cd79c674be50b86d2e984bfb0d74fdf492960",
+  "cases_per_method": 50,
+  "tasks": [
+    "organize_table",
+    "classify_objects_by_language",
+    "imitate_sorting_sequence",
+    "arrange_largest_number",
+    "pack_objects_into_box",
+    "classify_objects",
+    "build_tower",
+    "make_kong",
+    "fold_clothes",
+    "put_bottles_into_dustbin"
+  ],
+  "episodes_per_task": 5,
+  "sources": {
+    "repository": "https://github.com/anonymous-report-421/GPT-as-Policy",
+    "commit": "8f3d362b077d8efb77e2a7274d5b2c20e2243846",
+    "files": {
+      "README.md": {
+        "url": "https://raw.githubusercontent.com/anonymous-report-421/GPT-as-Policy/8f3d362b077d8efb77e2a7274d5b2c20e2243846/README.md",
+        "sha256": "aa0805d107e668aa25514bd218aa197bd93c7ce3fbb99b7ad91127cc36425d5f"
+      },
+      "public_results/evaluation_cases.json": {
+        "url": "https://raw.githubusercontent.com/anonymous-report-421/GPT-as-Policy/8f3d362b077d8efb77e2a7274d5b2c20e2243846/public_results/evaluation_cases.json",
+        "sha256": "b2ef651cc5d4c90375165a852030a3864b33d9410986dafedde7b04253f1c39a"
+      },
+      "hybrid_rollout/robodojo/SOURCE.json": {
+        "url": "https://raw.githubusercontent.com/anonymous-report-421/GPT-as-Policy/8f3d362b077d8efb77e2a7274d5b2c20e2243846/hybrid_rollout/robodojo/SOURCE.json",
+        "sha256": "63656da94951231bd493181bc7db176cf21cb355241bcbeb2b1e47cc7e6db7b7"
+      }
+    }
+  },
+  "reference_protocol": {
+    "robot": "arx_x5",
+    "isaac_sim": "5.1",
+    "model": "gpt-6-astra",
+    "reasoning_effort": "xhigh",
+    "robodojo_commit": "ee67a1468510da7624a089164402359f2afc72c8",
+    "openpi_commit": "432f82b1758c5b1202e42a3dfe014546dbc50871",
+    "pi05_checkpoint_config": "pi05_base_aloha_full_sim_arx-x5_seed_0",
+    "pi05_normalizer": "arx_x5_sim",
+    "seed_semantics": {
+      "eval_seed": "layout collection seed",
+      "layout_id": "layout within task and variant",
+      "reset_seed": "native env.reset seed, equal to layout_id",
+      "simulator_initial_seed": "simulator creation seed before reset",
+      "policy_rng_seed": "OpenPI JAX initial key in a fresh process with no warmup inference; not a GPT sampling seed"
+    },
+    "methods": {
+      "gpt": {
+        "rollout_evaluation_method": "gpt_only",
+        "pi05": false
+      },
+      "mix": {
+        "rollout_evaluation_method": "pi05_plus_gpt",
+        "pi05": true
+      }
+    },
+    "score_scale": [
+      0,
+      1
+    ],
+    "reported_score_scale": [
+      0,
+      100
+    ]
+  },
+  "reporting": {
+    "success_rate_denominator": 50,
+    "per_task_denominator": 5,
+    "missing_score": "retain null; exclude only from score mean",
+    "failures": "retain valid failures, invalid episodes, infrastructure faults and unknown outcomes",
+    "required_fields": [
+      "case_id",
+      "success",
+      "score",
+      "valid_episode",
+      "termination_reason",
+      "native_control_steps",
+      "model_calls",
+      "elapsed_wall_s",
+      "trajectory_path"
+    ]
+  },
+  "auriga_adapter": {
+    "comparison_scope": "same_case_set_re_evaluation",
+    "applied_fields": [
+      "task",
+      "variant",
+      "eval_seed",
+      "layout_id",
+      "reset_seed"
+    ],
+    "reference_only_fields": [
+      "simulator_initial_seed",
+      "policy_rng_seed",
+      "max_control_steps",
+      "control_dt_s",
+      "native_instruction"
+    ],
+    "task_mapping": {
+      "standard": "{task}",
+      "random": "{task}_random"
+    },
+    "known_differences": [
+      "Current simulator initial seed is layout_id, not the reference initial seed 0 for nonzero layouts.",
+      "Auriga pi05 tool does not implement the reference mix controller or enforce its fresh-process JAX seed contract.",
+      "Native limits, dt, assets, source versions, camera and robot configuration require runtime verification.",
+      "Auriga model-call, retry and no-progress limits remain method-specific; see README.md."
+    ],
+    "method_settings": {
+      "model": "use the evaluated Auriga configuration",
+      "reasoning_effort": "use the evaluated Auriga configuration; do not override with reference xhigh"
+    }
+  }
+}

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Auriga · Astra 具身工作台</title>
+    <link rel="stylesheet" href="/app.css">
+    <link rel="stylesheet" href="/styles.css">
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <header>
+      <div><strong>Auriga</strong><span>Astra 具身工作台</span><a id="library-link" href="/" hidden>实验库</a></div>
+      <div class="run-controls"><span id="run-mode">正在核对模式</span><span id="run-status" role="status">正在连接</span><button id="stop" class="danger" disabled>停止运行</button></div>
+    </header>
+    <main>
+      <div id="connection-gap" role="status" hidden></div>
+      <section class="task-panel" aria-label="持续会话任务与交互">
+        <div class="panel-bar"><h2>持续会话</h2><span id="input-status" role="status">正在读取输入归属</span><button id="claim-input" disabled>取得输入控制</button><button id="release-input" hidden>释放控制</button></div>
+        <div class="session-state"><span id="turn-state">Codex 轮次未知</span><span id="motion-state">机器人动作未知</span></div>
+        <form id="task-form"><label for="task-prompt">向当前 thread 提交任务</label><div class="task-entry"><textarea id="task-prompt" rows="2" maxlength="16000" placeholder="输入下一轮任务；前一轮与动作结束后可提交" required></textarea><button id="submit-task" type="submit" disabled>提交任务</button></div><p id="task-status" class="meta" role="status">任务由唯一运行协调器提交</p></form>
+        <div id="pending-interactions" aria-live="polite"></div>
+      </section>
+      <section class="phase-navigation" aria-label="观察与动作阶段导航">
+        <div class="panel-bar"><h2>按阶段回看</h2><a class="task-review-jump" href="#run-task-review">任务与评分</a><span id="phase-count" class="meta">正在整理阶段</span><button id="phase-retry">刷新阶段记录</button><button id="records-older" hidden>较早记录</button><button id="records-latest" hidden>返回最新记录</button><span id="records-window" class="meta"></span><a id="records-events" hidden target="_blank" rel="noopener" title="完整原始事件流；可将 after 改为已读取的接收序号继续读取">查看完整事件证据</a></div>
+        <nav id="phase-nav" aria-label="选择观察与动作阶段"></nav>
+      </section>
+      <div class="workbench">
+        <div class="review-left">
+        <section class="camera-panel" aria-label="机械臂画面">
+          <div class="panel-bar"><h1 id="phase-title">机械臂 · 阶段录像</h1><select id="phase-camera" aria-label="阶段录像视角"><option value="cam_head">头部 · 主视角</option></select></div>
+          <div class="phase-player"><video id="phase-video" controls playsinline preload="metadata" aria-label="当前阶段视频" hidden></video><p id="phase-empty">正在读取阶段与录像</p><span id="phase-playing" hidden></span></div>
+          <div class="phase-controls"><button id="phase-previous" disabled>上一阶段</button><button id="phase-play" disabled>播放本阶段</button><button id="phase-next" disabled>下一阶段</button><label><input id="phase-continuous" type="checkbox" checked>连续播放，跳过无视频阶段</label></div>
+          <div id="phase-segments" class="phase-segments" hidden></div>
+          <p id="phase-position" class="meta" role="status">视频将与阶段一一对应</p>
+          <details id="still-observations"><summary>单次观察证据 · 图片与帧索引</summary>
+          <div class="panel-bar"><h1 id="camera-heading">机械臂 · 实时观察</h1><select id="camera-select" aria-label="选择相机"></select><button id="return-live" hidden>返回实时</button></div>
+          <div id="camera-stage"><img id="camera-image" alt="尚无已发布的机器人画面" hidden><p id="camera-empty">等待 RoboDojo 发布观察</p></div>
+          <div id="frame-meta" class="meta">观察与媒体将按 ID 关联</div>
+          <div class="timeline-controls"><button id="frame-previous" aria-label="上一观察">上一帧</button><input id="frame-timeline" type="range" min="0" max="0" value="0" aria-label="按记录顺序选择历史观察" disabled><button id="frame-next" aria-label="下一观察">下一帧</button></div>
+          <p id="timeline-meta" class="meta">等待已记录观察</p>
+          </details>
+        </section>
+        <section class="phase-context-panel" aria-label="阶段指令与前后文"><div class="panel-bar"><h2>本阶段 · 指令、工具与前后文</h2></div><div id="phase-context"><p class="meta">选择阶段后查看已保存的记录</p></div></section>
+        </div>
+        <section class="terminal-panel" aria-label="Codex 阶段回放与原始终端">
+          <div class="panel-bar"><h2>Codex · 原生 TUI</h2><div class="codex-tabs" role="tablist" aria-label="Codex 回放方式"><button id="codex-tab-terminal" role="tab" aria-selected="true" aria-controls="raw-terminal">原生 TUI</button><button id="codex-tab-records" role="tab" aria-selected="false" aria-controls="codex-replay">阶段记录</button></div></div>
+          <p id="codex-terminal-notice" role="status" hidden></p>
+          <div id="codex-replay" hidden role="tabpanel" aria-labelledby="codex-tab-records"><p id="codex-replay-status" role="status">正在读取 Codex 记录</p><div id="codex-replay-content"></div><p class="codex-replay-note">随所选阶段显示已保存的消息、工具输入与结果；空白思考记录保留为空。</p></div>
+          <div id="raw-terminal" role="tabpanel" aria-labelledby="codex-tab-terminal">
+          <div class="panel-bar"><h2>Codex · 原生终端</h2><span id="terminal-status" role="status">正在连接</span><button id="terminal-retry">重新读取</button><button id="terminal-bottom">回到底部</button></div>
+          <div class="terminal-phase-link"><span id="terminal-phase-label">尚未选择阶段</span><button id="phase-terminal-jump" disabled>定位本阶段原文</button><p id="phase-terminal-status" role="status">选择阶段时尝试匹配已保存的终端原文</p></div>
+          <div id="terminal"></div>
+          <div class="terminal-note">只读监看 · 历史检查不会替换当前终端</div><a id="terminal-original-log" hidden>下载当时的原始终端日志</a>
+          </div>
+        </section>
+      </div>
+      <section id="run-task-review" class="task-review" aria-label="任务要求与评分"><h2>任务要求与评分</h2><p class="meta">正在读取官方规则与本次评测证据</p></section>
+      <section class="activity-panel" aria-label="观察与动作事件">
+        <div class="panel-bar"><h2>观察与动作 · 阶段记录</h2><span class="meta">与上方视频同步</span></div>
+        <ol id="phase-activity"><li class="empty">正在整理阶段</li></ol>
+        <details class="raw-activity"><summary>原始事件与独立证据</summary><p id="events-status" class="meta" role="status">等待事件</p>
+        <ol id="activity"><li class="empty">暂无事件</li></ol>
+        </details>
+      </section>
+      <section id="inspector" hidden aria-label="历史证据检查器">
+        <div class="panel-bar"><h2 id="inspector-title">证据检查</h2><button id="close-inspector">收起</button></div>
+        <p id="inspector-summary"></p>
+        <div id="observation-links"></div>
+        <div id="trace-records"></div>
+        <div id="associated-native"></div>
+        <details open><summary>原始观察、动作与关联记录</summary><pre id="inspector-data"></pre></details>
+      </section>
+      <details class="video-panel"><summary>录像文件与精确映射</summary>
+        <p id="video-status" class="meta">尚无已导出的录像；录制与观测记录分别保留</p>
+        <div id="video-list"></div>
+      </details>
+      <details class="native-panel"><summary>Codex 结构化记录 · 消息、工具、结果与差异</summary><p id="native-status" class="meta">按原生 item 聚合；原始事件独立保留</p><ol id="native-items"></ol></details>
+      <details class="scene-panel"><summary>内部局部场景 · 版本、几何查询、快照与对齐</summary>
+        <p id="scene-status" class="meta">正在读取局部场景能力</p>
+        <div class="scene-controls"><label for="scene-version">不可变版本</label><select id="scene-version"></select><label for="scene-anchor">快照证据锚点</label><select id="scene-anchor"></select><button id="scene-refresh">刷新版本</button><button id="scene-snapshot" disabled>保存几何快照</button></div>
+        <form id="scene-query-form"><label for="scene-query">几何查询参数</label><textarea id="scene-query" rows="3">{"kind":"ray_surface","entity_id":"指定代理实体 ID","origin_m":[0,0,1],"direction":[0,0,-1]}</textarea><button type="submit">查询所选版本</button></form>
+        <form id="scene-align-form"><label for="scene-align">与真实观察对齐的检查参数</label><textarea id="scene-align" rows="2" placeholder='{"observation_ids":["保留观察 ID"],"camera_id":"head","points_m":[[0,0,1]],"pixels":[[320,240]],"correspondence_source":"manual"}'></textarea><button type="submit">提交对齐检查</button></form>
+        <form id="scene-update-form"><label for="scene-update">从许可 RGB 构建几何的检查参数</label><textarea id="scene-update" rows="2" placeholder='{"observation_ids":["观察 A","观察 B"],"camera_id":"head","roi":[100,100,400,300],"entity_id":"table","primitive":"plane"}'></textarea><button type="submit">提交所选基线版本的几何更新</button></form>
+        <div id="scene-records"></div><pre id="scene-data"></pre>
+      </details>
+      <details class="run-details"><summary>运行详情</summary><pre id="run-data"></pre></details>
+    </main>
+  </body>
+</html>

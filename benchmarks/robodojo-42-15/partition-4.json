@@ -1,0 +1,16 @@
+{
+  "group_id": "robodojo-42-15",
+  "partition_id": "partition-4",
+  "tasks": [
+    "sort_nesting_dolls_by_size",
+    "hang_mugs",
+    "push_T",
+    "fasten_screws",
+    "insert_key",
+    "play_tic_tac_toe",
+    "make_kong",
+    "press_by_number",
+    "store_tools_in_toolbox",
+    "align_blocks"
+  ]
+}

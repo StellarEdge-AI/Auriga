@@ -1,0 +1,20 @@
+{
+  "version": "openai-gpt-6-astra-standard-2026-10-01",
+  "source": "https://developers.openai.com/api/docs/models/gpt-6-astra",
+  "currency": "USD",
+  "billing_basis": "OpenAI published dollar prices, Standard reference for <=272000 input tokens per request; no regional uplift. Applied to custom-provider usage as an estimate, not evidence of its billed service tier or paid invoice.",
+  "retrieved_at": "2026-10-01T14:02:57Z",
+  "official_snapshot_sha256": "290905c5491e594376583ae22c7d21b3b6f5469074c9a7de0189bd3ae54b290a",
+  "cache_write_reference_per_million": "12.5",
+  "cache_write_support": "Reported separately; nonzero or unknown writes require a billing adapter and currently make cost unavailable.",
+  "rates": [
+    {
+      "provider": "custom",
+      "model": "gpt-6-astra",
+      "uncached_input_per_million": "10",
+      "cached_input_per_million": "1",
+      "output_per_million": "50",
+      "max_input_tokens": 272000
+    }
+  ]
+}

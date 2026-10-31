@@ -1,0 +1,19 @@
+{
+  "schema_version": "0.1",
+  "data_origin": "synthetic_fixture",
+  "robot_model_id": "synthetic-geometry-only-v1",
+  "joints": {
+    "names": [
+      "fixture_joint"
+    ],
+    "q": [
+      0.0
+    ],
+    "source_kind": "measurement"
+  },
+  "qdot": null,
+  "gripper_feedback": null,
+  "limitations": [
+    "Synthetic state; not an ARX X5 robot model."
+  ]
+}

@@ -1,0 +1,15 @@
+diff --git a/src/eval_client/main.py b/src/eval_client/main.py
+index d0c2c90..7690248 100644
+--- a/src/eval_client/main.py
++++ b/src/eval_client/main.py
+@@ -126,6 +126,10 @@ from env.camera_manager.capture.render_sync import add_zero_delay_kit_args
+ add_zero_delay_kit_args(args_cli)
+ 
+ # launch omniverse app
++# Local installation: Vulkan indices were matched to nvidia-smi via PCI buses.
++# Keep the renderer on the requested physical GPU while CUDA uses logical 0.
++# An explicit override supports hosts where Vulkan and nvidia-smi ordering differ.
++os.environ.setdefault("ROBODOJO_RENDER_GPU", str(args_cli.device_id))
+ app_launcher = AppLauncher(args_cli)
+ simulation_app = app_launcher.app
+ 

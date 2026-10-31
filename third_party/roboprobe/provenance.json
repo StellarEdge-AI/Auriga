@@ -1,0 +1,21 @@
+{
+  "repository": "https://github.com/RoboProbe/RoboProbe",
+  "commit": "9ffacc54f372beef6479d61711bf4945e31ae4ce",
+  "license": "Apache-2.0",
+  "vendored_file": "auriga/roboprobe_pose.py",
+  "source_files": {
+    "policy.py": {
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect_EEF/policy.py",
+      "sha256": "2a9369fcf2b0ee70e27c74566ed250f4eb67c330b18512cead7d790ec56817ce"
+    },
+    "pose.py": {
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect_EEF/pose.py",
+      "sha256": "e9c8248bb4a6170557a2588be7202ba1afde440c45b0c539829c6ccaf17f3df1"
+    },
+    "deploy.py": {
+      "url": "https://github.com/RoboProbe/RoboProbe/blob/9ffacc54f372beef6479d61711bf4945e31ae4ce/policy/RoboDojo_Agent_L3_Inspect_EEF/deploy.py",
+      "sha256": "25c9a1da02d9e9cc409a4caa54c9655a3105195080dd44134406228fc6337e50"
+    }
+  },
+  "scope": "Exact pose.py only; policy/deploy inspected for grasp TCP, native plan_path, joint replay, arm-before-gripper, and latched-gripper hold semantics. Pipeline is a deterministic golden fixture, not full LLM policy reproduction."
+}

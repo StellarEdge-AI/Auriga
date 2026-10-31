@@ -1,0 +1,32 @@
+{
+  "version": "task_instruction_overrides_v2_public_20261030",
+  "scope": "Public-source corrections only: RoboDojo native instruction text, official task documentation, and upstream public issues. No evaluator thresholds, asset dimensions or values read from evaluator source or task configuration.",
+  "aliases": {
+    "arrange_largest_number_random": "arrange_largest_number"
+  },
+  "tasks": {
+    "organize_table": {
+      "replace_sections": {
+        "Instruction": "Place the mouse on the mouse pad, push the keyboard into the frame, put the figurine on the stand, and place the alarm clock on the drawer.",
+        "Description": "There are a computer, a keyboard, a mouse, an alarm clock, a cartoon figurine, and a drawer. The robot needs to organize the table by placing the mouse on the mouse pad, pushing the keyboard into the frame, putting the figurine on the stand, and placing the alarm clock on top of the drawer. The scene contains no miscellaneous items and the drawer cannot be opened; nothing needs to be placed inside it."
+      },
+      "reason": "The official documentation still asks to open the drawer and store remaining miscellaneous items; the scene has no such items and the drawer cannot be opened (upstream issue #42; native instruction updated upstream in 726e9aa).",
+      "sources": [
+        "https://github.com/RoboDojo-Benchmark/RoboDojo/issues/42",
+        "RoboDojo native instruction (gen_instruction) at 726e9aa",
+        "https://robodojo-benchmark.com/doc/sim-tasks/organize-table/"
+      ]
+    },
+    "arrange_largest_number": {
+      "replace_sections": {
+        "Description": "There are several number tiles on the table and a pad for placement. The robot needs to determine the order that forms the largest possible number, then place all the numbers on the pad from left to right in that order.",
+        "Comment": "Each digit's orientation is judged against the fixed table axes, not relative to its initial pose."
+      },
+      "reason": "The official comment refers orientation to the initial pose; upstream issue #72 reports that orientation is compared with fixed world axes. The official description says 'four numbers' although the official scoring table lists 4-digit and 5-digit layouts.",
+      "sources": [
+        "https://github.com/RoboDojo-Benchmark/RoboDojo/issues/72",
+        "https://robodojo-benchmark.com/doc/sim-tasks/arrange-largest-number/ (Scoring table)"
+      ]
+    }
+  }
+}

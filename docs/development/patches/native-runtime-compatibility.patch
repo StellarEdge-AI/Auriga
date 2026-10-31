@@ -1,0 +1,56 @@
+diff --git a/env/scene_manager/objects/garment.py b/env/scene_manager/objects/garment.py
+index 377a4f0..c8538ba 100644
+--- a/env/scene_manager/objects/garment.py
++++ b/env/scene_manager/objects/garment.py
+@@ -283,8 +283,7 @@ class GarmentObject(SingleClothPrim):
+         else:
+             mesh_points = self._cloth_prim_view.get_world_positions().squeeze(0).detach().cpu().numpy()
+             transformed_mesh_points = mesh_points
+-            pos_world = None
+-            ori_world = None
++            pos_world, ori_world = self.get_world_pose()
+ 
+         return transformed_mesh_points, mesh_points, pos_world, ori_world
+ 
+@@ -352,6 +351,9 @@ class GarmentObject(SingleClothPrim):
+         if self._device == "cpu":
+             self.initial_points_positions = self._get_points_pose().detach().cpu().numpy()
+         else:
++            import omni.physx
++
++            omni.physx.get_physx_interface().force_load_physics_from_usd()
+             self.physics_sim_view = SimulationManager.get_physics_sim_view()
+             self._cloth_prim_view.initialize(self.physics_sim_view)
+             self.initial_points_positions = self._cloth_prim_view.get_world_positions()
+@@ -422,11 +424,8 @@ class GarmentObject(SingleClothPrim):
+ 
+             # Apply relative transformation if needed
+             if is_relative and hasattr(self, "env_origin"):
+-                env_origin_tensor = (
+-                    torch.tensor(self.env_origin, dtype=torch.float32, device=root_pose.device)
+-                    if isinstance(self.env_origin, np.ndarray)
+-                    else self.env_origin
+-                )
++                env_origin_tensor = torch.as_tensor(
++                    self.env_origin, dtype=root_pose.dtype, device=root_pose.device)
+                 if env_origin_tensor.dim() == 0:
+                     env_origin_tensor = env_origin_tensor.unsqueeze(0)
+                 if env_origin_tensor.shape[0] < 3:
+diff --git a/env/scene_manager/objects/geometry.py b/env/scene_manager/objects/geometry.py
+index e41200f..586839e 100644
+--- a/env/scene_manager/objects/geometry.py
++++ b/env/scene_manager/objects/geometry.py
+@@ -272,11 +272,8 @@ class GeometryObject(SingleGeometryPrim):
+             orientation = orientation.squeeze()
+         root_pose = torch.cat([translation, orientation])
+         if is_relative and hasattr(self, "env_origin"):
+-            env_origin_tensor = (
+-                torch.tensor(self.env_origin, dtype=torch.float32, device=root_pose.device)
+-                if isinstance(self.env_origin, np.ndarray)
+-                else self.env_origin
+-            )
++            env_origin_tensor = torch.as_tensor(
++                self.env_origin, dtype=root_pose.dtype, device=root_pose.device)
+             if env_origin_tensor.dim() == 0:
+                 env_origin_tensor = env_origin_tensor.unsqueeze(0)
+             if env_origin_tensor.shape[0] < 3:

@@ -1,0 +1,727 @@
+{
+  "version": 2,
+  "created_at": "2026-10-09T06:14:33.731583+00:00",
+  "scope": "All 54 runtime task modules in RoboDojo at the pinned commit: 42 base tasks and 12 random-layout variants. DLC and real-robot-only task pages are outside this runtime roster.",
+  "upstream_commit": "726e9aabfaa642203722eb126f5eaf0f37f3e1ad",
+  "roster_source_url": "https://github.com/RoboDojo-Benchmark/RoboDojo/tree/726e9aabfaa642203722eb126f5eaf0f37f3e1ad/task/RoboDojo/tasks",
+  "sources": [
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/align-blocks/",
+      "fetched_at": "2026-10-09T06:14:33.406596+00:00",
+      "sha256": "49518595a70aae2c71d150d6e2d8063320b5229128f68d88722057c718e22d0d"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/arrange-largest-number/",
+      "fetched_at": "2026-10-09T06:14:33.404072+00:00",
+      "sha256": "8ce24f7d07efa9a5b158b04a09d8bae1fe7ef715bc5ce27a32767ae4bf2fc2ef"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/build-tower/",
+      "fetched_at": "2026-10-09T06:14:33.410917+00:00",
+      "sha256": "b3a260ee033cb4e3cb6e9d06efdbbe7f3d69cc7d1b7bd9984a22e118bba7cb22"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/classify-objects/",
+      "fetched_at": "2026-10-09T06:14:33.402581+00:00",
+      "sha256": "5da330cfcfd99aedaa74d32b84b778d01e883a15ff9ef3153a7236881ceb203b"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/classify-objects-by-language/",
+      "fetched_at": "2026-10-09T06:14:33.409920+00:00",
+      "sha256": "7b7bff0b91cf5524d9e497ba46e9094cc8ccffebaf50d09b1f76b935ce49f036"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/cover-blocks/",
+      "fetched_at": "2026-10-09T06:14:33.404582+00:00",
+      "sha256": "f107b1ddf6e2a352f63e79b66a4261a00c2dac819f968ee452e7f37b970a9f22"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/deposit-coin/",
+      "fetched_at": "2026-10-09T06:14:33.412019+00:00",
+      "sha256": "1cb948a0b507360d2e431724e95c331b45b5cb10aafae95b785660857a226715"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/fasten-screws/",
+      "fetched_at": "2026-10-09T06:14:33.410756+00:00",
+      "sha256": "c8e9bda7a7b677e31d74a0238d1e8ec084aa49333469886206b786f453079c5d"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/fill-egg-holder/",
+      "fetched_at": "2026-10-09T06:14:33.643169+00:00",
+      "sha256": "4d0336bdca0152e8d9822b5d54ce94a84c360f5b502a0e566a0a97555781690a"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/fill-pen-holder/",
+      "fetched_at": "2026-10-09T06:14:33.647084+00:00",
+      "sha256": "e652d5e143d8ed95f5e034f492aa6ba63213f403083259ac469b351944ad08cf"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/fold-clothes/",
+      "fetched_at": "2026-10-09T06:14:33.646759+00:00",
+      "sha256": "6b13682017ce48fdf0dfa38981d296f0ce9d4c0e9760fab4ac0a0beafd26b0f9"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/general-pickup/",
+      "fetched_at": "2026-10-09T06:14:33.643326+00:00",
+      "sha256": "1a953035a41329d46165ef1c83c3df5ecb1a5ab35e63c17d0bc4499d37e03cec"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/hang-mugs/",
+      "fetched_at": "2026-10-09T06:14:33.648709+00:00",
+      "sha256": "3d34f949477bad3a8e3a7558675304b794c2f81774767bd983a20ba30da5db92"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/imitate-sorting-sequence/",
+      "fetched_at": "2026-10-09T06:14:33.650867+00:00",
+      "sha256": "bfffbe0745e6e03356a496e4fdee615a1b4f48d476d06084af15afa203bd8fd5"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/insert-key/",
+      "fetched_at": "2026-10-09T06:14:33.649272+00:00",
+      "sha256": "baa9879cbe8c3159a7d75786a0b1bbd6ec93c6d9eccaa57defc8eb4c77cbe6db"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/insert-tubes/",
+      "fetched_at": "2026-10-09T06:14:33.648948+00:00",
+      "sha256": "6c3933d5d3906b2e59f2924a32c749f5ef022ef41e69abad8125995383090e1b"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/make-kong/",
+      "fetched_at": "2026-10-09T06:14:33.663455+00:00",
+      "sha256": "86775db1ad6afd3f27c5b61433840287c66e9d57762496b67287f2e5f38f3295"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/make-toast/",
+      "fetched_at": "2026-10-09T06:14:33.668245+00:00",
+      "sha256": "ff3cf1e7413360f51b03f7bc1af3e8f906cf974009805d2957c9d3cedf73339c"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/match-and-pick-from-conveyor/",
+      "fetched_at": "2026-10-09T06:14:33.672072+00:00",
+      "sha256": "f3265ea859c28836fd8286f270dc184745755a864b40ba3cf31b5cb8fdbc25dc"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/organize-table/",
+      "fetched_at": "2026-10-09T06:14:33.669638+00:00",
+      "sha256": "4b73b5501fbfdc095c155754fc2d868ea93bcd95c5f18407b0cee052d2c1bc25"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/pack-objects-into-box/",
+      "fetched_at": "2026-10-09T06:14:33.679422+00:00",
+      "sha256": "b89729c4175cbdae1e1e63f832bfaa52e8ebc0e7e23f01b47914e38199338013"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/pick-from-conveyor-by-image/",
+      "fetched_at": "2026-10-09T06:14:33.668091+00:00",
+      "sha256": "2f2d49038c322b2207f265fad0da961d877589129c88f08a613b0906820e65c7"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/play-xylophone/",
+      "fetched_at": "2026-10-09T06:14:33.674857+00:00",
+      "sha256": "ecc36eb395df9186c8189ba25f4a70e55ba5a01cea9076217a75f9dfc4b620b7"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/play-stacking-toy/",
+      "fetched_at": "2026-10-09T06:14:33.674699+00:00",
+      "sha256": "5c8c4ecb2943575ec87e5aab06e340465b7b16adbdf7bfc739888ca243a33afd"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/play-tic-tac-toe/",
+      "fetched_at": "2026-10-09T06:14:33.682044+00:00",
+      "sha256": "6947b588511569ed701f447223238aafb5a092e033a968a9e0a300ae8bcc0eb7"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/plug-in-charger/",
+      "fetched_at": "2026-10-09T06:14:33.696955+00:00",
+      "sha256": "c9207825687d31262d226caf3d8e28d2d8c20ff8c85f8ddcd843de4ed0217a76"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/pour-balls-into-vase/",
+      "fetched_at": "2026-10-09T06:14:33.691386+00:00",
+      "sha256": "1187dfa8a39e5f98aa2439205fadcfe61d325e4b44e467331d23d203f875b527"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/pour-by-language/",
+      "fetched_at": "2026-10-09T06:14:33.696248+00:00",
+      "sha256": "a93c958d5e5099ba31584c251ef04960916b86d98dd7a8c506ef63e167afa90d"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/pour-liquid-into-cup/",
+      "fetched_at": "2026-10-09T06:14:33.696830+00:00",
+      "sha256": "ec05902ce8a58582f6a219e1e85c49aaecc978267a1266e4d8d01a12ff6413c6"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/press-by-number/",
+      "fetched_at": "2026-10-09T06:14:33.697212+00:00",
+      "sha256": "dee3d81dc92bbb59f31dd16e11abd155490b9d2e11e6df34751082235d627b11"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/push-t/",
+      "fetched_at": "2026-10-09T06:14:33.699106+00:00",
+      "sha256": "6b70d7e54c0dec9e5618cfb89b512d33e70b954b81408ddb0e887f057d7a7146"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/put-bottles-into-dustbin/",
+      "fetched_at": "2026-10-09T06:14:33.704416+00:00",
+      "sha256": "91195c7e65e84da9059425e24ff6394cdf13ce0b8a340abb46337e0ea6d195c9"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/solve-equation/",
+      "fetched_at": "2026-10-09T06:14:33.701765+00:00",
+      "sha256": "d64dddb4c974af51a1f536d9dbd3f03debb5c6b43d86c1a799d7711a239f9268"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/sort-nesting-dolls-by-size/",
+      "fetched_at": "2026-10-09T06:14:33.714091+00:00",
+      "sha256": "6ad7a232a38475b915356944285d2e88b676929b3a6c88aabd43520e600166b1"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/stack-blocks/",
+      "fetched_at": "2026-10-09T06:14:33.723118+00:00",
+      "sha256": "4597d8b49b380fa8711e8d6417b59d71b59381dbc920ce37ec98d45035c61887"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/stack-blocks-by-language/",
+      "fetched_at": "2026-10-09T06:14:33.720399+00:00",
+      "sha256": "697cf1ee8a37dae75eb623955fa26977a65a194a2c1da417f52d0e91f94bcb97"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/stack-bowls/",
+      "fetched_at": "2026-10-09T06:14:33.719627+00:00",
+      "sha256": "c6f7589be35ed7ee5d640619238d0659d3f8a38a09dc9c82a79faea7a18f128e"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/store-laptop-and-headphones/",
+      "fetched_at": "2026-10-09T06:14:33.723275+00:00",
+      "sha256": "f39a4a3863df6ddef581b61a768ff628aa3c7c698dc85f00834e88c4a596c4f4"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/store-tools-in-toolbox/",
+      "fetched_at": "2026-10-09T06:14:33.721153+00:00",
+      "sha256": "1d1a2ed1fb2104afc7c123a69a0dfeb49b7f09c6ee812d1ff52550e700b06813"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/swap-t/",
+      "fetched_at": "2026-10-09T06:14:33.722446+00:00",
+      "sha256": "1f0ba3aee38a51435a5fdbf902cb3eddf11d169114a0e1a6402948ed5e381bb4"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/swap-blocks/",
+      "fetched_at": "2026-10-09T06:14:33.727338+00:00",
+      "sha256": "ae0a601aee7845ca4e33f3c55aea0b29750cd8939c9933be9f39d1a9b5e7792b"
+    },
+    {
+      "url": "https://robodojo-benchmark.com/doc/sim-tasks/sweep-blocks/",
+      "fetched_at": "2026-10-09T06:14:33.731583+00:00",
+      "sha256": "44d4cbb56efc5886975743f4b33e4af17968269150973d521d9c7fb9bc97bde7"
+    }
+  ],
+  "tasks": {
+    "align_blocks": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/align-blocks/",
+      "base_task": "align_blocks",
+      "public_rules": [
+        "Instruction\n\nUse the set square to push the three blocks into a straight, aligned row, then reset the robot arm.",
+        "Description\n\nThere is a set square and three blocks. The robot needs to use the set square to push the blocks until they are aligned in parallel in a straight row.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The alignment, reset, or no-lift condition is not satisfied. |\n| 100 | The three cubes are in one straight aligned row, the robot returns to origin, and no cube has been lifted above the allowed height during the episode. |"
+      ]
+    },
+    "arrange_largest_number": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/arrange-largest-number/",
+      "base_task": "arrange_largest_number",
+      "public_rules": [
+        "Instruction\n\nArrange the numbers from left to right to form the largest possible number, and place them on the pad.",
+        "Description\n\nThere are several number tiles on the table and a pad for placement. The robot needs to determine the order that forms the largest possible number, then place the four numbers on the pad from left to right in that order.",
+        "Comment\n\nEach digit must remain within the permitted rotational tolerance relative to its initial pose.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No digit is placed correctly. |\n| 5 | Any one digit is placed on its correct pad in descending-number order, with valid orientation and the gripper open. |\n| 15 | Any two digits are correctly placed. |\n| 25 | In a 5-digit layout, any three digits are correctly placed. |\n| 30 | In a 4-digit layout, any three digits are correctly placed. |\n| 40 | In a 5-digit layout, any four digits are correctly placed. |\n| 100 | All digits are correctly ordered on the pads, have valid orientation, and the robot returns to origin. |"
+      ]
+    },
+    "arrange_largest_number_random": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/arrange-largest-number/",
+      "base_task": "arrange_largest_number",
+      "public_rules": [
+        "Instruction\n\nArrange the numbers from left to right to form the largest possible number, and place them on the pad.",
+        "Description\n\nThere are several number tiles on the table and a pad for placement. The robot needs to determine the order that forms the largest possible number, then place the four numbers on the pad from left to right in that order.",
+        "Comment\n\nEach digit must remain within the permitted rotational tolerance relative to its initial pose.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No digit is placed correctly. |\n| 5 | Any one digit is placed on its correct pad in descending-number order, with valid orientation and the gripper open. |\n| 15 | Any two digits are correctly placed. |\n| 25 | In a 5-digit layout, any three digits are correctly placed. |\n| 30 | In a 4-digit layout, any three digits are correctly placed. |\n| 40 | In a 5-digit layout, any four digits are correctly placed. |\n| 100 | All digits are correctly ordered on the pads, have valid orientation, and the robot returns to origin. |"
+      ],
+      "variant": "random_layout_same_public_objective"
+    },
+    "build_tower": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/build-tower/",
+      "base_task": "build_tower",
+      "public_rules": [
+        "Instruction\n\nBuild a stable multi-layer tower with the wooden blocks and boards.",
+        "Description\n\nThere are wooden blocks and wooden boards on the table. The robot needs to place each board or block on the supports below it, keep each layer centered over the layer beneath it, and keep all pieces upright.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No tower layer is completed. |\n| 10 | The lower board is placed across two upright supports, remains stable and centered on them, and the gripper is open. |\n| 30 | The middle board is placed on the completed lower layer, stays centered over it, and all lower and middle pieces remain upright. |\n| 100 | The full tower is completed with the top pieces, all eight pieces remain upright, each layer stays centered over the layer below it, the gripper is open, and the robot returns to origin. |"
+      ]
+    },
+    "classify_objects": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/classify-objects/",
+      "base_task": "classify_objects",
+      "public_rules": [
+        "Instruction\n\nSort the objects by category into the three baskets.",
+        "Description\n\nThere are three categories of objects and three baskets. The robot needs to group the objects by category and place each category into a separate basket. Any basket can be used for any category, as long as objects of the same category are placed together.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No category basket is completed. |\n| 15 | One basket contains exactly one complete object category, with no objects from other categories, and the gripper is open. |\n| 40 | Two baskets each contain exactly one complete category. |\n| 100 | All three categories are separated into three baskets, the objects are settled inside the baskets, and the robot returns to origin. |"
+      ]
+    },
+    "classify_objects_by_language": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/classify-objects-by-language/",
+      "base_task": "classify_objects_by_language",
+      "public_rules": [
+        "Instruction\n\nPut category₁ objects into the left basket, category₂ objects into the middle basket, and category₃ objects into the right basket, then reset the robot arm.",
+        "Description\n\nThere are three baskets and three categories of unseen objects. The robot needs to understand the language instruction, identify the category of each object, and place the objects into the specified baskets from left to right.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No specified category is placed into its assigned basket. |\n| 10 | One specified category is placed into its assigned basket, no other objects are in that basket, and the gripper is open. |\n| 40 | Two specified categories are placed into their assigned baskets, with no extra objects in those baskets. |\n| 100 | All three specified categories are placed into the left, middle, and right baskets as instructed, no basket contains objects from another category, and the robot returns to origin. |"
+      ]
+    },
+    "cover_blocks": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/cover-blocks/",
+      "base_task": "cover_blocks",
+      "public_rules": [
+        "Instruction\n\nCover the blocks from left to right, remember their colors, then uncover them in the order: red, green, and blue.",
+        "Description\n\nThere are three covers and three blocks arranged in a random order. The blocks are red, green, and blue. The robot needs to cover the blocks from left to right, remember the color under each cover, and then uncover the blocks in the order of red, green, and blue.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No block-covering step is completed. |\n| 5 | All three blocks are covered by cups from left to right. |\n| 15 | After all blocks are covered, the red block is uncovered first while the green and blue blocks remain covered. |\n| 30 | The red and green blocks are uncovered in order while the blue block remains covered. |\n| 100 | All three blocks are first covered from left to right, then uncovered in red, green, and blue order; cup orientation remains valid and the robot returns to origin. |"
+      ]
+    },
+    "deposit_coin": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/deposit-coin/",
+      "base_task": "deposit_coin",
+      "public_rules": [
+        "Instruction\n\nPick up the coin from the holder and insert it precisely into the coin bank.",
+        "Description\n\nThere is a coin placed on a holder and a coin bank. The robot needs to pick up the coin and accurately insert it into the slot of the coin bank.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The coin is not lifted. |\n| 20 | The coin is lifted at least 8 cm. |\n| 100 | The coin bounding box is inside the coin bank slot region, and the robot returns to origin. |"
+      ]
+    },
+    "fasten_screws": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/fasten-screws/",
+      "base_task": "fasten_screws",
+      "public_rules": [
+        "Instruction\n\nInsert and tighten each screw into the nut of the same color.",
+        "Description\n\nThere are three screws and three nuts on the table. The screws and nuts come from five possible colors: red, blue, gray, yellow, and purple. In each episode, three different colors are selected, and the robot needs to match each screw with the nut of the same color, insert it, and tighten it. The screw positions vary within a small range, while the nut positions vary within a larger range. If a handover is needed, the robot can first place the screw in the middle and then let the other arm pick it up and fasten it.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No nut is fastened onto its matching bolt. |\n| 20 | Any one nut is upright, aligned with its matching bolt, rotated onto the bolt to the required depth, and the gripper is open. |\n| 50 | Any two matching nut-bolt pairs are fastened correctly. |\n| 100 | All three nut-bolt pairs are fastened, the gripper is open, and the robot returns to origin. |"
+      ]
+    },
+    "fill_egg_holder": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/fill-egg-holder/",
+      "base_task": "fill_egg_holder",
+      "public_rules": [
+        "Instruction\n\nPlace the four eggs from the basket into the egg holder, then close the lid.",
+        "Description\n\nThere is a woven basket containing four eggs and an egg holder. The robot needs to pick up the eggs one by one, place all four into the egg holder, and then close the lid.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No egg is placed into the egg holder. |\n| 10 | Any one egg is inside the egg holder and close to the holder bottom, with the gripper open. |\n| 25 | Any two eggs are placed correctly into the egg holder. |\n| 40 | Any three eggs are placed correctly into the egg holder. |\n| 90 | All four eggs are placed in the holder, but the lid is not fully closed yet. |\n| 100 | All four eggs are in the holder, the holder lid is correctly and fully closed, and the robot returns to origin. |"
+      ]
+    },
+    "fill_pen_holder": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/fill-pen-holder/",
+      "base_task": "fill_pen_holder",
+      "public_rules": [
+        "Instruction\n\nHold the pen holder with one hand, place all pens into it with the other hand, then put it back down.",
+        "Description\n\nThere is a pen holder and several pens. The robot needs to grasp the pen holder with one hand, use the other hand to place the pens into the holder one by one, and finally put the filled pen holder back on the table.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No pen is correctly inserted into the pen holder. |\n| 10 | Any one pen is correctly inserted tip-up into the upright pen holder. |\n| 25 | Any two pens are correctly inserted into the pen holder. |\n| 40 | Any three pens are correctly inserted into the pen holder. |\n| 90 | All four pens are inserted into the upright pen holder, but the robot has not returned to origin yet. |\n| 100 | All four pens are inserted, the pen holder is upright, and the robot returns to origin. |"
+      ]
+    },
+    "fold_clothes": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/fold-clothes/",
+      "base_task": "fold_clothes",
+      "public_rules": [
+        "Instruction\n\nFold the clothes neatly.",
+        "Description\n\nThere is a piece of clothing. The robot needs to fold it neatly.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The sleeve-fold condition is not reached. |\n| 20 | When the gripper opens, both sleeves are folded inward close to the opposite chest points. |\n| 100 | Both sleeves are folded inward, the hems are close to the shoulder points in x/y, the hem line is aligned with the shoulder line within the angle threshold, and the robot returns to origin. |"
+      ]
+    },
+    "fold_clothes_random": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/fold-clothes/",
+      "base_task": "fold_clothes",
+      "public_rules": [
+        "Instruction\n\nFold the clothes neatly.",
+        "Description\n\nThere is a piece of clothing. The robot needs to fold it neatly.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The sleeve-fold condition is not reached. |\n| 20 | When the gripper opens, both sleeves are folded inward close to the opposite chest points. |\n| 100 | Both sleeves are folded inward, the hems are close to the shoulder points in x/y, the hem line is aligned with the shoulder line within the angle threshold, and the robot returns to origin. |"
+      ],
+      "variant": "random_layout_same_public_objective"
+    },
+    "general_pickup": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/general-pickup/",
+      "base_task": "general_pickup",
+      "public_rules": [
+        "Instruction\n\nPick up the target object by 10 cm.",
+        "Description\n\nThere are multiple objects. The robot needs to understand the language instruction, identify the target object, and pick it up.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The target object is not lifted high enough. |\n| 100 | The target object is lifted at least 10 cm. |"
+      ]
+    },
+    "hang_mugs": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/hang-mugs/",
+      "base_task": "hang_mugs",
+      "public_rules": [
+        "Instruction\n\nHang all the mugs on the mug rack.",
+        "Description\n\nThere are three mugs and one mug rack. The robot needs to pick up each mug and hang all of them on the rack.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No mug is hung on the mug rack. |\n| 15 | Any one mug is hung on the mug rack and the gripper is open. |\n| 40 | Any two mugs are hung on the mug rack. |\n| 100 | All three mugs are hung on the rack and the robot returns to origin. |"
+      ]
+    },
+    "hang_mugs_random": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/hang-mugs/",
+      "base_task": "hang_mugs",
+      "public_rules": [
+        "Instruction\n\nHang all the mugs on the mug rack.",
+        "Description\n\nThere are three mugs and one mug rack. The robot needs to pick up each mug and hang all of them on the rack.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No mug is hung on the mug rack. |\n| 15 | Any one mug is hung on the mug rack and the gripper is open. |\n| 40 | Any two mugs are hung on the mug rack. |\n| 100 | All three mugs are hung on the rack and the robot returns to origin. |"
+      ],
+      "variant": "random_layout_same_public_objective"
+    },
+    "imitate_sorting_sequence": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/imitate-sorting-sequence/",
+      "base_task": "imitate_sorting_sequence",
+      "public_rules": [
+        "Instruction\n\nObserve the object placement order, remember it, then place the corresponding objects into the basket in the same order.",
+        "Description\n\nThere are five categories of objects, with five objects on each side. The opposite robot places its objects into the basket on the right side in a certain order. The robot needs to observe and remember this sequence, then place its corresponding objects into the basket in the same order. This is a memory-based imitation task.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The first sequence step is not completed, or the policy robot moves before the opposite robot arm finishes. |\n| 5 | The first target object is placed into the policy basket, later target objects are still outside it, all demonstration objects remain in the demo basket, and the gripper is open. |\n| 15 | The first two target objects are placed in the correct sequence. |\n| 30 | The first three target objects are placed in the correct sequence. |\n| 50 | The first four target objects are placed in the correct sequence. |\n| 100 | All five target objects are placed in sequence, all demonstration objects remain in the demo basket, the gripper is open, and the robot returns to origin. |",
+        "Notes\n\nThe first half of this task is watching, and moving during it scores zero however well the second half goes, and one step too early ends the episode at zero on the spot. The opposite arm takes up to twenty-four seconds to place its five objects. Hold still for that whole demonstration.\n\nThe wait is the demonstration, not a stall, and after it you still have five of your own objects to place. The episode is not lost until you move too early or copy the order wrong. Write the five-object order down from the demonstration frames so it lives in words rather than only in images, then place your own objects in exactly that order. Keep going until your five are in."
+      ]
+    },
+    "insert_key": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/insert-key/",
+      "base_task": "insert_key",
+      "public_rules": [
+        "Instruction\n\nPick up the key, hand it over to the other hand, insert it into the keyhole, then turn it.",
+        "Description\n\nThere is a key and a keyhole on the table. The robot needs to pick up the key, hand it over to the other hand for pose adjustment, insert it accurately into the keyhole, and then turn it.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The key is not lifted. |\n| 15 | The key is lifted at least 5 cm. |\n| 100 | The key is inserted deep enough into the slot, aligned closely in x/y, kept upright, and successfully turned after insertion. |"
+      ]
+    },
+    "insert_tubes": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/insert-tubes/",
+      "base_task": "insert_tubes",
+      "public_rules": [
+        "Instruction\n\nInsert the three tubes into the rack one by one.",
+        "Description\n\nThere is a tube rack and three tubes. The robot needs to pick up each tube in sequence and insert all tubes into the rack.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No tube is inserted into a slot. |\n| 20 | Any one tube is inside the slot, inserted to the required depth, upright, and the gripper is open. |\n| 40 | Any two tubes are inserted correctly. |\n| 100 | All three tubes are inserted correctly and the robot returns to origin. |"
+      ]
+    },
+    "make_kong": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/make-kong/",
+      "base_task": "make_kong",
+      "public_rules": [
+        "Instruction\n\nWait for the opponent to discard a tile, then declare a kong with the matching tiles.",
+        "Description\n\nThere is a Mahjong setup. The opponent first pushes out a tile. The robot needs to observe the discarded tile, identify the matching tiles on its side, and perform a valid kong action. The setup guarantees that a kong is possible.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The kong declaration state is not completed. |\n| 100 | The three matching Mahjong tiles are pushed down, the non-matching tiles remain upright on the table, the target tile is correctly grasped and placed at the required position, the gripper is open, and no invalid robot motion is detected. |",
+        "Notes\n\nThe table holds three groups: your own row of upright tiles facing you, the opponent's short row of face-down tiles beyond it, and a stack of tiles lying flat off to the left.\n\nNothing you do before the discard can help, and the discarded tile is what your three have to match, so hold still until the opponent has pushed one tile out face up.\n\nDeclaring the kong is then two motions, not one. First push your three matching tiles flat, leaving every tile that does not match standing. Then take one tile off the flat stack on the left — not one of the three you have just pushed down — and stand it upright at the right-hand end of your own row. Open the gripper once that tile is standing on its own."
+      ]
+    },
+    "make_toast": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/make-toast/",
+      "base_task": "make_toast",
+      "public_rules": [
+        "Instruction\n\nPick up two slices of bread, place them into the toaster, and press the lever down.",
+        "Description\n\nThere is a basket containing multiple slices of bread and a toaster. The robot needs to pick up two slices one by one, place them into the toaster, and then press the lever down to start toasting.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No bread slice is inserted into a toaster slot. |\n| 25 | One bread slice is inserted into a toaster slot and all bread axes satisfy the required orientation. |\n| 50 | Two bread slices are inserted into the toaster slots and all bread axes satisfy the required orientation. |\n| 100 | Both toaster slots are filled, exactly two bread slices remain on the shelf, the toaster control is pressed down, and the robot returns to origin. |"
+      ]
+    },
+    "make_toast_random": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/make-toast/",
+      "base_task": "make_toast",
+      "public_rules": [
+        "Instruction\n\nPick up two slices of bread, place them into the toaster, and press the lever down.",
+        "Description\n\nThere is a basket containing multiple slices of bread and a toaster. The robot needs to pick up two slices one by one, place them into the toaster, and then press the lever down to start toasting.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No bread slice is inserted into a toaster slot. |\n| 25 | One bread slice is inserted into a toaster slot and all bread axes satisfy the required orientation. |\n| 50 | Two bread slices are inserted into the toaster slots and all bread axes satisfy the required orientation. |\n| 100 | Both toaster slots are filled, exactly two bread slices remain on the shelf, the toaster control is pressed down, and the robot returns to origin. |"
+      ],
+      "variant": "random_layout_same_public_objective"
+    },
+    "match_and_pick_from_conveyor": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/match-and-pick-from-conveyor/",
+      "base_task": "match_and_pick_from_conveyor",
+      "public_rules": [
+        "Instruction\n\nRemember the first object on the conveyor, then pick the matching object when it appears again.",
+        "Description\n\nAn object first appears on the conveyor and is carried away. The robot needs to remember this object, observe the following objects on the conveyor, and pick the one that matches the first object.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The matching target object is not lifted high enough. |\n| 100 | The matching target object is lifted at least 10 cm. |",
+        "Notes\n\nThe belt does not stop for you. A grasp aimed at where the object is now closes on empty belt by the time the arm gets there, so read the object's direction and speed off two observations and aim at where it will be when the jaws arrive.\n\nWait for it above the belt rather than on it. An earlier attempt parked the jaws low in the object's path and stopped it travelling instead of catching it; come down onto the object only as it reaches you."
+      ]
+    },
+    "organize_table": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/organize-table/",
+      "base_task": "organize_table",
+      "public_rules": [
+        "Instruction\n\nPlace the mouse on the mouse pad, push the keyboard into the frame, put the figurine on the stand, place the alarm clock on the drawer, then open the drawer and put all remaining miscellaneous items inside.",
+        "Description\n\nThere are a computer, a keyboard, a mouse, an alarm clock, a cartoon figurine, three miscellaneous items, and a drawer. The robot needs to organize the table by placing the mouse on the mouse pad, pushing the keyboard into the frame, putting the figurine on the stand, placing the alarm clock on top of the drawer, opening the drawer, and putting all remaining miscellaneous items into it.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No target item is organized correctly. |\n| 25 | Any one target item is organized correctly: mouse on mouse pad, keyboard in the frame, figurine on its stand, or alarm clock on the drawer, with the gripper open. |\n| 50 | Any two target items are organized correctly. |\n| 75 | Any three target items are organized correctly. |\n| 100 | All four target items are organized correctly and the robot returns to origin. |"
+      ]
+    },
+    "pack_objects_into_box": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/pack-objects-into-box/",
+      "base_task": "pack_objects_into_box",
+      "public_rules": [
+        "Instruction\n\nPlace all the objects into the box with their front sides facing left.",
+        "Description\n\nThere are several objects on the table and a box. The robot needs to pick up all the objects, place them into the box, and ensure that each object is oriented with its front side facing left.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No object is placed correctly into the box. |\n| 10 | Any one object is inside the box with its front side facing left, the box is aligned, and the gripper is open. |\n| 25 | Any two objects are placed correctly into the box. |\n| 50 | Any three objects are placed correctly into the box. |\n| 100 | All four objects are placed in the aligned box with correct facing direction, and the robot returns to origin. |"
+      ]
+    },
+    "pack_objects_into_box_random": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/pack-objects-into-box/",
+      "base_task": "pack_objects_into_box",
+      "public_rules": [
+        "Instruction\n\nPlace all the objects into the box with their front sides facing left.",
+        "Description\n\nThere are several objects on the table and a box. The robot needs to pick up all the objects, place them into the box, and ensure that each object is oriented with its front side facing left.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No object is placed correctly into the box. |\n| 10 | Any one object is inside the box with its front side facing left, the box is aligned, and the gripper is open. |\n| 25 | Any two objects are placed correctly into the box. |\n| 50 | Any three objects are placed correctly into the box. |\n| 100 | All four objects are placed in the aligned box with correct facing direction, and the robot returns to origin. |"
+      ],
+      "variant": "random_layout_same_public_objective"
+    },
+    "pick_from_conveyor_by_image": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/pick-from-conveyor-by-image/",
+      "base_task": "pick_from_conveyor_by_image",
+      "public_rules": [
+        "Instruction\n\nLift the basket more than 8 cm, identify the target object on the conveyor according to the image on the board, pick it up, and place it into the basket.",
+        "Description\n\nThere is a board displaying an image of the target object, a basket, and a conveyor carrying multiple objects. The robot needs to first lift the basket more than 8 cm, identify the target object on the conveyor based on the image shown on the board, pick up the target object, and place it into the basket.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The target object is not placed into the lifted basket. |\n| 100 | The image-specified target object is in the basket and lifted at least 8 cm. |"
+      ]
+    },
+    "play_Xylophone": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/play-xylophone/",
+      "base_task": "play_Xylophone",
+      "public_rules": [
+        "Instruction\n\nPick up the mallet and strike all xylophone keys from left to right.",
+        "Description\n\nThere is a xylophone and a mallet. The robot needs to pick up the mallet with one hand and strike all the xylophone keys from left to right.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The full left-to-right strike sequence is not completed. |\n| 100 | The mallet tip hits all xylophone keys from left to right, and after each hit the mallet is lifted by at least 0.025 m. |"
+      ]
+    },
+    "play_stacking_toy": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/play-stacking-toy/",
+      "base_task": "play_stacking_toy",
+      "public_rules": [
+        "Instruction\n\nPlace all stacking toy pieces onto the correct pegs.",
+        "Description\n\nThere is a stacking toy with four pegs and four types of pieces. The numbers of pieces in the four types are 4, 3, 2, and 1, and each peg matches one type. The robot needs to place all pieces onto their corresponding pegs correctly.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No peg group is completed. |\n| 10 | One peg group is completed with its pieces aligned on the correct peg and inserted into the base, with the gripper open. |\n| 30 | Two peg groups are completed. |\n| 60 | Three peg groups are completed. |\n| 100 | All four peg groups are completed and the robot returns to origin. |"
+      ]
+    },
+    "play_tic_tac_toe": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/play-tic-tac-toe/",
+      "base_task": "play_tic_tac_toe",
+      "public_rules": [
+        "Instruction\n\nPlay tic-tac-toe as the first player and fill the board with the opponent.",
+        "Description\n\nThere is a 3-by-3 tic-tac-toe board. The robot plays as the first player, while the opponent follows a random strategy. The robot and the opponent take turns placing their marks until the board is filled.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No player piece reaches a board cell, or the policy robot moves while the opponent robot arm is moving. |\n| 10 | Any one player piece is placed on a board cell and the gripper is open. |\n| 30 | Any two player pieces are placed on board cells. |\n| 50 | Any three player pieces are placed on board cells. |\n| 75 | Any four player pieces are placed on board cells. |\n| 100 | All five player pieces are on board cells at the correct height and the gripper is open. |"
+      ]
+    },
+    "plug_in_charger": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/plug-in-charger/",
+      "base_task": "plug_in_charger",
+      "public_rules": [
+        "Instruction\n\nPlug the charger into the power strip.",
+        "Description\n\nThere is a charger plug and a power strip. The robot needs to pick up the charger plug and insert it into the power strip.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The charger is not fully plugged into the socket. |\n| 100 | The charger is inside the socket, inserted to the required depth, upright, and the robot returns to origin. |"
+      ]
+    },
+    "pour_balls_into_vase": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/pour-balls-into-vase/",
+      "base_task": "pour_balls_into_vase",
+      "public_rules": [
+        "Instruction\n\nPour all the balls from the cup into the vase.",
+        "Description\n\nThere is a cup containing many small balls and a vase. The robot needs to pick up the cup and pour all the balls into the vase.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | Not all balls are transferred into the vase. |\n| 100 | All seven balls are inside the vase, the cup is upright, and the robot returns to origin. |"
+      ]
+    },
+    "pour_by_language": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/pour-by-language/",
+      "base_task": "pour_by_language",
+      "public_rules": [
+        "Instruction\n\nPour the liquid from the first color₁ bottle into the first color₂ bowl, from the second color₃ bottle into the second color₄ bowl, and from the third color₅ bottle into the third color₆ bowl. Then reset the robot arm.",
+        "Description\n\nThere are three colored bottles and three colored bowls on the table. The robot needs to follow the language instruction and pour the liquid from each specified bottle into the corresponding specified bowl.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The first target pour is not completed. |\n| 20 | The liquid from the first specified bottle is poured into its specified bowl, and the other two liquids have not been poured into their bowls. |\n| 50 | The first two specified liquids are poured into their bowls, and the third liquid has not yet been poured. |\n| 100 | All three specified liquids are poured into their corresponding bowls. |"
+      ]
+    },
+    "pour_liquid_into_cup": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/pour-liquid-into-cup/",
+      "base_task": "pour_liquid_into_cup",
+      "public_rules": [
+        "Instruction\n\nPour the liquid from the bottle into the cup.",
+        "Description\n\nThere is a bottle containing liquid and a cup. The robot needs to pick up the bottle and pour the liquid into the cup.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The liquid is not successfully poured into the cup. |\n| 100 | The cup contains the required amount of liquid and the bottle is upright. |"
+      ]
+    },
+    "pour_liquid_into_cup_random": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/pour-liquid-into-cup/",
+      "base_task": "pour_liquid_into_cup",
+      "public_rules": [
+        "Instruction\n\nPour the liquid from the bottle into the cup.",
+        "Description\n\nThere is a bottle containing liquid and a cup. The robot needs to pick up the bottle and pour the liquid into the cup.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The liquid is not successfully poured into the cup. |\n| 100 | The cup contains the required amount of liquid and the bottle is upright. |"
+      ],
+      "variant": "random_layout_same_public_objective"
+    },
+    "press_by_number": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/press-by-number/",
+      "base_task": "press_by_number",
+      "public_rules": [
+        "Instruction\n\nPress the two red buttons the required number of times according to the number cards, then press the blue button to confirm. After completing each red button, press the blue confirmation button immediately; do not finish both reds before pressing blue.",
+        "Description\n\nThere are two number cards, two red buttons, and one blue confirmation button. Read the left number card, press the left red button that many times, and then press the blue confirmation button once. Next, read the middle number card, press the middle red button that many times, and then press the same blue confirmation button once more. Do not finish both red buttons before pressing the blue button. Each press is one full down-and-up of the cap, and the two red buttons are counted separately.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The required press counts or confirm sequence is not completed exactly. |\n| 100 | Button `0` is pressed exactly the number shown by `num0`, the blue confirm button is pressed, button `1` is pressed exactly the number shown by `num1`, the blue confirm button is pressed again, and the robot returns to origin. |",
+        "Notes\n\nFor pressing, ignore the general advice about small corrections. Each press is one firm down onto the cap, a little deeper than first contact, then one lift clear of it. Do not hunt in millimetre steps, and do not press extra times to be sure."
+      ]
+    },
+    "push_T": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/push-t/",
+      "base_task": "push_T",
+      "public_rules": [
+        "Instruction\n\nPush the T-shaped block to align it precisely with the gray T-shaped pad.",
+        "Description\n\nThere is a thin gray T-shaped pad and a T-shaped block. The robot needs to push the T-shaped block until it is precisely aligned with and fitted onto the gray pad.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The target pose, reset, or no-lift condition is not satisfied. |\n| 100 | The T-shaped block is within the target xy threshold, its orientation matches the target, the robot returns to origin, and the block is never lifted above the allowed height. |"
+      ]
+    },
+    "push_T_random": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/push-t/",
+      "base_task": "push_T",
+      "public_rules": [
+        "Instruction\n\nPush the T-shaped block to align it precisely with the gray T-shaped pad.",
+        "Description\n\nThere is a thin gray T-shaped pad and a T-shaped block. The robot needs to push the T-shaped block until it is precisely aligned with and fitted onto the gray pad.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The target pose, reset, or no-lift condition is not satisfied. |\n| 100 | The T-shaped block is within the target xy threshold, its orientation matches the target, the robot returns to origin, and the block is never lifted above the allowed height. |"
+      ],
+      "variant": "random_layout_same_public_objective"
+    },
+    "put_bottles_into_dustbin": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/put-bottles-into-dustbin/",
+      "base_task": "put_bottles_into_dustbin",
+      "public_rules": [
+        "Instruction\n\nPick up the bottles and throw them into the dustbin, using handover when needed.",
+        "Description\n\nThere are four bottles on the table, and they may be either standing or lying down. A dustbin is placed beside the table. The robot needs to pick up the bottles and throw them into the dustbin. Because of the shifted table layout, bottles on the right side require a handover between the two hands before being discarded.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No bottle is placed into the dustbin. |\n| 10 | Any one bottle is inside the dustbin, and the gripper is open. |\n| 25 | Any two bottles are inside the dustbin. |\n| 40 | Any three bottles are inside the dustbin. |\n| 100 | All four bottles are inside the dustbin and the robot returns to origin. |"
+      ]
+    },
+    "solve_equation": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/solve-equation/",
+      "base_task": "solve_equation",
+      "public_rules": [
+        "Instruction\n\nComplete the equation by selecting the correct missing number or operator and placing it on the pad, then reset the robot arm.",
+        "Description\n\nThere is an arithmetic equation on the table and a pad for the answer. The equation is missing either a number or an operator. The robot needs to choose the correct missing item from the randomly arranged numbers and operators on the table and place it on the pad to complete the equation.",
+        "Comment\n\nEach digit must remain within the permitted rotational tolerance relative to its initial pose.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The missing equation piece is not placed correctly. |\n| 100 | The correct missing number/operator piece is placed on the missing mat and the robot returns to origin. |"
+      ]
+    },
+    "sort_nesting_dolls_by_size": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/sort-nesting-dolls-by-size/",
+      "base_task": "sort_nesting_dolls_by_size",
+      "public_rules": [
+        "Instruction\n\nArrange the five nesting dolls in a row from left to right, from smallest to largest.",
+        "Description\n\nThere are five nesting dolls of different sizes on the table. The robot needs to sort them by size and arrange them in a straight row from left to right, from smallest to largest.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The dolls are not arranged in the required size order. |\n| 100 | All five nesting dolls stand in a one horizontal straight row, are ordered from left to right from smallest to largest, and the robot returns to origin. |"
+      ]
+    },
+    "sort_nesting_dolls_by_size_random": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/sort-nesting-dolls-by-size/",
+      "base_task": "sort_nesting_dolls_by_size",
+      "public_rules": [
+        "Instruction\n\nArrange the five nesting dolls in a row from left to right, from smallest to largest.",
+        "Description\n\nThere are five nesting dolls of different sizes on the table. The robot needs to sort them by size and arrange them in a straight row from left to right, from smallest to largest.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The dolls are not arranged in the required size order. |\n| 100 | All five nesting dolls stand in a one horizontal straight row, are ordered from left to right from smallest to largest, and the robot returns to origin. |"
+      ],
+      "variant": "random_layout_same_public_objective"
+    },
+    "stack_blocks": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/stack-blocks/",
+      "base_task": "stack_blocks",
+      "public_rules": [
+        "Instruction\n\nStack the three blocks with different textures.",
+        "Description\n\nThere are three blocks with different textures on the table. The robot needs to pick them up and stack them into a stable pile.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No two-block stack is completed. |\n| 15 | Any two of the three blocks are stacked, and the gripper is open. |\n| 100 | All three blocks are stacked together and the robot returns to origin. |"
+      ]
+    },
+    "stack_blocks_by_language": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/stack-blocks-by-language/",
+      "base_task": "stack_blocks_by_language",
+      "public_rules": [
+        "Instruction\n\nStack the three blocks on top of each other in the order of color₁, color₂, and color₃, then reset the robot arm.",
+        "Description\n\nThere are several colored blocks. The robot needs to understand the language instruction and stack the blocks in the specified color order.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The first ordered stack is not completed. |\n| 20 | The first two specified blocks are stacked in the instructed order, the bottom block remains on the table, and the gripper is open. |\n| 100 | All three specified blocks are stacked in order and the robot returns to origin. |"
+      ]
+    },
+    "stack_blocks_random": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/stack-blocks/",
+      "base_task": "stack_blocks",
+      "public_rules": [
+        "Instruction\n\nStack the three blocks with different textures.",
+        "Description\n\nThere are three blocks with different textures on the table. The robot needs to pick them up and stack them into a stable pile.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No two-block stack is completed. |\n| 15 | Any two of the three blocks are stacked, and the gripper is open. |\n| 100 | All three blocks are stacked together and the robot returns to origin. |"
+      ],
+      "variant": "random_layout_same_public_objective"
+    },
+    "stack_bowls": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/stack-bowls/",
+      "base_task": "stack_bowls",
+      "public_rules": [
+        "Instruction\n\nStack the three bowls together.",
+        "Description\n\nThere are three bowls. The robot needs to stack all the bowls together.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No two bowls are stacked correctly. |\n| 15 | Any two bowls are stacked upright and the gripper is open. |\n| 100 | All three bowls are stacked together, all bowls are upright, the bottom bowl is strictly and stably placed on the table, and the robot returns to origin. |"
+      ]
+    },
+    "stack_bowls_random": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/stack-bowls/",
+      "base_task": "stack_bowls",
+      "public_rules": [
+        "Instruction\n\nStack the three bowls together.",
+        "Description\n\nThere are three bowls. The robot needs to stack all the bowls together.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No two bowls are stacked correctly. |\n| 15 | Any two bowls are stacked upright and the gripper is open. |\n| 100 | All three bowls are stacked together, all bowls are upright, the bottom bowl is strictly and stably placed on the table, and the robot returns to origin. |"
+      ],
+      "variant": "random_layout_same_public_objective"
+    },
+    "store_laptop_and_headphones": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/store-laptop-and-headphones/",
+      "base_task": "store_laptop_and_headphones",
+      "public_rules": [
+        "Instruction\n\nHang the headphones on the headphone stand, close the laptop, then place it into the vertical laptop stand.",
+        "Description\n\nThere is an open laptop on a laptop stand, a vertical laptop stand, a pair of headphones, and a headphone stand. The laptop opening angle is random but greater than 30 degrees. The robot needs to first hang the headphones on the headphone stand, then close the laptop, pick it up from the stand, and insert it into the vertical laptop stand.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | Neither the headphones nor the laptop is stored correctly. |\n| 20 | The headphones are placed on the stand: the headband bridge is close to the support cradle and aligned, with the gripper open. |\n| 80 | The headphones are correctly placed on the stand, and the laptop is closed, vertically inserted into the laptop rack, and within the required range. |\n| 100 | Both the headphones and laptop conditions are satisfied and the robot returns to origin. |"
+      ]
+    },
+    "store_laptop_and_headphones_random": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/store-laptop-and-headphones/",
+      "base_task": "store_laptop_and_headphones",
+      "public_rules": [
+        "Instruction\n\nHang the headphones on the headphone stand, close the laptop, then place it into the vertical laptop stand.",
+        "Description\n\nThere is an open laptop on a laptop stand, a vertical laptop stand, a pair of headphones, and a headphone stand. The laptop opening angle is random but greater than 30 degrees. The robot needs to first hang the headphones on the headphone stand, then close the laptop, pick it up from the stand, and insert it into the vertical laptop stand.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | Neither the headphones nor the laptop is stored correctly. |\n| 20 | The headphones are placed on the stand: the headband bridge is close to the support cradle and aligned, with the gripper open. |\n| 80 | The headphones are correctly placed on the stand, and the laptop is closed, vertically inserted into the laptop rack, and within the required range. |\n| 100 | Both the headphones and laptop conditions are satisfied and the robot returns to origin. |"
+      ],
+      "variant": "random_layout_same_public_objective"
+    },
+    "store_tools_in_toolbox": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/store-tools-in-toolbox/",
+      "base_task": "store_tools_in_toolbox",
+      "public_rules": [
+        "Instruction\n\nPlace each tool into its matching position in the toolbox, then reset the robot arm.",
+        "Description\n\nThere are several tools and a toolbox with designated slots. The robot needs to pick up each tool and place it into the corresponding position in the toolbox.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | No tool is placed into its matching toolbox slot. |\n| 25 | Any one tool is placed in its matching toolbox slot with the gripper open. |\n| 50 | Any two tools are placed into their matching toolbox slots. |\n| 75 | Any three tools are placed into their matching toolbox slots. |\n| 100 | All four tools are placed in their matching slots, covered by the toolbox, and the robot returns to origin. |"
+      ]
+    },
+    "swap_T": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/swap-t/",
+      "base_task": "swap_T",
+      "public_rules": [
+        "Instruction\n\nPick up the two T-shaped blocks, swap their positions, and place them back with the correct orientations.",
+        "Description\n\nThere are two T-shaped blocks on the table. The robot needs to grasp them with both hands, swap their positions, and place them back so that each block matches the original pose of the other one, including both position and orientation. This is a memory-based task.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The two T blocks are not swapped with the required pose accuracy. |\n| 100 | The two T-shaped blocks swap their original xy positions, their orientations match the swapped targets, and the robot returns to origin. |"
+      ]
+    },
+    "swap_blocks": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/swap-blocks/",
+      "base_task": "swap_blocks",
+      "public_rules": [
+        "Instruction\n\nSwap the two blocks using the empty mat, pressing the button after each move.",
+        "Description\n\nThere are three mats, two blocks placed on two of the mats, and one button. The robot needs to swap the positions of the two blocks by using the empty mat as a temporary place. After each move, the robot must press the button.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The swap sequence is not completed, or the button is not pressed after each move. |\n| 100 | The two target blocks are swapped using the empty mat, the button is pressed once after each of the three moves, the blocks finish on each other's original mats, and the robot returns to origin. |",
+        "Notes\n\nFor pressing, ignore the general advice about small corrections. Each press is one firm down onto the cap, a little deeper than first contact, then one lift clear of it. Do not hunt in millimetre steps, and do not press extra times to be sure."
+      ]
+    },
+    "sweep_blocks": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/sweep-blocks/",
+      "base_task": "sweep_blocks",
+      "public_rules": [
+        "Instruction\n\nPick up the broom, hand it over to the right hand, then use the dustpan to sweep the blocks.",
+        "Description\n\nThere is a broom and a dustpan on the left side, and the blocks are on the right side. The robot needs to pick up the broom, hand it over to the right hand, grasp the dustpan with the left hand, and sweep the blocks into the dustpan.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The blocks are not fully swept into the dustpan. |\n| 100 | The dustpan is positioned left of the broom, stably placed upright on the table, all blocks are inside the dustpan, and the robot returns to origin. |"
+      ]
+    },
+    "sweep_blocks_random": {
+      "source_url": "https://robodojo-benchmark.com/doc/sim-tasks/sweep-blocks/",
+      "base_task": "sweep_blocks",
+      "public_rules": [
+        "Instruction\n\nPick up the broom, hand it over to the right hand, then use the dustpan to sweep the blocks.",
+        "Description\n\nThere is a broom and a dustpan on the left side, and the blocks are on the right side. The robot needs to pick up the broom, hand it over to the right hand, grasp the dustpan with the left hand, and sweep the blocks into the dustpan.",
+        "Scoring\n\n| Score | Condition |\n| --- | --- |\n| 0 | The blocks are not fully swept into the dustpan. |\n| 100 | The dustpan is positioned left of the broom, stably placed upright on the table, all blocks are inside the dustpan, and the robot returns to origin. |"
+      ],
+      "variant": "random_layout_same_public_objective"
+    }
+  }
+}

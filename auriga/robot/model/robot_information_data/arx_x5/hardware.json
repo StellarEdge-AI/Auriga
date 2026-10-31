@@ -1,0 +1,725 @@
+{
+  "applicability": "Comparative hardware knowledge only. The installed arms have modified X5A fingers and added wrist cameras; exact product variant is unknown. Do not replace the simulation geometry, calibrated contact offsets or measured state with these parameters.",
+  "model_differences": {
+    "unchanged_geometry_links": [
+      "base_link",
+      "link1",
+      "link2",
+      "link3",
+      "link4",
+      "link5",
+      "link6"
+    ],
+    "modified_finger_links": [
+      "link7",
+      "link8"
+    ],
+    "added_camera_links": [
+      "camera_base",
+      "camera"
+    ],
+    "x5a_unmodified_joint6_limit_rad": [
+      -10,
+      10
+    ],
+    "installed_joint6_limit_rad": [
+      -3.14,
+      3.14
+    ],
+    "joint3_and_joint6_frames": "Installed X5A has approximately 180-degree rotations about X; other model frames can be unrotated with different axis signs. Raw axis signs alone cannot be compared as physical directions.",
+    "shared_upper_arm_offset_m": 0.264,
+    "shared_forearm_offsets_m": [
+      0.245,
+      0.056
+    ],
+    "installed_wrist_internal_z_offset_m": 0.0865,
+    "other_wrist_internal_z_offset_m": 0.0845,
+    "installed_joint5_y_offset_m": 0.0005,
+    "other_joint5_y_offset_m": 0.0
+  },
+  "product_families": {
+    "x5_2023": {
+      "gripper": "single-rail two-finger",
+      "sdk_type": 0,
+      "sdk_gripper_range": [
+        0,
+        5
+      ]
+    },
+    "x5_2025": {
+      "gripper": "dual-rail two-finger",
+      "sdk_type": 2,
+      "conflicting_sdk_gripper_ranges": [
+        [
+          -3.14,
+          0.1
+        ],
+        [
+          -3.4,
+          0.1
+        ]
+      ]
+    }
+  },
+  "sdk_gripper_units_warning": "SDK motor values are not local prismatic displacement in metres and do not establish jaw gap.",
+  "hardware_description": {
+    "supply_voltage_V": 24,
+    "communication": "ARX communication module or USB2CAN",
+    "gripper_nominal_opening_mm": [
+      0,
+      80
+    ],
+    "control_feedback": [
+      "position",
+      "velocity",
+      "torque"
+    ],
+    "end_interface": "XT30 2+2",
+    "base_screws": "M3x10",
+    "mounting": "G clamps at table edge",
+    "conflicting_gripper_mass_g": [
+      510,
+      585
+    ],
+    "unresolved_grip_rating_claims": [
+      "2 N",
+      "10NM"
+    ],
+    "rating_warning": "These incompatible grip ratings do not establish usable force: 10NM is a torque-unit string, not force. Mass and opening claims concern hardware grippers, not the modified simulated fingers."
+  },
+  "alternate_models": {
+    "x5_2025_mechanical_model": {
+      "name": "X5",
+      "links": [
+        {
+          "name": "base_link",
+          "mass_kg": 0.45749
+        },
+        {
+          "name": "link1",
+          "mass_kg": 0.066982101964648
+        },
+        {
+          "name": "link2",
+          "mass_kg": 1.10681273913005
+        },
+        {
+          "name": "link3",
+          "mass_kg": 0.543164013838109
+        },
+        {
+          "name": "link4",
+          "mass_kg": 0.118272367738645
+        },
+        {
+          "name": "link5",
+          "mass_kg": 0.673984769720165
+        },
+        {
+          "name": "link6",
+          "mass_kg": 0.525313357680127
+        }
+      ],
+      "joints": [
+        {
+          "name": "joint1",
+          "type": "revolute",
+          "parent": "base_link",
+          "child": "link1",
+          "origin": {
+            "xyz_m": [
+              0.0,
+              0.0,
+              0.0605
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "declared_limits": {
+            "lower": -2.094,
+            "upper": 3.1416,
+            "effort": 27.0,
+            "velocity": 5.5
+          }
+        },
+        {
+          "name": "joint2",
+          "type": "revolute",
+          "parent": "link1",
+          "child": "link2",
+          "origin": {
+            "xyz_m": [
+              0.02,
+              0.0,
+              0.04
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "declared_limits": {
+            "lower": 0.0,
+            "upper": 3.665,
+            "effort": 27.0,
+            "velocity": 5.5
+          }
+        },
+        {
+          "name": "joint3",
+          "type": "revolute",
+          "parent": "link2",
+          "child": "link3",
+          "origin": {
+            "xyz_m": [
+              -0.264,
+              3e-05,
+              0.0
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "declared_limits": {
+            "lower": 0.0,
+            "upper": 3.24,
+            "effort": 27.0,
+            "velocity": 5.5
+          }
+        },
+        {
+          "name": "joint4",
+          "type": "revolute",
+          "parent": "link3",
+          "child": "link4",
+          "origin": {
+            "xyz_m": [
+              0.245,
+              -3e-05,
+              0.056
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "declared_limits": {
+            "lower": -1.571,
+            "upper": 1.571,
+            "effort": 7.0,
+            "velocity": 20.0
+          }
+        },
+        {
+          "name": "joint5",
+          "type": "revolute",
+          "parent": "link4",
+          "child": "link5",
+          "origin": {
+            "xyz_m": [
+              0.06775,
+              0.0,
+              0.0845
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "declared_limits": {
+            "lower": -1.571,
+            "upper": 1.571,
+            "effort": 7.0,
+            "velocity": 20.0
+          }
+        },
+        {
+          "name": "joint6",
+          "type": "revolute",
+          "parent": "link5",
+          "child": "link6",
+          "origin": {
+            "xyz_m": [
+              0.02895,
+              0.0,
+              -0.0845
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "declared_limits": {
+            "lower": -1.9635,
+            "upper": 2.094,
+            "effort": 7.0,
+            "velocity": 20.0
+          }
+        }
+      ]
+    },
+    "x5_2023_control_model": {
+      "name": "X5-2023",
+      "links": [
+        {
+          "name": "base_link",
+          "mass_kg": 0.45749
+        },
+        {
+          "name": "link1",
+          "mass_kg": 0.066982101964648
+        },
+        {
+          "name": "link2",
+          "mass_kg": 1.10681273913005
+        },
+        {
+          "name": "link3",
+          "mass_kg": 0.543164013834141
+        },
+        {
+          "name": "link4",
+          "mass_kg": 0.118272367738645
+        },
+        {
+          "name": "link5",
+          "mass_kg": 0.673984769720165
+        },
+        {
+          "name": "link6",
+          "mass_kg": 0.589997204780952
+        }
+      ],
+      "joints": [
+        {
+          "name": "joint1",
+          "type": "revolute",
+          "parent": "base_link",
+          "child": "link1",
+          "origin": {
+            "xyz_m": [
+              0.0,
+              0.0,
+              0.0605
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "declared_limits": {
+            "lower": -2.617994,
+            "upper": 3.1416,
+            "effort": 27.0,
+            "velocity": 5.5
+          }
+        },
+        {
+          "name": "joint2",
+          "type": "revolute",
+          "parent": "link1",
+          "child": "link2",
+          "origin": {
+            "xyz_m": [
+              0.02,
+              0.0,
+              0.04
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "declared_limits": {
+            "lower": 0.0,
+            "upper": 3.665,
+            "effort": 27.0,
+            "velocity": 5.5
+          }
+        },
+        {
+          "name": "joint3",
+          "type": "revolute",
+          "parent": "link2",
+          "child": "link3",
+          "origin": {
+            "xyz_m": [
+              -0.264,
+              3e-05,
+              0.0
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "declared_limits": {
+            "lower": 0.0,
+            "upper": 3.141593,
+            "effort": 27.0,
+            "velocity": 5.5
+          }
+        },
+        {
+          "name": "joint4",
+          "type": "revolute",
+          "parent": "link3",
+          "child": "link4",
+          "origin": {
+            "xyz_m": [
+              0.245,
+              -3e-05,
+              0.056
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "declared_limits": {
+            "lower": -1.571,
+            "upper": 1.571,
+            "effort": 7.0,
+            "velocity": 20.0
+          }
+        },
+        {
+          "name": "joint5",
+          "type": "revolute",
+          "parent": "link4",
+          "child": "link5",
+          "origin": {
+            "xyz_m": [
+              0.06775,
+              0.0,
+              0.0845
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "declared_limits": {
+            "lower": -1.571,
+            "upper": 1.571,
+            "effort": 7.0,
+            "velocity": 20.0
+          }
+        },
+        {
+          "name": "joint6",
+          "type": "revolute",
+          "parent": "link5",
+          "child": "link6",
+          "origin": {
+            "xyz_m": [
+              0.02895,
+              0.0,
+              -0.0845
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "declared_limits": {
+            "lower": -2.094395,
+            "upper": 2.094,
+            "effort": 7.0,
+            "velocity": 20.0
+          }
+        }
+      ]
+    },
+    "x5_2025_control_model": {
+      "name": "X5-2025",
+      "links": [
+        {
+          "name": "base_link",
+          "mass_kg": 0.45749
+        },
+        {
+          "name": "link1",
+          "mass_kg": 0.066982101964648
+        },
+        {
+          "name": "link2",
+          "mass_kg": 1.10681273913005
+        },
+        {
+          "name": "link3",
+          "mass_kg": 0.543164013839182
+        },
+        {
+          "name": "link4",
+          "mass_kg": 0.118272367738645
+        },
+        {
+          "name": "link5",
+          "mass_kg": 0.67398
+        },
+        {
+          "name": "link6",
+          "mass_kg": 0.53426
+        }
+      ],
+      "joints": [
+        {
+          "name": "joint1",
+          "type": "revolute",
+          "parent": "base_link",
+          "child": "link1",
+          "origin": {
+            "xyz_m": [
+              0.0,
+              0.0,
+              0.0605
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "declared_limits": {
+            "lower": -2.617994,
+            "upper": 3.1416,
+            "effort": 27.0,
+            "velocity": 5.5
+          }
+        },
+        {
+          "name": "joint2",
+          "type": "revolute",
+          "parent": "link1",
+          "child": "link2",
+          "origin": {
+            "xyz_m": [
+              0.02,
+              0.0,
+              0.04
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "declared_limits": {
+            "lower": 0.0,
+            "upper": 3.665,
+            "effort": 27.0,
+            "velocity": 5.5
+          }
+        },
+        {
+          "name": "joint3",
+          "type": "revolute",
+          "parent": "link2",
+          "child": "link3",
+          "origin": {
+            "xyz_m": [
+              -0.264,
+              3e-05,
+              0.0
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "declared_limits": {
+            "lower": 0.0,
+            "upper": 3.141593,
+            "effort": 27.0,
+            "velocity": 5.5
+          }
+        },
+        {
+          "name": "joint4",
+          "type": "revolute",
+          "parent": "link3",
+          "child": "link4",
+          "origin": {
+            "xyz_m": [
+              0.245,
+              -3e-05,
+              0.056
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "declared_limits": {
+            "lower": -1.571,
+            "upper": 1.571,
+            "effort": 7.0,
+            "velocity": 20.0
+          }
+        },
+        {
+          "name": "joint5",
+          "type": "revolute",
+          "parent": "link4",
+          "child": "link5",
+          "origin": {
+            "xyz_m": [
+              0.06775,
+              0.0,
+              0.0845
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "declared_limits": {
+            "lower": -1.571,
+            "upper": 1.571,
+            "effort": 7.0,
+            "velocity": 20.0
+          }
+        },
+        {
+          "name": "joint6",
+          "type": "revolute",
+          "parent": "link5",
+          "child": "link6",
+          "origin": {
+            "xyz_m": [
+              0.02895,
+              0.0,
+              -0.0845
+            ],
+            "rpy_rad": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "declared_limits": {
+            "lower": -2.094395,
+            "upper": 2.094,
+            "effort": 7.0,
+            "velocity": 20.0
+          }
+        }
+      ]
+    }
+  },
+  "alternate_model_warning": "The two X5-2025 model parameter sets disagree on joint1 lower limit, joint3 upper limit, joint6 lower limit and link6 mass. They are not interchangeable or a single authoritative configuration.",
+  "not_established": [
+    "Exact product variant of the simulated arm",
+    "Reliable hardware payload, reach, repeatability or total product weight",
+    "Full-arm editable mechanical assembly or dimensioned drawing"
+  ]
+}
