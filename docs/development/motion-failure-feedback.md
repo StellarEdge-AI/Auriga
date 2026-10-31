@@ -1,89 +1,52 @@
-# 运动规划失败反馈
+# Motion Planning Failure Feedback
 
-`robot_action` 的移动阶段（原 `robot_move_grasp`，已删除）和同一末端执行后端在 `path_infeasible` 时返回
-`receipt.failure_feedback`。预览失败也提供相同字段。反馈随原回执保存并直接进入
-full、lean、compact 和程序调用返回，不需要模型读取私有规划日志。
+When a `move` stage in `robot_action` (or the legacy `robot_move_grasp` tool, removed in 2026-10) fails with `path_infeasible`, the end-effector execution backend returns structured diagnostics in `receipt.failure_feedback` (and provides the same fields on failed previews). This feedback is persisted with the original receipt and delivered directly across `full`, `lean`, `compact`, and program replies so the model never needs access to private planner logs.
 
-原有 `planner_failure_stage`、`failed_waypoint_index`、执行步数、执行区间、前段
-`waypoint_results`、轨迹和终态观测继续保留。规划失败可能发生在已执行的前段之后，
-因此不能从 `path_infeasible` 推断机器人没有移动。
+Existing fields—including `planner_failure_stage`, `failed_waypoint_index`, executed step counts, `execution_interval`, completed `waypoint_results`, trajectories, and terminal observations—remain unchanged. Because a planning failure on a later waypoint can occur after earlier segments have already moved the robot, never infer zero physical motion from `path_infeasible` alone.
 
-## 实机信息来源边界
+## Real-Hardware Information Boundary
 
-失败反馈只允许请求参数、实机规划器也能返回的数值结果，以及配置的机器人
-运动学/碰撞模型。没有实机传感器、标定或用户提供的环境几何来源时，不输出环境
-障碍位置、桌面真值、实际接触、仿真基座坐标或它们推导出的世界坐标诊断。
-`information_sources` 明确列出这些来源和不可用项。
+Failure feedback exposes only caller request parameters, numerical solver outputs that a real-robot motion planner can likewise report, and the configured public robot kinematic/collision model. When no real-hardware sensor, calibration, or caller-supplied environment geometry is present, the feedback never leaks simulated obstacle positions, ground-truth tabletop coordinates, physical contact forces, simulator base poses, or world-frame diagnostics derived from them. `information_sources` explicitly lists which sources were used and which were unavailable.
 
-## 模型能看到什么
+## Fields Delivered to the Model
 
-| 字段 | 含义 |
+| Field | Meaning |
 | --- | --- |
-| `waypoint_index`、`waypoint_role` | 从 0 开始的失败点，区分中间途经点和最终目标 |
-| `requested_grasp_pose` | 该点原始的夹持中心位置和 `angles_deg`，仅抓取接口提供 |
-| `requested_ee_pose` | 工具偏移转换后的实际 link6 目标；坐标系见 `frame_id` |
-| `solver_summary` | 各阶段调用数、原生求解状态码、成功/可行候选数、返回候选中的最小位置与姿态误差；这些是求解器结果，不是实测接触 |
-| `candidates` | 每个 IK/轨迹优化阶段保留一个候选，列出阶段调用索引、seed、同一候选的误差及末端关节值 |
-| `constraint_witness` | 原生配置中的关节限位、动态限位及机器人自碰撞模型检查结果；诊断不可用时明确标注 |
-| `cause_status` | 当前为 `undetermined`；阶段及候选观察不足以证明唯一根因 |
+| `waypoint_index`, `waypoint_role` | Zero-based index of the failed waypoint and whether it is an `"intermediate"` waypoint or the `"final"` target |
+| `requested_grasp_pose` | Caller's requested grasp contact center and `angles_deg` at that waypoint (present for grasp-pose requests) |
+| `requested_ee_pose` | Converted `link6` target pose after applying the tool offset, expressed in `frame_id` |
+| `solver_summary` | Per-stage solver call counts, native solver status codes, feasible candidate counts, and minimum position/orientation residuals across returned seeds (numerical solver outputs, not measured physical contact) |
+| `candidates` | One representative candidate per IK / trajectory-optimization stage, recording `stage_call_index`, seed index, that candidate's exact position/orientation residuals, and terminal joint values |
+| `constraint_witness` | Checks against configured URDF joint limits, dynamic limits, and the robot self-collision sphere model (explicitly marked when unavailable) |
+| `cause_status` | Currently `"undetermined"`, since solver stage summaries and discrete candidate witnesses do not prove a single unique root cause |
 
-例如抓取中心为 `[-0.22,-0.08,1.08]`、`angles_deg=[0,0,0]` 的中间点，
-反馈会明确标为 `intermediate`，并显示 link6 目标高度 `1.2301 m`。
-这能提醒模型修改实际失败的中间点，而不是误认为最终抓取点已经测试失败。
+For example, if an intermediate waypoint at `grasp_position_m=[-0.22, -0.08, 1.08]`, `angles_deg=[0, 0, 0]` fails planning, `failure_feedback` explicitly labels it as `"intermediate"` and shows the converted `link6` target height of `1.2301 m`—making clear that the intermediate waypoint failed rather than the final grasp target.
 
-候选从每次 solver 返回时立即复制，避免 CUDA graph 后续覆盖结果。选择标准是返回
-seed 中最小的最大归一化末端残差；不同残差的独立最小值可能属于不同 seed，只有
-`candidates` 内的位置、姿态、关节及 witness 才是同一个候选。`stage_call_index`
-是从 0 开始的该阶段调用编号，不能作为跨阶段共用的规划重试编号。
-`selection_normalization` 区分原生 solver 容差和仅用于排序的诊断参考值。
+Candidate buffers are copied immediately upon each native solver return before subsequent CUDA graph replays can overwrite them. Within each stage, the selected candidate is the seed minimizing the maximum normalized end-effector residual; while independent minimum position and orientation errors in `solver_summary` may come from different seeds, the position error, orientation error, joint configuration, and constraint witness inside a `candidates` entry always belong to the **same single seed**. `stage_call_index` is zero-based within that solver stage rather than a global retry counter across stages, and `selection_normalization` distinguishes native solver tolerances from diagnostic ranking scales.
 
-原生 `js_solution` 可以包含已锁定的夹爪关节，并重新排列列顺序。反馈按 native
-active joint names 严格映射，排除米制夹爪值；名称缺失或形状不匹配时只报告可确认的
-残差，不构造关节诊断。速度、加速度和 jerk 同样取自该 seed 的原生衍生状态，
-不对位置做差分推测。
+Because native `js_solution` tensors can include locked gripper joints and permute column order, feedback strictly maps values by native `active_joints` names and excludes metric finger joints; if joint names are missing or tensor shapes mismatch, only verified Cartesian residuals are reported rather than fabricating joint diagnostics. Velocities, accelerations, and jerks are read directly from the seed's native derivative tensors rather than estimated via finite differences.
 
-## 关节和碰撞诊断
+## Joint Limit and Self-Collision Diagnostics
 
-关节位置超限记录给出名称、轨迹采样点、位置、上下限、最近限位和余量。离限位
-不超过 `0.05 rad` 的关节单独报告为 `joints_near_limits`，邻限本身不是失败原因。
-动态超限给出对应关节、采样点、原生速度/加速度/jerk 数值及限值。
+Joint position violation records report the joint name, trajectory sample index, joint value, lower/upper bounds, nearest bound, and violation margin. Joints within `0.05 rad` of a bound without violating it are reported separately under `joints_near_limits` (being near a limit is advisory and not itself a failure). Dynamic constraint violations report the offending joint, sample index, native velocity/acceleration/jerk value, and configured limit.
 
-自碰撞检查只使用配置的机器人碰撞球、pair/padding。记录给出两条连杆、球索引、
-球中心和球模型重叠量，每类保留至多三项最严重观察，并报告省略数量。
-诊断只做候选 FK 和自碰撞几何计算，不重规划、不推进物理、不读取环境模型。
+Self-collision diagnostics evaluate only the configured robot collision spheres, link pairs, and padding, reporting the two colliding links, sphere indices, sphere centers, and penetration depth (retaining up to the three worst violations per category alongside the omitted count). Computing these witnesses performs only candidate forward kinematics and self-collision sphere checks—never replanning, stepping physics, or querying the environment scene model.
 
-所有候选 FK 与碰撞位置使用 `planner_base`。当前没有实机世界坐标标定来源，
-因此不读取 `robot.entity_origin_pose`，不提供 `T_world_planner_base`、候选世界
-末端位姿或世界残差向量。请求的 `requested_ee_pose` 仍保留调用者指定的原坐标系，
-不能与 `planner_base` 的候选坐标直接相减。
+All candidate forward kinematics and self-collision sphere centers are expressed in `planner_base`. Because this diagnostic path does not assume a live world-frame base calibration source, it never reads `robot.entity_origin_pose` and omits `T_world_planner_base`, world-frame candidate poses, and world-frame residual vectors. The caller's `requested_ee_pose` remains in the requested `frame_id` and must not be subtracted directly from `planner_base` candidate coordinates.
 
-同样，不读取 `planner.scene_model` 中由仿真配置生成的静态桌面，不输出静态障碍
-ID、表面点、碰撞位置或穿透量。`environment_geometry_unavailable_reason` 与
-`world_frame_transform_unavailable_reason` 说明当前缺少实机环境/标定来源。
-未来环境碰撞反馈必须来自实机可获取的感知、标定或用户明确提供的几何信息；
-不能用仿真配置替代该来源。
+Similarly, the diagnostic path ignores static tabletop obstacles injected into `planner.scene_model` by the simulation config, omitting static obstacle IDs, surface points, contact locations, and penetration depths. `environment_geometry_unavailable_reason` and `world_frame_transform_unavailable_reason` document why those fields are absent; any future environment-collision diagnostics must derive from permitted perception, calibration, or caller-supplied geometry rather than hidden simulator configs.
 
-球模型重叠不是实际接触；没有找到离散样本重叠也不能证明整条路径可行。
-`solver_feasible=false` 是规划器约束检查的数值返回，可能受规划器内部场景模型
-影响，不能单凭该布尔值断言实机碰撞或关节超限。原始 `planning_diagnostics`、
-任务物体真值和评价器状态仍不进入模型返回。
+Collision-sphere overlap is an approximate model check rather than physical contact, and the absence of discrete sample overlap does not prove continuous-time feasibility. Likewise, `solver_feasible=false` reflects the native planner's internal constraint evaluation (which may include its internal static table model) and cannot by itself distinguish self-collision, environment collision, or joint-limit failure. Raw `planning_diagnostics`, ground-truth object states, and evaluator flags remain excluded from model replies.
 
-## 运动预览的同一边界
+## Matching Information Boundary in Motion Preview
 
-原生运动预览也不输出 `planner_scene_model`，不读取仿真基座配置生成公开几何。
-在公开测量契约充分时，由 named joint measurements、测得的 EE pose 和机器人
-运动学模型推导 `T_world_base = T_world_ee @ inverse(T_base_ee)`，并标注
-`derived_from_public_proprioception_and_robot_model`。这只重用已经公开的机器人
-信息；不增加环境几何。公共测量或模型不足时 `preview_geometry.available=false`，
-不提供基座变换，不用仿真数据回退。可执行计划仍可缓存，几何审查返回不可用。
-环境风险估计只使用调用者提供的有观测依据的代理几何或重建场景。
+Native motion preview likewise withholds `planner_scene_model` and never reads simulator base configs to construct public geometry. When permitted proprioception is complete, preview derives `T_world_base = T_world_ee @ inverse(T_base_ee)` from public named joint measurements, the measured `link6` pose, and the public URDF kinematic model, tagging the result with `derived_from_public_proprioception_and_robot_model`. This reuses already disclosed robot state without adding hidden environment geometry. If public proprioception or the kinematic model is incomplete, `preview_geometry.available=false` is returned without falling back to simulator ground truth (the compiled trajectory can still be cached while geometric clearance review reports unavailable). Environmental clearance estimates rely exclusively on caller-supplied proxy bounding boxes or permitted 3D scene reconstructions.
 
-## 验证
+## Validation
 
-CPU 回归涵盖 solver hooks、buffer 复制、seed/name 对齐、实机来源边界、部分执行、
-关节与球模型检查、不可用数据降级及各返回 profile 的反馈保存。
+CPU regressions cover solver hooks, tensor buffer copying, seed and joint-name alignment, real-hardware information boundaries, partial execution preservation, joint and sphere-model witness extraction, graceful degradation on missing data, and feedback preservation across payload profiles.
 
-使用空闲 GPU 和新的目录运行原生端到端探针（`scripts/motion_failure_probe.py` 驱动已删除的 `robot_move_grasp`，已于 2026-10 删除，以下命令仅作历史记录）：
+Historically, an end-to-end native GPU probe (`scripts/motion_failure_probe.py`, removed in 2026-10 alongside `robot_move_grasp`) verified live solver diagnostics on an idle GPU:
 
 ```bash
 python scripts/motion_failure_probe.py \
@@ -92,6 +55,4 @@ python scripts/motion_failure_probe.py \
   --gpu 1
 ```
 
-探针请求原记录的中间点、直接目标和一个远距离不可达目标。前两个请求可能因
-随机规划产生不同结果；最后一个必须失败、零执行并返回原生候选诊断。
-它检查模型实际收到的回执及 Store 持久化，不调用模型，也不评估任务成功率。
+That probe tested a recorded intermediate waypoint, a direct target, and an unreachable far target—verifying that the unreachable target failed with zero executed steps, returned native candidate diagnostics in the model-facing receipt, and persisted cleanly to `Store` without invoking a model or claiming task-level success.

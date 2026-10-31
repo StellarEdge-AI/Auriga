@@ -1,18 +1,23 @@
-# 实验完成后通知主会话
+# Experiment Completion Hook
 
-实验由主会话安排；一批实验结束后，`scripts/experiment_hook.py`（实现位于 `auriga/apps/evaluation/completion.py`）向同一个 Codex 主会话发送一句话：
+Experiments are scheduled by a primary Codex session. Once a batch of experiments finishes, `scripts/experiment_hook.py` (implemented in `auriga/apps/evaluation/completion.py`) sends a single notification line back to that same primary Codex session:
 
 ```text
-实验已结束，结果目录：/absolute/path/to/queue
+Experiment finished, results directory: /absolute/path/to/queue
 ```
 
-主会话根据已有上下文自行读取结果、决定改进和下一批实验。hook 不附加研究策略、输出格式、迭代次数或开发限时。主会话发布队列后结束当前回合，等待阶段只有普通后台进程，没有模型轮询。
+Using its existing conversation context, the primary session reads the results, decides on improvements, and plans the next batch of experiments. The hook does not inject research strategies, output formatting rules, iteration counts, or development time limits. After launching a queue, the primary session ends its current turn; while the queue runs, only normal background processes execute, with zero model polling.
 
-若队列进程已退出但记录不完整，消息改为说明部分实验停止状态尚未确认；若调度已结束但正常关闭未确认或发生强制回收，消息提示检查清理记录。两种消息同样附结果目录。
+If the queue process has exited but its records are incomplete, the message instead reports that the stop status of some experiments remains unconfirmed. If scheduling has finished but clean shutdown was not confirmed or required forced reclamation, the message prompts the session to inspect the cleanup records. Both fallback messages still include the results directory path.
 
-## 由队列发送通知
+## Sending Notifications from the Queue
 
-接收通知的主会话 UUID 按以下顺序确定：命令行 `--wake-thread UUID`；统一配置的 `queue.wake_thread`；最后是 `~/.config/auriga/completion-thread` 文件中保存的 UUID。`--wake-thread ''` 显式关闭通知且不读取该文件；`--no-wake-enabled` 或 `queue.wake_enabled=false` 同样关闭通知。没有接收方时队列独立运行。实验 actor 继续读取 `experiments.json` 中的 `codex_home` 和 `price_card`，凭据只保存在本地 profile 中；接收方单独保存，两者互不影响。
+The target primary session UUID is resolved in the following order:
+1. The CLI flag `--wake-thread UUID`
+2. The unified configuration field `queue.wake_thread`
+3. The UUID saved in `~/.config/auriga/completion-thread` (if present)
+
+Passing `--wake-thread ''` explicitly disables notifications without reading `~/.config/auriga/completion-thread`; `--no-wake-enabled` or `queue.wake_enabled=false` likewise disables notifications. When no recipient is configured, the queue runs standalone. Experiment actors continue to read `codex_home` and `price_card` from `experiments.json` with credentials kept in the local profile; the notification recipient is stored separately so the two never interfere.
 
 ```sh
 mamba run -n Auriga python scripts/benchmark_queue.py \
@@ -20,17 +25,17 @@ mamba run -n Auriga python scripts/benchmark_queue.py \
   --wait-timeout-s 86400 --wake-thread MAIN_THREAD_UUID
 ```
 
-队列在启动前解析并固定接收方，运行和清理结束后自动通知一次；通知未被接受（回执不是 `sent`）时，队列以非零状态退出。GPU 等待和单个 benchmark 的预算属于实验配置，与主会话的研究轮次无关。
+The queue resolves and freezes the recipient before launch and sends a single notification after execution and cleanup complete. If the notification is not accepted (i.e., the receipt status is not `sent`), the queue exits with a non-zero code. GPU wait timeouts and per-benchmark budgets belong to the experiment configuration and are independent of the primary session's research turns.
 
-`--wake-codex /absolute/path/to/codex`（配置字段 `queue.wake_codex`，默认 PATH 中的 `codex`）指定发送通知所用的 Codex 可执行文件；`--wake-remote unix:///path/to/app-server.sock`（配置字段 `queue.wake_remote`）指定接收会话所在的 app-server 端点。二者仅用于完成通知，不改变实验 actor 的模型或环境。若 PATH 中的包装脚本注入 `--no-daemon`，它会与通知的 `--remote` 冲突，应显式使用原生 binary。当前 TUI 使用独立 daemon 时，通知可以由经验证的独立端点在同一 thread UUID 续跑，但这不表示当前 TUI 被直接唤醒。更换机器或端点后，应先实际验证通知能够送达。
+`--wake-codex /absolute/path/to/codex` (config field `queue.wake_codex`, defaulting to `codex` on `PATH`) specifies the Codex executable used to send the notification, and `--wake-remote unix:///path/to/app-server.sock` (config field `queue.wake_remote`) specifies the app-server endpoint hosting the recipient session. Both options apply exclusively to completion notifications and do not alter the experiment actor's model or environment. If a wrapper script on `PATH` injects `--no-daemon`, it will conflict with the notification's `--remote` flag; pass the native binary path explicitly in that case. When an interactive TUI runs against a standalone daemon, notifications can resume the same thread UUID through a verified endpoint, though this does not directly wake an unattached TUI process. Always verify notification delivery after switching machines or endpoints.
 
-GPU 调度由队列后台进程执行：默认每 90 秒（manifest 的 `sample_interval_s` 可调）检查全部可见 GPU，综合利用率和剩余显存补排，允许同一卡运行多个 case；每次启动前再检查一次。默认每个 case 按 11264 MiB（11 GiB）预算，每卡额外余量为 0，可用 manifest 的 `memory_per_case_mib`、`gpu_headroom_mib` 调整。新队列默认 `max_parallel=60`，实际并发受待办 case 数和资源准入限制；显式配置或 manifest 可覆盖上界。已完成 case 的回收和停止信号仍及时处理，不等待采样周期。
+GPU scheduling is handled by the background queue process: by default, every 90 seconds (configurable via `sample_interval_s` in the manifest) it inspects all visible GPUs, schedules pending cases based on utilization and available memory (allowing multiple cases per GPU), and re-verifies availability immediately before launching each case. By default, each case reserves `11264` MiB (11 GiB) with `0` MiB extra GPU headroom, adjustable via `memory_per_case_mib` and `gpu_headroom_mib` in the manifest. New queues default to `max_parallel=60`, with actual concurrency bounded by pending cases and resource admission; explicit config or manifest settings can override this ceiling. Completed case reclamation and stop signals are processed immediately without waiting for the next sampling interval.
 
-消息使用原生 `codex queue --thread UUID --message TEXT --remote unix://...` 提交到当前用户的共享 app-server。默认 socket 是 `~/.codex/app-server-control/app-server-control.sock`，hook CLI 可用 `--remote` 指定其他已确认端点。显式端点避免实验 actor 的独立 `CODEX_HOME` 把消息送往错误的 daemon。空闲会话自动开始新回合；正在工作的会话在当前回合结束后处理排队消息。
+Messages are submitted to the current user's shared app-server via native `codex queue --thread UUID --message TEXT --remote unix://...`. The default socket is `~/.codex/app-server-control/app-server-control.sock`, and the hook CLI accepts `--remote` to target another verified endpoint. Specifying an explicit endpoint prevents an experiment actor's isolated `CODEX_HOME` from routing the message to the wrong daemon. An idle session starts a new turn automatically, while an active session processes the queued message once its current turn finishes.
 
-## 接管已经运行的队列
+## Attaching to an Already Running Queue
 
-启动时未配置通知的队列可挂一个一次性 watcher：
+For a queue that was started without notification flags, you can attach a one-shot watcher:
 
 ```sh
 mamba run -n Auriga python scripts/experiment_hook.py \
@@ -38,16 +43,16 @@ mamba run -n Auriga python scripts/experiment_hook.py \
   --pid QUEUE_PID --start-ticks PROC_START_TICKS
 ```
 
-`--pid` 与 `--start-ticks` 必须同时提供；省略二者时 hook 不等待进程，只在队列已留下终态时立即通知。`--codex` 和 `--remote` 的含义与队列的 `--wake-codex`、`--wake-remote` 相同。
+`--pid` and `--start-ticks` must be provided together; when both are omitted, the hook does not wait for a process and notifies immediately only if the queue has already written a terminal state. `--codex` and `--remote` have the same meaning as `--wake-codex` and `--wake-remote` on the queue CLI.
 
-watcher 核对 PID、`/proc` 启动时间、队列命令（`benchmark_queue.py` 或 `-m auriga.apps.evaluation.queue`）和输出目录，再通过 Linux pidfd 阻塞等待退出。若进程已经消失，只有队列留下终态且没有运行中 case 时才直接通知。普通终态包括失败、中断和 GPU 等待超时；缺失 case summary 不阻止主会话获知失败。若已核实进程退出但记录不完整，则发送简短的异常通知，说明部分实验停止状态尚未确认。
+The watcher verifies the PID, `/proc` start ticks, queue command line (`benchmark_queue.py` or `-m auriga.apps.evaluation.queue`), and output directory before blocking on process exit via Linux `pidfd`. If the process has already exited, the watcher sends the normal notification only when the queue left a terminal state and no cases remain running. Normal terminal states include failure, interruption, and GPU wait timeout—missing individual case summaries do not prevent the primary session from being notified of a failure. If process exit is confirmed but queue records are incomplete, the watcher sends the fallback alert noting that stop status is unconfirmed for some runs.
 
-每个队列的 `.main-session-wake.json` 独占认领防止重复发送，`completion-hook/` 保存 prompt、队列快照、命令、CLI 输出和回执。`sent` 仅表示原生队列接受了消息，主会话是否执行以原生 turn 记录为准。发送中断或结果不明时记录 `delivery_unknown`，不自动重发。没有独立的后台研发 thread，也不使用 `codex exec resume` 与主会话争用。
+Each queue uses an exclusive `.main-session-wake.json` claim file to prevent duplicate notifications, and writes the prompt, queue snapshot, command, CLI output, and receipt under `completion-hook/`. A `sent` status only confirms that the native queue accepted the message; whether the primary session executed a turn is determined by the native turn records. If delivery is interrupted or its outcome is ambiguous, `delivery_unknown` is recorded without automatic retries. No separate background research thread is created, and `codex exec resume` is never used to contend with the primary session.
 
-## 验证
+## Verification
 
 ```sh
 mamba run -n Auriga python -m unittest tests.test_experiment_hook -v
 ```
 
-检查覆盖精确主会话目标、成功和失败后的通知、重复/不明交付、真实 pidfd 等待及运行中记录拒绝。
+The test suite covers exact primary session targeting, post-success and post-failure notifications, duplicate/ambiguous delivery handling, real `pidfd` waiting, and rejection of still-running queue records.

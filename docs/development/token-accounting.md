@@ -1,28 +1,30 @@
-# Token 与费用记录
+# Token and Cost Accounting
 
-计量来自 Codex 原生 `thread/tokenUsage/updated` 的累计 `total`。每次通知替换快照，不将重复累计值相加。原生 `last`、`total`、原文 artifact 和 turn 关联继续保留；新增 `token_accounting` 写入 runtime、每 turn 状态、通知事件、实时 snapshot 及最终 summary。
+Token accounting is derived from the cumulative `total` field in native Codex `thread/tokenUsage/updated` notifications. Each notification replaces the current snapshot rather than summing repeated cumulative totals. Native `last` and `total` payloads, raw artifacts, and turn associations are preserved, while structured `token_accounting` records are written to runtime state, per-turn status, notification events, live snapshots, and the final summary.
 
-## 统计口径
+## Accounting Definitions
 
-- `input_tokens` 包含缓存读取；`cached_input_tokens` 为命中输入；`uncached_input_tokens = input_tokens - cached_input_tokens`。
-- `cache_hit_rate = cached_input_tokens / input_tokens`，0–1 十进制字符串；输入为 0 或缺失时为 null。
-- `output_tokens` 已包含 `reasoning_output_tokens`，推理输出单独展示但不重复计费。
-- `cache_write_input_tokens` 原样保留；缺失不是 0。当前独立缓存写入计费语义不明或非零时，不输出完整费用。
-- 缺失/非法计数、身份未知、价卡不匹配均保留 unknown；汇总同时输出已知小计、完整总额和已知/未知 run 数，失败 run 不被丢弃。
+- `input_tokens` includes cached reads; `cached_input_tokens` is the cache-hit portion, and `uncached_input_tokens = input_tokens - cached_input_tokens`.
+- `cache_hit_rate = cached_input_tokens / input_tokens`, formatted as a decimal string in `[0, 1]`, or `null` when `input_tokens` is `0` or missing.
+- `output_tokens` already includes `reasoning_output_tokens`; reasoning output tokens are displayed separately for visibility without double-counting them in cost calculations.
+- `cache_write_input_tokens` is preserved verbatim (`null` when absent, never coerced to `0`). Whenever separate cache-write billing semantics are unknown or the count is non-zero, a complete total cost is omitted.
+- Missing or invalid token counts, unknown model/provider identity, or mismatched price cards keep the cost status as `unknown`. Aggregated reports output known subtotals, complete totals, and counts of known vs. unknown runs side by side without dropping failed runs.
 
-`rate_card_estimate` 是指定价卡计算出的费用；`provider_reported` 是供应商账单金额。当前原生通知只有 token，没有账单字段，因此后者保持 null，不把估算命名为实际扣费。
+`rate_card_estimate` represents the estimated cost computed from the specified price card, whereas `provider_reported` represents the billed amount reported by the upstream provider. Because native notifications currently report token counts without billing fields, `provider_reported` remains `null`—estimates are never labeled as actual billed charges.
 
-## 官方参考价卡
+## Official Reference Price Card
 
-公开配置为 `configs/pricing/openai-gpt-6-astra-standard-2026-10-01.json`：OpenAI Standard，输入 $10、缓存读取 $1、输出 $50 / 百万 token，适用于每次请求输入不超过 272000 tokens。采用原生 `model_context_window <= 272000` 作为平价适用范围的上界证据；不拿一个 thread 累计几百万输入当作单请求长上下文。未知/超过上界时费用为 null，需按单请求档位另算。
+The repository includes the public reference price card `configs/pricing/openai-gpt-6-astra-standard-2026-10-01.json`: OpenAI Standard tier at `$10` per 1M uncached input tokens, `$1` per 1M cached input tokens, and `$50` per 1M output tokens, applicable when single-request input does not exceed `272,000` tokens. Auriga uses native `model_context_window <= 272000` as upper-bound evidence that standard flat pricing applies, rather than mistaking multi-million cumulative thread input tokens for a single long-context request. If the context window is unknown or exceeds `272,000`, the estimated cost remains `null` so per-request tier pricing can be calculated separately.
 
-官方还列出缓存写入 $12.50 / 百万；本价卡保留其参考值，但当前仅在原生明确写入数为 0 时给出完整总额。Fast、Ultrafast、Batch/Flex、区域附加费及长上下文都有独立规则，此卡只作为 Standard 参考，不声称自定义供应商实际采用这些价格或档位。
+Official pricing also lists `$12.50` per 1M tokens for cache writes; the reference card records this rate for completeness, but only outputs a complete total cost when native telemetry explicitly reports `0` cache-write tokens. Fast, Ultrafast, Batch/Flex, regional surcharges, and long-context tiers follow separate pricing rules; this file serves strictly as a Standard-tier reference and does not claim that custom providers bill at these rates or tiers.
 
-对于当前支持条件：
+When all supported conditions are met, the estimated cost is computed as:
 
-`费用 = (未命中输入 × 10 + 命中输入 × 1 + 输出 × 50) / 1,000,000`
+```text
+cost = (uncached_input_tokens * 10 + cached_input_tokens * 1 + output_tokens * 50) / 1,000,000
+```
 
-金额使用 `Decimal`，不提前四舍五入为美分。价卡按 provider/model 精确匹配，保留版本、来源、币种、所用 rate、计价说明及原文件 SHA256。恢复同一累计 thread 需保持 provider/model 和价卡；更换价卡回算请用离线报告。
+Amounts are computed using exact `Decimal` arithmetic without premature rounding to cents. Price cards match on exact `provider` and `model` identifiers and record the card version, source, currency, applied rates, billing notes, and SHA-256 digest of the price card file. Resuming the same cumulative thread requires keeping the same provider, model, and price card; to recompute costs under a different price card, run an offline report:
 
 ```sh
 python scripts/benchmark_report.py /absolute/run1 /absolute/run2 \
@@ -30,12 +32,12 @@ python scripts/benchmark_report.py /absolute/run1 /absolute/run2 \
   --output /absolute/new-cost-report.json
 ```
 
-旧归档无需改写：从该 run 冻结的 manifest/config 恢复身份并按保存的 token 回算。新版 gateway 支持 `--price-card` 或 `AURIGA_PRICE_CARD`，将完整价卡冻结到 manifest。
+Historical archives never need to be rewritten: offline reporting reconstructs model identity from the run's frozen `manifest.json` / configuration and recalculates estimates from saved token counts. The gateway accepts `--price-card` or `AURIGA_PRICE_CARD` and freezes the complete price card into `manifest.json`.
 
-## 实验专用配置与生效范围
+## Experiment-Specific Configuration and Scope
 
-自动队列每次发射 case 前读取 `~/.config/auriga/experiments.json`，也可用 `AURIGA_EXPERIMENT_CONFIG` 指定其他文件。仅允许 `codex_home` 与 `price_card` 两个绝对路径；实验专用 Codex home 包含 `config.toml` 与 `auth.json`，敏感文件为 0600、目录为 0700，密钥不进入仓库或实验报告。
+Before launching each case, the automated evaluation queue reads `~/.config/auriga/experiments.json` (or an alternate file specified via `AURIGA_EXPERIMENT_CONFIG`). Only two absolute path keys are permitted: `codex_home` and `price_card`. A dedicated experiment Codex home contains `config.toml` and `auth.json` with file permissions set to `0600` and directory permissions set to `0700` so API keys never enter the repository or experiment reports.
 
-队列仅对子 gateway 设置 `CODEX_HOME` 与 `AURIGA_PRICE_CARD`，不修改全局 Codex auth。这兼容已冻结的旧 actor 源码：原有 credential preparation 会从所选 home 拷贝本次凭据到 run 私有目录；旧源码不产生新 accounting 字段，但可离线回算已有原生计数。
+The queue sets `CODEX_HOME` and `AURIGA_PRICE_CARD` exclusively for child gateway processes without mutating global Codex authentication. This remains compatible with frozen legacy actor checkouts: existing credential preparation copies the necessary credentials from the selected home into the run's private directory, and while older checkouts do not emit the newer live `token_accounting` fields, their native token counts can still be priced offline.
 
-新逻辑在新启动的 queue 进程生效。更新前已经运行的整个 queue 仍使用旧代码/环境，包含其中未启动的 case；不通过修改冻结 checkout 或重启实验来热切换。持续开发 controller 的 Codex 凭据保持原配置，与 benchmark actor 分开。
+Updated accounting logic takes effect in newly launched queue processes. An already running queue continues using its original code and environment—including for cases that have not yet started—without hot-patching frozen checkouts or restarting active experiments. Credentials for the interactive development controller session remain separate from benchmark actors.

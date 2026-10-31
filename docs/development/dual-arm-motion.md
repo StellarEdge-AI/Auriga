@@ -1,29 +1,29 @@
-# 双臂同步动作
+# Synchronized Dual-Arm Motion
 
-> 状态：本文描述的 `robot_move_dual_grasp` / `robot_execute_ee` 双臂请求格式已在 2026-10 重构中删除（只供 trusted_legacy 调用，模型与程序均不可达），保留作历史参考；当前双臂动作通过 `robot_action` 在同一 `stages` 列表中给出左右臂阶段（共享执行时间轴），见[统一动作](unified-actions.md)。
+> **Status**: The `robot_move_dual_grasp` and `robot_execute_ee` dual-arm request formats described below were removed in the 2026-10 refactor (`trusted_legacy` only; unreachable by actors or programs) and are retained here as historical reference. Dual-arm motion is now specified through `robot_action` by placing left-arm and right-arm stages into the same `stages` list on a shared execution timeline; see [Unified Actions](unified-actions.md).
 
-在 `motion_execution_mode="resampled"` 下，Astra 可通过 `robot_move_dual_grasp` 在一次请求中指定左右臂动作。两臂使用同一条原生执行时间轴，每条合并命令只计一个官方 action step。`features.joint_replan` 默认 `true`；双臂功能不依赖开启重规划。
+Under `motion_execution_mode="resampled"`, Astra could specify left-arm and right-arm motions in a single request via `robot_move_dual_grasp`. Both arms shared a single native execution timeline, where each merged command row counted as one official native action step. Although `features.joint_replan` defaults to `true`, dual-arm execution does not depend on joint-space replanning being enabled.
 
-成对同步模式与独立推进模式均有 CPU 回归和原生短动作检查；独立推进的原生检查实测了不同路点阶段同时运动以及夹爪与对侧运动的重叠。
+Both `paired` synchronization mode and `independent` progression mode are covered by CPU regressions and native short-motion validation; native validation of `independent` mode verified simultaneous motion across unequal waypoint counts as well as gripper actuation overlapping with opposite-arm movement.
 
-## 模型接口
+## Model Interface (Historical)
 
-请求包含当前 `observation_id`、`left` 和 `right`，以及可选的 `action_id`、`timeout_s` 和 `dual_arm_progression`。默认 `paired` 在每对 waypoint 等待双方到位；显式 `independent` 让每臂通过自己的实测终点检查后，立即进入自己的下一路点或末尾夹爪动作。`paired` 的左右 via 列表须等长；`independent` 允许各臂各自 0–7 个 via，不需要补齐、重复终点或插入占位动作。同序号只是各臂的路线索引，不是同步屏障。两侧各自接受：
+A request took the current `observation_id`, `left`, and `right` arm specifications, plus optional `action_id`, `timeout_s`, and `dual_arm_progression`. The default `"paired"` mode waited for both arms to arrive at each corresponding waypoint pair before advancing; explicit `"independent"` mode allowed each arm to advance immediately to its next waypoint or terminal gripper phase as soon as its own measured endpoint check passed. While `"paired"` required equal-length `via_grasp_poses` lists on both arms, `"independent"` allowed each arm to specify 0–7 intermediate waypoints independently without padding, repeating endpoints, or inserting dummy holds (matching array indices simply indexed each arm's own route rather than acting as synchronization barriers). Each arm object accepted:
 
-| 字段 | 含义 |
-|---|---|
-| `grasp_position_m`、`angles_deg` | 必填，与 `robot_move_grasp` 相同的所选接触截面中心及顶抓参考角度（默认仍为末端平面夹持区中心）；每个目标只转换一次工具偏移 |
-| `contact_region` 或 `contact_depth_m` | 每臂独立选择接触参考，两字段互斥；默认 `pad_center`，可选 `finger_middle` 或 `fingertip`，数值深度用于细调 |
-| `via_grasp_poses` | 可选，每臂最多 7 个中间位姿；仅 `paired` 要求左右列表等长，`independent` 保留各自长度 |
-| `speed_preset` 或 `speed_scale` | 本臂移动速度，二者互斥；省略则使用运行默认 |
-| `waypoint_speed_presets` 或 `waypoint_speed_scales` | 本臂每个 incoming 段的速度，长度严格为本臂 via 数加 1，与对臂长度无关；按 via 再终点排列，`null` 继承本臂请求速度 |
-| `gripper_goal_normalized` | 可选夹爪目标，0 闭合、1 打开；省略则保持本臂夹爪命令 |
-| `gripper_speed_preset` 或 `gripper_speed_scale` | 本臂夹爪速度，须同时提供本臂夹爪目标 |
-| `gripper_motion` | 可选的 `{start_fraction,end_fraction}`；在本臂最终运动段中执行夹爪渐变，不传则在到位后执行：`paired` 等双臂，`independent` 只等所属臂 |
+| Field | Meaning |
+| --- | --- |
+| `grasp_position_m`, `angles_deg` | Required. Center of the selected finger contact cross-section and top-down grasp reference angles (matching `robot_move_grasp`; defaults to the distal planar pad center). The tool offset is applied exactly once per target. |
+| `contact_region` or `contact_depth_m` | Mutually exclusive per-arm contact reference selector. Defaults to `"pad_center"`; also accepts `"finger_middle"`, `"fingertip"`, or a continuous numeric depth `contact_depth_m` for fine tuning. |
+| `via_grasp_poses` | Optional list of up to 7 intermediate poses per arm (`"paired"` requires equal lengths across both arms; `"independent"` allows independent lengths). |
+| `speed_preset` or `speed_scale` | Mutually exclusive arm motion speed selector; defaults to the run's default motion speed when omitted. |
+| `waypoint_speed_presets` or `waypoint_speed_scales` | Per-incoming-segment speed list for this arm, of length `len(via_grasp_poses) + 1` (independent of the opposite arm's length), ordered from the first via to the final target (`null` inherits this arm's request-level speed). |
+| `gripper_goal_normalized` | Optional gripper target (`0` closed, `1` open); omitting keeps this arm's latched gripper command. |
+| `gripper_speed_preset` or `gripper_speed_scale` | Gripper speed selector for this arm (requires `gripper_goal_normalized` on the same arm). |
+| `gripper_motion` | Optional `{start_fraction, end_fraction}` scheduling a synchronized gripper ramp across this arm's final motion segment; if omitted, the gripper runs after arrival (waiting for both arms in `"paired"` mode, or only this arm in `"independent"` mode). |
 
-机械臂档位为 `slow=0.8`、`normal=1`、`fast=1.25`、`faster=1.5`；夹爪 `slow=0.8`、`normal=1`。数字精调仍分别支持 0.25–2 和 0.25–1。详见[运动速度接口](motion-speed.md)。
+Arm speed presets map to `slow=0.8`, `normal=1`, `fast=1.25`, and `faster=1.5`; gripper speed presets map to `slow=0.8` and `normal=1`. Continuous numeric scales remain supported in `[0.25, 2.0]` for arms and `[0.25, 1.0]` for grippers; see [Motion Speed Control](motion-speed.md).
 
-例如，两臂各有一个接近点和一个最终目标时，可以分别选择：
+For example, when both arms had one approach waypoint and one final target, per-segment speeds could be specified as:
 
 ```json
 {
@@ -32,7 +32,7 @@
 }
 ```
 
-独立任务长度不同时，例如左臂无 via、右臂有两个 via，可用下面的选速形状：
+When independent routes had different lengths—for example, zero intermediate waypoints on the left arm and two on the right—the speed configuration took the form:
 
 ```json
 {
@@ -42,89 +42,81 @@
 }
 ```
 
-这仍须提供当前观察和两臂目标／右臂两个 via；短臂到自己的终点即可进入自己的夹爪阶段，然后保持目标到请求结束。不会为了与右臂对齐再规划两次同一终点。
+(Actual requests also required `observation_id` and full pose specifications.) In the second example, the shorter left route entered its gripper phase immediately upon reaching its target and then held its pose until the right arm finished, without replanning the same left endpoint twice just to pad the timeline. Whenever fresh visual evidence was needed to decide subsequent targets or release timing, the actions had to be split into separate requests.
 
-以上仅示意选速字段；实际请求还须提供当前观察和两臂位姿。左臂先按 1.25 移动、右臂先按运行默认移动，第二阶段均为 0.8。需要新的图像判断才能决定后续目标或放手时，应拆成不同请求。
+## Contact Reference Locations: Distal Pad Center, Finger Middle, and Fingertip
 
-## 接触位置：末端夹持区、指中与爪尖
+"Grasping the middle of a bottle" and "grasping with the middle of the fingers" are two distinct concepts. The historical `0.1501 m` offset corresponds to the center of the distal 15 mm planar pad; closer to the palm, the inner finger surface is an approximately 55 mm angled ramp rather than the same planar pad.
 
-“夹瓶子的中部”和“用手指的中部夹”是两件事。旧工具 0.1501 m 参考点是末端 15 mm 平面夹持区的中心；整根手指更靠掌部的内侧面是长约 55 mm 的斜面，并非同一个接触区。
+Both single-arm grasp stages and dual-arm `left`/`right` specifications support selecting the axial contact reference along the finger:
 
-单臂 `robot_move_grasp` 与双臂每个 `left/right` 对象都可以选择：
+| Selector | Distance from `link6` along tool $+x$ | Axial Depth Relative to `pad_center` |
+| --- | ---: | ---: |
+| `contact_region="pad_center"` (default) | `150.1 mm` | `0 mm` |
+| `contact_region="finger_middle"` | `122.6 mm` | `+27.5 mm` toward the palm |
+| `contact_region="fingertip"` | `157.6 mm` | `-7.5 mm` toward the fingertip |
 
-| 选择 | 接触参考距 link6 的工具 +x 距离 | 相对旧参考的深度 |
-|---|---:|---:|
-| `contact_region="pad_center"`（默认） | 150.1 mm | 0 |
-| `contact_region="finger_middle"` | 122.6 mm | 向掌部 27.5 mm |
-| `contact_region="fingertip"` | 157.6 mm | 向指尖 7.5 mm |
+Alternatively, pass `contact_depth_m` in `[-0.0075, 0.0625]` m for continuous adjustment (mutually exclusive with `contact_region`). These bounds and presets derive from the axial span of the inner finger surface in the public robot mesh (with ~0.03 mm calibration rounding) and do not represent a guaranteed safe insertion depth for arbitrary objects. Note that `"finger_middle"` lies on the ~8.735° inner ramp and is not inherently more stable than the distal planar pad.
 
-也可用 `contact_depth_m` 在 -0.0075 至 0.0625 m 范围细调，不能同时传 `contact_region`。范围与预设来自公开机器人网格的内侧面轴向跨度，并有约 0.03 mm 的标定舍入；不是任一物体的安全伸入距离。`finger_middle` 位于约 8.735° 的内侧斜面，不保证比末端平面更稳。
+`grasp_position_m` specifies the **point midway between the two fingers at the selected axial cross-section**, which should align with the target object's local cross-section rather than its visible top surface. Given target point $C$, unit tool approach axis $u$, and contact depth $d$, the compiler computes `link6 = C - (0.1501 - d) * u`—the model must not subtract the depth offset a second time manually. For a vertical top-down grasp (`angles_deg=[0, 0, 0]`), selecting `"finger_middle"` places `link6` 27.5 mm lower for the same $C$; for a horizontal side grasp, it advances 27.5 mm further along the horizontal tool axis rather than along world $z$.
 
-`grasp_position_m` 表示模型希望放置的**所选截面上两指之间的点**，应对应所选物体局部截面，而非直接使用可见顶面点。令该目标为 C、目标姿态的工具轴为 u、深度为 d，工具使用 `link6 = C - (0.1501 - d) * u`。模型不要再手动减一次深度。零角顶抓时，指中选项相对同一个 C 让机械臂再向下 27.5 mm；水平侧抓沿工具朝向前进相同距离，而不是固定沿世界 z。
+Within a multi-waypoint request, intermediate `via_grasp_poses` inherit that arm's contact reference by default unless overridden on an individual waypoint; subsequent separate requests do not inherit the previous call's selection. During transport, keep a consistent contact reference or convert explicitly so measured `pad_center` coordinates are never mistaken for `finger_middle` coordinates. Low-level `link6` commands (`position_m + quaternion_xyzw` or legacy `robot_execute_ee`) control `link6` directly and reject grasp contact selectors.
 
-同一请求中的 via 默认继承本臂的接触选项；单个 via 可用自己的任选一种字段覆盖。后续独立请求不自动继承上一次的选区。搬运时保持同一参考或显式换算，避免把默认 pad_center 的实测坐标误当成 finger_middle 坐标。底层 `robot_execute_ee` 仍直接控制 link6，不接受这些便利字段；单臂 grasp 形式 preview 使用相同换算。
+Every grasp action receipt includes `grasp_contact_feedback`, which computes the achieved position of the selected contact cross-section from the terminal measured `link6` pose and reports both the 3D position error relative to the **requested final target** and the signed axial shortfall `approach_shortfall_m` along the requested approach axis (where positive values indicate the fingers stopped short of the requested depth). If an action partially executes, fails, or stops early, the final target may never have been attempted, so this comparison is strictly relative to the requested final target rather than a claim of completion. In observations, `robot_state.arms[arm].grasp_pose` always reports the default `pad_center` reference (explicitly labeled as such). This geometric feedback neither detects physical object contact nor triggers automatic retries, gripper closure, or simulation steps.
 
-每次 grasp 请求的回执新增 `grasp_contact_feedback`，从终态实测 link6 与实际朝向计算所选截面的位置，并给出与请求最终目标的三维误差和沿目标接近轴的 `approach_shortfall_m`。正值表示尚未深入到请求的位置。该反馈明确是与**请求最终目标**的比较；请求部分执行、失败或停止时，最终点可能未被尝试，数值不代表完成。观察中的 `robot_state.arms[arm].grasp_pose` 始终保留默认 pad_center，并明确标注。反馈既不检测物体接触，也不自动重试、闭爪或推进仿真。
+When an approach stops short with a tracking error, inspect the measured contact cross-section position alongside the RGB images before deciding whether to adjust the target or adapt the grasp strategy—requesting a descent never proves the descent succeeded. Before commanding a deep grasp, check clearance for the palm, fingertips, support surface, and neighboring objects, and verify actual retention after closing and lifting. Default calibration, speeds, motion planners, and official step counting are unchanged by contact reference selection.
 
-接近跟踪失败后，先看所选截面的实测位置与 RGB，再决定修正或接受另一种有依据的抓法；“要求下探”不能当成“已经下探”。深夹前同时检查掌部、指尖、支撑面和邻近物体，闭爪与短抬后确认实际保持。默认标定、速度、规划器和官方计步都不因新增选区字段而改变。
+## Planning, Execution, and Step Counting
 
-## 规划、执行与计步
+Under the default `dual_arm_progression="paired"`, each waypoint pair executes as follows:
 
-默认 `dual_arm_progression="paired"` 时，每对 waypoint 执行以下过程：
+1. Plan left and right arm trajectories independently from the same unadvanced measured robot state. If either arm fails planning, that waypoint pair is not dispatched (while preserving step counts and feedback from any earlier completed pairs).
+2. Resample each arm's trajectory at its requested speed and compile any in-motion gripper schedule. Merge corresponding row indices across both arms; the shorter trajectory holds its terminal joint target and gripper command while the longer trajectory finishes, without speeding up the longer arm or requiring simultaneous arrival.
+3. Dispatch row by row, where each row contains 6 left arm joints, 1 left gripper command, 6 right arm joints, and 1 right gripper command (14 values total). Each merged row counts as one native action step; cancellation, timeouts, and native episode termination are handled on the shared timeline, and tracking guards (when enabled) monitor both arms.
+4. Check measured endpoints for both arms. If either arm exceeds its position or orientation tolerance, halt the entire request without dispatching post-arrival gripper phases or subsequent waypoints.
+5. For the final waypoint pair, `after_motion` gripper ramps begin only after both arms pass their endpoint checks. Standard execution rebuilds slow gripper sequences for both arms from their latest measured openings while enforcing per-arm speed limits and verifying remaining shared step budgets against the merged row count (the shorter gripper sequence holds its terminal goal until the other finishes). This prevents natural passive jaw drift during arm motion from causing a first-step jump against a stale initial gripper command. Executing an explicit cached preview plan dispatches its exact cached rows while enforcing start-state drift guards without silent recompilation.
 
-1. 从同一份未推进的机器人实测状态分别规划左右臂。任一规划失败，该对目标不执行；此前完成的阶段仍计步并保留反馈。
-2. 按各自速度重采样，编译各自的运动中夹爪时序。合并两臂命令的同序号行；较短路径结束后保持其末端关节目标与夹爪命令，不加速较长路径，也不要求两臂同时到达。
-3. 逐行执行，每行同时含左臂 6 关节、左夹爪、右臂 6 关节、右夹爪。每行计一个原生动作步，取消、超时和原生终止都在共同时间轴上处理；启用跟踪保护时检查两臂。
-4. 检查两臂实测终点。任一臂超出位置或姿态容差，停止整条请求，不执行到位后的夹爪阶段或后续路点。
-5. 最终阶段的 `after_motion` 夹爪命令在双臂到位后开始。普通执行从同一份新实测状态重建两侧慢夹爪序列，保留各自速度限制，按合并行数核验剩余共享预算后开始；较短序列保持终值。不会因为移臂期间开度自然变化而使用过时的首个夹爪目标。显式缓存计划执行仍保持原行及旧起点保护，不静默重编译。
-
-对于单对目标，计划步数为：
+For a single paired segment, the planned native step count is:
 
 ```text
-max(左臂运动行数, 右臂运动行数)
-+ max(左夹爪 after_motion 行数, 右夹爪 after_motion 行数)
+max(left_arm_motion_rows, right_arm_motion_rows)
++ max(left_gripper_after_motion_rows, right_gripper_after_motion_rows)
 ```
 
-其中运动中夹爪时序需要的细分已经计入各臂运动行数。多个阶段累加，共享现有单请求 10 秒仿真时长／250 原生步上限，不能给每只手臂各用 250 步。最终实际计费以 `executed_native_steps` 为准，原生任务总预算保持不变。
+(where any row subdivision needed for `during_motion` gripper schedules is already included in each arm's motion row count). Multi-segment requests sum across pairs and share the existing per-request cap of 10 seconds of simulation time (250 native steps)—the budget is shared, not 250 steps per arm. Actual step consumption is recorded in `executed_native_steps` against the unchanged episode budget.
 
-显式 `dual_arm_progression="independent"` 时，两臂的第一段均规划、编译成功后才执行；随后分别维护各自路点、运动／夹爪阶段及行号。每个 native row 合并两臂当时的命令，不要求它们处于相同阶段。一臂自身到位后立即检查，再规划自己的下一段；另一臂已经编译的命令继续保留。规划计算期间仿真暂停，不通过额外 hold 动作等待求解。
+Under explicit `dual_arm_progression="independent"`, execution begins only after the first segment of both arms compiles successfully; thereafter, each arm tracks its own waypoint index, motion/gripper phase, and local row cursor independently. Each dispatched native row merges the current command from each arm regardless of whether the two arms are in the same phase. As soon as one arm finishes a segment and passes its own measured endpoint check, it immediately plans its next segment from the current measured state while the opposite arm continues dispatching its already compiled rows (simulation pauses during planner calls rather than burning hold steps).
 
-最终段的 `after_motion` 夹爪只需所属臂到位，从当前开度重建并通过速度及剩余预算检查，便可与另一臂的运动重叠。**此语义允许夹爪释放后另一臂才发生失败，没有回滚**；仅适用于释放本身不依赖另一臂到位或支撑的情况。同一 native row 上多个阶段结束时，先检查所有结束臂；任一失败即停止，不再派发新的夹爪／路点。完成后保持目标，并在整条请求结束前重新检查两臂终点，防止较早完成臂漂移却被误报完成。
+An `after_motion` gripper phase on the final segment requires only its own arm to pass its endpoint check, rebuilding the ramp from current measured opening and overlapping with the opposite arm's ongoing motion. **Note that this semantics allows one arm to open and release an object before the opposite arm subsequently fails, with no physical rollback**—use independent post-motion release only when releasing does not depend on the other arm's arrival or support. When multiple phases finish on the exact same native row, all finishing arms are checked before any new gripper ramp or waypoint is dispatched; if any check fails, execution halts immediately. Once an arm finishes its entire route, it holds its final command, and both arms' endpoints are re-verified at the end of the request so post-completion drift on the earlier-finishing arm is never misreported as `completed`.
 
-两臂各段时长已知且所有检查通过时，独立推进的共享总行数约为 `max(左臂各段运动+后置夹爪, 右臂各段运动+后置夹爪)`，无需把短路径故意放慢。实际会从最新本体状态重新规划后续段，仍可能因跟踪、接触或规划失败提前停止，因此不能把旧轨迹重排的算术当作实测节省。仍共用 250 步上限，不给每臂单独增加预算。
+When all segments succeed without replanning surprises, total shared rows under `"independent"` are roughly `max(sum(left_motion + left_after_gripper), sum(right_motion + right_after_gripper))` without artificially slowing the shorter arm. Because later waypoints are planned online from live measured states and may still halt early on tracking, contact, or planning failures, arithmetic on static pre-planned lengths is only an estimate, and both arms still share the single 250-step request cap.
 
-例如，两臂路线独立、清楚各自扫掠空间时，在完整请求顶层增加：
+Use `"paired"` whenever handoffs, cooperative carrying, or entering a shared workspace requires both arms to reach position together, and split requests whenever visual confirmation of grasp stability is needed before the other arm acts. Independent progression eliminates intra-request synchronization waits inside a single dual-arm call, but it cannot automatically parallelize two separate single-arm tool calls—group independent preparation and transport stages into a single batch at planning time without dropping necessary observations.
 
-```json
-{"dual_arm_progression": "independent"}
-```
+Sequential solver calls on CPU/GPU do not advance simulation time and do not prevent simultaneous command dispatch once compiled. Separate single-arm tool invocations remain serialized by Harness's single-writer lock and are never auto-merged.
 
-交接、共同持物或进入同一区域需要对方先到位时保留 `paired`；需要视觉确认接收手握稳时仍拆成不同请求。独立模式减少已提交双臂请求内部的等待，不能自动把模型此前拆开的单臂请求并行化。应在规划时将已确定、没有相互依赖的准备／搬运动作放在同一请求；不为了提高重叠率省掉必要观察。
+## Low-Level `EEAction` and Receipt Feedback
 
-规划求解可以顺序计算；这不推进仿真，不影响之后两臂同步下发。多个独立单臂工具调用仍由唯一动作写入者串行控制，不会自动合并成双臂动作。
+`robot_execute_ee` supported dual-arm paths via `path.kind="backend_free"`. In `"paired"` mode, every element of `path.waypoints` specified `link6` poses for both `left` and `right`. In `"independent"` mode, the first element required both arms, while trailing elements after the shorter route finished contained only the longer arm—for example, `[{"left": L0, "right": R0}, {"right": R1}, {"right": R2}]` specified one target for the left arm and three for the right. Each arm's waypoints had to form a contiguous prefix starting at index `0` (gapped lists such as `[{"left": L0, "right": R0}, {"right": R1}, {"left": L2, "right": R2}]` were rejected, and omitting an arm on trailing entries meant its route had finished rather than adding a new hold waypoint).
 
-## 底层 EEAction 与反馈
+Top-level speed fields served as shared defaults, while `action.arm_options.left/right` could override motion, gripper, or waypoint speeds per arm. Harness resolved all speed presets into numeric scales before archiving both the raw selections and resolved per-arm values, passing only numeric scales to the worker.
 
-`robot_execute_ee` 同样支持双臂路径：`path.kind="backend_free"`。`paired` 中每个 `path.waypoints` 元素同时包含 `left` 和 `right` 的 link6 位姿，始终使用相同的臂集合。显式 `independent` 中第一项仍须包含两臂；较短路线结束后，尾部项可只包含较长臂。例如 `[{left:L0,right:R0},{right:R1},{right:R2}]` 表示左臂一个目标、右臂三个目标；这是结构示意，L/R 须替换为完整 link6 位姿。每臂目标必须从索引 0 连续排列，缺失后不得重现；`[{left:L0,right:R0},{right:R1},{left:L2,right:R2}]` 拒绝。缺失尾目标表示该臂路线已结束，不是新增 hold 路点。
+Receipts include `arm_results`, `waypoint_results`, and `failed_arm` / `failed_arms` when applicable. Planned traces archive the merged 14-DOF `actions` array alongside per-arm resampled joint paths, speeds, planned motion/gripper row counts, and peer-wait hold counts. Shared executed step counts are counted once, and full measured trajectories, interpolated actuator commands, and native step counters are archived as usual. Planning failure feedback identifies the failing arm and tags private solver diagnostics accordingly.
 
-原有顶层速度字段可作为共享默认；`action.arm_options.left/right` 可分别覆盖移动、夹爪或路点速度。该对象只接受速度选择字段。共享列表长度为整条 `waypoints` 长度，各臂只取自身实际存在的前缀；每臂覆盖列表长度为自身路线长度。共享列表中的 `null` 在各臂请求速度确定后解析；显式路点速度则覆盖该段请求速度。Harness 将全部选速解析为数值，归档原始选择和两侧有效值；worker 只接收数值。便利工具的 `left/right` 参数会转换成同一条底层动作。顶层 `action.dual_arm_progression` 使用相同两种模式；单臂、hold、policy、preview 或 feedback 模式不接受此选项，未知值明确拒绝。
+In `"independent"` mode, `waypoint_results` records per-arm checks tagged with `arm`, `waypoint_index`, `sim_step`, and `phase` (`"paired"` mode likewise tags residuals with waypoint index and timestep). On an interrupted receipt, the last recorded endpoint check for an arm may reflect an earlier waypoint rather than its final target. In independent traces, top-level `actions` and `row_contexts` record the step-by-step shared commands actually scheduled (never claiming to contain uncompiled future segments), while `arms[arm].segments` retains the compiled per-arm segments, unexecuted remainders, and completed step counts. Native counter deltas remain the authoritative measure of step consumption, distinguishing faulted native calls that consumed budget from completed steps.
 
-回执包含 `arm_results`、`waypoint_results` 和可能的 `failed_arm`／`failed_arms`。计划 trace 保存合并的 14 维 `actions`、两侧原始重采样关节路径、速度、计划运动／夹爪行数及等待另一臂的保持行数。共享实际完成数只计一次；完整实际轨迹、底层插值命令和原生计数照常归档。规划失败反馈对应指定的失败臂；私有求解诊断标注所属手臂。
+In `resampled` mode, `robot_capabilities` advertises `dual_arm=true`, `max_simultaneous_arms=2`, and `dual_arm_progression={"available": true, "modes": ["paired", "independent"], "default": "paired"}`. `feedback` mode rejects dual-arm paths.
 
-独立模式的 `waypoint_results` 是逐臂检查记录，各自携带 `arm`、`waypoint_index`、`sim_step`、`phase`；成对模式也给残差标注所属路点与时间。中断回执中的最近一次终点检查可能早于当前姿态，不能当作最新目标已经到达。独立模式 trace 的 `actions` / `row_contexts` 是逐步排定的共享命令及两臂阶段，不声称包含尚未规划的未来；`arms[arm].segments` 单独保留已经完整编译的逐臂段和未执行余量、实际完成计数。以 native 计数差作为实际消耗；故障原生调用可能计费但未完成，二者分别记录。
+## Route and Object Constraints
 
-`robot_capabilities` 在 resampled 模式公布 `dual_arm=true`、`max_simultaneous_arms=2`，以及 `dual_arm_progression={available:true,modes:["paired","independent"],default:"paired"}`。feedback 模式拒绝双臂路径且不向模型公布此便利工具。现有 preview 仍限单臂，双臂 preview 明确拒绝。
+Dual-arm execution dispatches two independently planned native trajectories on a shared clock. The native motion planner checks only single-arm self-collision and the static tabletop—**it provides no joint inter-arm collision avoidance, dynamic task-object collision avoidance, or closed-chain rigid-body constraint for two arms holding the same object**. The model must account for the full swept volume of both arms, open fingers, held objects, and nearby obstacles; two individually reachable endpoints never guarantee that both arms can pass through the workspace simultaneously without colliding.
 
-## 路线与物体约束
+Appropriate uses include non-overlapping dual-arm approaches, withdrawing a donor hand while the receiving hand moves in an uncontested region, and other stages with verified spatial separation. During a handoff, whether the receiving hand actually supports the object must be verified from feedback before the donor hand releases—never rely on an unmodeled intra-request assumption. As always, `completed` means only that the commanded schedule finished, not that a grasp, handoff, or task succeeded.
 
-本接口将两条独立原生计划同步执行。原生规划器检查各臂本体自碰撞及配置的固定桌面，**没有联合双臂避碰、任务物体碰撞或共同持物的刚性约束保证**。模型应考虑两臂、打开的手指、持物及邻近物体的完整扫掠空间；不能仅依据两个终点均可达就断言两臂可以同时通过。
+## Joint Replanning and Information Boundaries
 
-适合的用途包括互不干涉的双臂接近、供给手撤离与接收手后续移动等已确定可重叠的阶段。交接中接收手是否实际支撑仍由反馈判断，供给手释放不得依赖同一请求中不存在的模型检查。`completed` 只表明动作完成，不证明抓取、交接或任务成功。
+When enabled, optional joint-space replanning uses the native cuRobo solver with the requested target, measured joint positions, URDF joint limits, static URDF kinematics, base calibration, and the static tabletop model. It never runs speculative physics rollouts, state rollbacks, or queries against ground-truth object poses, future rewards, or evaluator scores. Planner invocations do not consume native action steps; only dispatched `take_action` rows count against the step budget.
 
-## 重规划与信息边界
+These capabilities constitute a control condition equipped with a robot kinematic model and motion planner rather than a raw pixels-to-torques policy. While the upstream RoboDojo README notes that leaderboard submissions undergo cloud anti-cheat verification, it does not publish a separate track specification for native motion planners; our information-boundary audit enforces strict separation from hidden task state but does not constitute upstream leaderboard certification. Benchmark reports should always disclose whether joint replanning and planner features were enabled (enabled by default in new runs, while explicit configs and frozen historical archives preserve their recorded settings).
 
-可选重规划沿用原生 cuRobo 求解器，使用指定目标、机器人实测关节、限位、固定 URDF、基座标定和固定桌面模型。它不执行试探性仿真、不回滚、不使用任务对象真值、未来奖励或评分来选路。规划计算不消耗 action step，最终实际下发的动作照常计步。
-
-这些能力属于带机器人模型及运动规划器的控制条件，不能描述成纯 RGB 策略。RoboDojo 官方 README 说明榜单须经过云端反作弊验证，但未提供允许原生规划器的完整赛道条款；上述数据流审查不等于官方合规认证。实验应披露是否启用重规划及规划器条件。新运行默认开启，显式配置与历史冻结实验仍保留原选择。
-
-不等长独立推进有定向 CPU 回归；这些验证不表示已证明整局成功率或接触安全提高。
+Unequal-length independent progression is covered by targeted CPU regressions; those unit tests verify scheduling and accounting invariants rather than claiming end-to-end task success rate gains or physical collision safety.

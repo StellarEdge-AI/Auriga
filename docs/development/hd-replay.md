@@ -1,10 +1,10 @@
-# 归档动作的高清离线重放
+# High-Definition Offline Action Replay
 
-`auriga.apps.replay.hd_replay` 从已完成回合的归档读取实际下发的关节与夹爪命令，使用原任务、seed、layout 和原生仿真时钟重新执行并录制高清画面，不调用模型。它是 **action resimulation（动作重新仿真）**；归档没有完整场景物理状态，因此不能保证物体运动逐帧一致。
+`auriga.apps.replay.hd_replay` reads the exact joint and gripper commands issued during a completed run from its archive, re-executing them under the original task, seed, layout, and native simulation clock to record high-definition video without invoking any model. This is **action resimulation**: because archives do not store full simulator physics state at every tick, frame-by-frame object motion is not guaranteed to be identical to the original rollout.
 
-## 从网页下载后重放
+## Replaying a Trajectory Bundle Downloaded from the Web UI
 
-在实验库中选中已结束的实验，点击 **下载原始轨迹**，得到一个 ZIP。在安装了 Auriga 的机器上运行以下命令，直接读取 ZIP，无需解压，也无需原实验目录：
+Select a completed experiment in the Experiment Library and click **Download Raw Trajectory** to obtain a `.zip` bundle. On a machine with Auriga and RoboDojo installed, pass the `.zip` file directly to `hd_replay`—no manual extraction or access to the original run directory is needed:
 
 ```sh
 python -m auriga.apps.replay.hd_replay \
@@ -13,7 +13,7 @@ python -m auriga.apps.replay.hd_replay \
   --width 1920 --height 1440 --fps 25
 ```
 
-渲染需要匹配的 RoboDojo / Isaac Sim 环境、任务资产、GPU、`ffmpeg` 和 `ffprobe`。归档绑定了 adapter 源码与原生依赖版本；0.0.2 更新了 worker，因此旧归档可能被 `runtime_versions_differ_from_archive` 拒绝实际重放，应使用归档匹配的源码/环境。ZIP 下载和 `--inspect` 不受这一执行准入限制；不要为跨版本回放放松版本核验。ZIP 使用本机 Auriga 配置中的运行环境；如果本机安装路径不同，可以显式指定：
+Rendering requires a matching RoboDojo / Isaac Sim environment, task assets, a GPU, `ffmpeg`, and `ffprobe`. Archives record the adapter source and native dependency versions; for example, version `0.0.2` updated the worker, so older archives may be rejected from execution with `runtime_versions_differ_from_archive` unless replayed against a matching checkout and environment. Trajectory `.zip` downloads and `--inspect` are not subject to this execution admission check; never relax version checks to force cross-version replay. By default, `.zip` replay uses the runtime paths from your local Auriga configuration, which you can override explicitly if your local installation paths differ:
 
 ```sh
 python -m auriga.apps.replay.hd_replay \
@@ -24,15 +24,15 @@ python -m auriga.apps.replay.hd_replay \
   --robodojo-python /path/to/robodojo-env/bin/python
 ```
 
-ZIP 格式为 `auriga.robodojo_trajectory.v1`，只包含 `manifest.json`、`commands.jsonl`、`measured_states.jsonl`：任务与 seed/layout、版本和时钟、原评分、逐物理 tick 的执行器命令、原生动作边界的机器人实测状态。它不包含模型对话、凭据、服务器安装路径、可执行代码、视频或仿真资产。导入时校验成员、大小、hash、命令连续性及数据格式；归档不能指定要执行的 Python 或程序。
+The trajectory bundle uses format `auriga.robodojo_trajectory.v1` and contains only three files—`manifest.json`, `commands.jsonl`, and `measured_states.jsonl`—recording the task, seed/layout, software versions and clocks, original evaluation score, per-physics-tick actuator commands, and measured robot states at native action boundaries. It never includes model transcripts, credentials, server installation paths, executable code, videos, or simulation assets. Upon import, `hd_replay` verifies archive members, file sizes, SHA-256 hashes, command continuity, and schema validity; an archive cannot specify which Python interpreter or program to execute.
 
-网页仅对已结束且具有原始轨迹文件的运行显示下载入口。点击后还会严格验证完整性；不完整的动作轨迹会拒绝导出。历史导入副本暂不支持此入口，可使用保存完整证据的原始运行目录。下载不会启动 GPU 或调用模型，也不会修改原 benchmark。
+The web UI only exposes the download link for completed runs that contain raw trajectory files, and strictly validates trajectory completeness when clicked, rejecting incomplete action traces. Legacy imported run copies do not currently support this endpoint; use the original run directory containing full evidence instead. Downloading a bundle neither allocates a GPU nor calls a model, and never mutates the original benchmark archive.
 
-## 本地原运行目录与参数
+## Replaying from a Local Run Directory and CLI Options
 
-同一个工具也接受原运行目录。在仓库根目录、Auriga Python 环境中运行；目录输入默认使用源回合 `effective_config.json` 记录的 RoboDojo 路径及 Python，也支持上述本机路径覆盖参数。
+The same tool also accepts an original run directory directly. Run it from the repository root inside the `Auriga` Python environment; directory inputs default to the RoboDojo root and Python interpreter recorded in the source run's `effective_config.json`, while still accepting the local path override flags shown above.
 
-先做只读检查，无需 GPU，也不创建输出目录：
+You can run a read-only inspection first without allocating a GPU or creating an output directory:
 
 ```sh
 python -m auriga.apps.replay.hd_replay \
@@ -40,9 +40,9 @@ python -m auriga.apps.replay.hd_replay \
   --inspect
 ```
 
-检查会验证归档引用、命令覆盖和原生动作边界测量，输出 tick 数、仿真时长、原评分及来源 hash。含 WAL 的封存目录通过 `open_read_store` 私有副本读取，归档加载、轨迹 ZIP 导出与回放对照图读取均不会在原目录生成 SHM。它不启动仿真，因此不验证当前 GPU 环境能否重建原场景。
+`--inspect` verifies archive references, command coverage, and native action boundary measurements, printing the tick count, simulated duration, original evaluation score, and provenance hashes. Sealed directories containing a WAL file are read via a private copy through `open_read_store`, ensuring that archive loading, trajectory `.zip` export, and comparison image extraction never create `.shm` files in the source directory. Because `--inspect` does not launch the simulator, it does not verify whether the current GPU environment can reconstruct the scene.
 
-导出默认 **1920×1440、25 fps** 的三相机视频：
+To render three-camera video at the default **1920x1440, 25 fps** resolution:
 
 ```sh
 python -m auriga.apps.replay.hd_replay \
@@ -50,13 +50,13 @@ python -m auriga.apps.replay.hd_replay \
   --output /path/to/hd-replays/new-case
 ```
 
-`--output` 必须是尚不存在的新目录，与源目录互不包含。源回合以只读方式打开；新视频、评分和报告全部写入独立输出，原 benchmark 结果不被替换。
+`--output` must point to a non-existent directory that neither contains nor is contained by the source run directory. The source run is opened read-only; all newly rendered videos, evaluation scores, and reports are written to the separate output directory without modifying the original benchmark results.
 
-不指定 `--gpu` 时，通过 Auriga 共享预留机制选择利用率为 0 且显存满足准入条件的 GPU；没有合适设备就退出，不抢占已有任务。可以用 `--gpu 4` 限定设备，该设备仍须通过准入检查。
+When `--gpu` is omitted, `hd_replay` uses Auriga's shared GPU reservation mechanism to select a GPU with `0%` utilization and sufficient free memory, exiting immediately rather than preempting active workloads if no device qualifies. You can restrict selection to a specific device with `--gpu 4`, which must still pass the admission check.
 
-若要与其他任务并行渲染，可加 `--allow-busy-gpu`。此时也会逐次检查并预留未占用显存（当前每次预留 14336 MiB，另留 2048 MiB 余量；普通空闲 GPU 模式仍为 32768 + 4096 MiB），允许选择利用率非零的 GPU；`--gpu` 仍可用于限定设备。并行门槛依据一次 1920×1440、50 fps 重放时观察到的 12631 MiB 显存占用设定；这只是一次采样，不保证所有任务资产有相同峰值。没有足够未预留显存时会退出，由批量调度脚本稍后重试。
+To render alongside active workloads on the same GPU, pass `--allow-busy-gpu`. This mode still checks and reserves unallocated GPU memory (reserving `14336` MiB per job with `2048` MiB headroom, compared to `32768` + `4096` MiB in idle-GPU mode) while allowing GPUs with non-zero utilization; `--gpu` can still be combined to pin a device. The shared-GPU memory threshold is based on a `12631` MiB peak observed during a 1920x1440, 50 fps replay—treat this as an empirical baseline rather than a hard upper bound across all task assets. If insufficient unreserved memory is available, the process exits so a batch wrapper script can retry later.
 
-如需较小画面，可保持原相机 4:3 比例：
+For smaller video files, choose any positive even width and height that preserve the native camera `4:3` aspect ratio:
 
 ```sh
 python -m auriga.apps.replay.hd_replay \
@@ -65,21 +65,21 @@ python -m auriga.apps.replay.hd_replay \
   --width 1280 --height 960 --fps 25
 ```
 
-宽高须为正偶数且保持 4:3；帧率须能整除原物理频率。视频按均匀**仿真时间**采样，初始化与模型思考耗时不进入视频。旧录像将稀疏观察及额外观察边界按 5 fps 播放，所以新旧视频的播放时长可能不同；请按 `sim_step` 对照。
+Both `--width` and `--height` must be positive even integers maintaining a `4:3` ratio, and `--fps` must evenly divide the native physics frequency. Video frames are sampled uniformly in **simulation time**, excluding environment initialization and model thinking wall-clock time. Because standard run recordings play back sparse observations and extra observation boundaries at 5 fps, playback durations between the original recording and the HD replay may differ; align comparisons by `sim_step`.
 
-运行要求源回合记录的版本字段与当前运行时全部一致，包括 RoboDojo、局部修改 hash、相关组件、机器人配置和 adapter 源码；物理 dt 与每个 native action 的 tick 数也必须一致。版本不一致会停止，不会忽略差异继续输出。
+Execution requires all version fields recorded in the source run to match the current runtime—including the RoboDojo revision, local patch hashes, related submodules, robot configuration, and adapter source—as well as matching physics `dt` and tick counts per native action. Any version mismatch halts replay immediately rather than producing unverified output.
 
-命令缺口、重复 tick、跨多个环境 generation、原生动作中途故障或缺失边界测量都会拒绝重放。已完成的动作前缀可以属于失败回合；“任务失败”本身不是拒绝条件。新仿真若先于源回合进入原生终态，会保留已有证据并标为 `incomplete`。
+Command gaps, duplicate ticks, trajectories spanning multiple environment generations, mid-action native faults, or missing boundary measurements cause replay to be rejected. Completed action prefixes from a run that ultimately failed the task are still valid to replay—task failure itself is not a rejection criterion. If the resimulated episode reaches a native terminal state earlier than the source run, `hd_replay` preserves the collected evidence and marks the report as `incomplete`.
 
-| 输出 | 用途 |
+| Output Artifact | Purpose |
 | --- | --- |
-| `cam_head.mp4`、`cam_left_wrist.mp4`、`cam_right_wrist.mp4` | H.264 高清视频；完成时用 `ffprobe` 核对实际尺寸、编码及帧数。 |
-| `report.json` | 运行状态、版本差异、来源 hash、执行覆盖、新旧评分、机器人轨迹误差与视频校验结果。 |
-| `frames.json` | 视频帧号、视频时间戳与原生 `sim_step` / 仿真时间映射；不是逐帧图片目录。 |
-| `trajectory.jsonl` | 每个 native action 边界的实测机器人状态，以及相对原轨迹的误差。 |
-| `comparisons/`、`comparisons.json` | 目录输入按源观察选取最多 12 个时间点、三相机并排图；右侧高清图缩到原尺寸，索引记录来源及像素差异。ZIP 不含原图，因此此项为空，报告标注 `original_image_comparison_available=false`。 |
-| `worker.log`、`*.ffmpeg.log`、`process.json` | 仿真、编码与子进程退出诊断；`admission.json` 记录 GPU 准入。 |
+| `cam_head.mp4`, `cam_left_wrist.mp4`, `cam_right_wrist.mp4` | H.264 HD videos; upon completion, `ffprobe` verifies resolution, codec, and frame count. |
+| `report.json` | Execution status, version comparison, provenance hashes, command coverage, original vs. replay evaluation scores, robot trajectory tracking errors, and video verification results. |
+| `frames.json` | Mapping between video frame indices, video timestamps, and native `sim_step` / simulation time (not a directory of individual frame images). |
+| `trajectory.jsonl` | Measured robot state at each native action boundary alongside tracking errors relative to the original trajectory. |
+| `comparisons/`, `comparisons.json` | For directory inputs, selects up to 12 timestamps from source observations and renders side-by-side three-camera comparisons (with the right-hand HD frame downscaled to the original resolution), indexing sources and pixel differences. Because `.zip` bundles exclude original RGB images, this directory is empty for `.zip` inputs and `report.json` sets `original_image_comparison_available=false`. |
+| `worker.log`, `*.ffmpeg.log`, `process.json` | Simulator, encoder, and subprocess exit diagnostics; `admission.json` records GPU admission details. |
 
-验收先检查 `report.json` 的 `complete`、`source_unchanged`、`robot_trajectory_within_tolerance` 和 `evaluation_matches`，再查看对照图中的物体位置、抓取、释放与最终状态。`status=completed` 或退出码 0 表示导出完整，不能单独证明场景重现；机器人误差、相同评分和像素差异也不能替代物体运动核对。
+When validating an HD replay, first check `complete`, `source_unchanged`, `robot_trajectory_within_tolerance`, and `evaluation_matches` in `report.json`, then visually inspect object positions, grasps, releases, and final states in the side-by-side comparison images. Neither `status=completed` nor exit code `0` alone proves faithful scene reproduction, and low robot joint tracking error, matching evaluation scores, or pixel difference metrics are not a substitute for verifying physical object motion.
 
-报告以 `data_origin=archived_action_resimulation`、`exact_scene_replay=false` 标明来源。保留原 benchmark 评分，新评分用于判断本次重放是否偏离；实际效果以每次导出的报告和画面对照为准。
+The output report explicitly sets `data_origin=archived_action_resimulation` and `exact_scene_replay=false`. The original benchmark evaluation score remains authoritative, while the resimulated score indicates whether the replay diverged; always judge replay fidelity from the generated report and visual comparisons.

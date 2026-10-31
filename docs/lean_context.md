@@ -1,221 +1,123 @@
-# Lean context: cache-preserving history projection for the actor thread
+# Lean Context: Cache-Preserving History Projection for the Actor Thread
 
-> **潜在性能影响说明（默认全部关闭）**
+> [!WARNING]
+> **Potential Performance Impact (All Switches Disabled by Default)**
 >
-> 1. **范围**：当前代码包含上游请求历史投影能力（`features.lean_projection`、`lean_projection_block`、`lean_projection_k`、`lean_request_dump`）以及禁用 `operation_memory` 工具时同步省略其启动说明段，**所有开关默认关闭（`false` / `0`）**。早期实验中的 `features.lean_profile`（覆盖 Codex 原生 `baseInstructions`、关闭原生 `multi_agent`/`skills`、省略内联 URDF、对测量浮点数做 4 位舍入与字段裁剪）因违反仓库“保留原生 Codex 基底说明与测量精度、不另建平行 payload 裁剪”边界而未纳入。
-> 2. **压缩原始信息的潜在性能风险**：开启 `features.lean_projection` 后，已闭合历史块中非锚点步的高频工具返回将被替换为简短摘要，内联图像被替换为文本占位符。虽然这能降低单次请求上下文长度，但**会丢失历史非锚点步的原始图像像素、完整轨迹采样数据、详细几何/接触字段及完整程序 `stdout`**（除非模型主动调用 `history_view_observation` 重新读取）。在长程精细操作、跨步误差对比或多步失败恢复场景中，压缩历史原始证据可能削弱模型的空间推理与归因能力，或诱导额外的回看调用；且下文第 1 节的对比仅基于小规模单轮运行，尚未在全量场景集上排除任务成功率退化风险。默认配置已通过 `ModelRequestProxy` 的超限请求图像裁剪（`images.trim_oversized_requests`，默认开启，「保首尾、压中段」）与 `reuse_exact_images` 解决大请求体 400 与缓存保活问题，各压缩手段的开关与实测见[上下文与图像压缩](development/image-pipeline.md#模型请求的上下文与图像压缩)，请保持 `lean_projection = false` 默认关闭，仅在明确评估信息压缩代价时按需开启。
+> 1. **Scope**: The codebase includes an optional upstream request history projection (`features.lean_projection`, `lean_projection_block`, `lean_projection_k`, and `lean_request_dump`), and automatically omits the startup instruction paragraph for `operation_memory` when that tool is listed in `features.disabled_tools`. **All projection switches default to disabled (`false` / `0`).** An earlier experimental `features.lean_profile` (which overrode Codex's native `baseInstructions`, disabled native `multi_agent` and `skills`, omitted inline URDF data, and rounded measured floats to 4 decimal places while dropping fields) was rejected because it violated repository boundaries requiring preservation of native Codex base instructions, full measurement precision, and a single payload projection path.
+> 2. **Risks of Compressing Historical Raw Evidence**: Enabling `features.lean_projection` replaces high-volume tool replies on non-anchor steps in closed history blocks with concise text summaries and replaces their inline images with text placeholders. While this reduces per-request token counts, **it discards raw image pixels, full trajectory samples, detailed geometric/contact fields, and full program `stdout` from non-anchor historical steps** (unless the model explicitly re-fetches an observation via `history_view_observation`). In long-horizon precision tasks, cross-step residual comparisons, or multi-step failure recovery, summarizing historical raw evidence can degrade spatial reasoning and error attribution or induce extra history-retrieval turns; moreover, the comparison in Section 1 below reflects only a small 15-case run and has not ruled out task success regressions on the full benchmark suite. Because the default configuration already prevents HTTP 400 oversized-request errors and preserves prompt cache hit rates via `ModelRequestProxy` image trimming (`images.trim_oversized_requests`, enabled by default with a "keep head & tail, trim middle" window) and `reuse_exact_images` (see [Context and Image Compression for Model Requests](development/image-pipeline.md#context-and-image-compression-for-model-requests)), keep `lean_projection = false` by default and enable it only when explicitly evaluating context-compression trade-offs.
 
-With every switch below off the upstream request is unchanged byte for byte. One
-independent change, active regardless of the switches: when the `operation_memory` tool
-is listed in `features.disabled_tools`, its paragraph is also dropped from the developer
-instructions.
+When all switches in the table below are off, outbound upstream requests are unchanged byte for byte. Independently of these switches, whenever `operation_memory` is listed in `features.disabled_tools`, its descriptive paragraph is omitted from the developer instructions.
 
-| Key | Default | What it does |
+| Configuration Key | Default | Description |
 |---|---|---|
-| `features.lean_projection` | `false` | Block-wise projection of the upstream request: old steps become summaries, images become placeholders (section 2) |
-| `features.lean_projection_block` | `8` | Block length B in tool steps; `0` = trailing mode |
-| `features.lean_projection_k` | `1` | Image steps carried in the trailing message (trailing mode only) |
-| `features.lean_request_dump` | `0` | Diagnostics: number of projected request bodies (image data replaced by digests) written to `<run-dir>/private/request-dump/`; keep `0` in production |
+| `features.lean_projection` | `false` | Enables block-wise history projection on outbound upstream requests: older non-anchor steps are summarized and inline images become placeholders (Section 2) |
+| `features.lean_projection_block` | `8` | Block length `B` measured in tool steps (`0` selects trailing mode) |
+| `features.lean_projection_k` | `1` | Number of recent image steps retained in the trailing message (trailing mode only) |
+| `features.lean_request_dump` | `0` | Diagnostic limit: number of projected request payloads (with image bytes replaced by digests) written to `<run-dir>/private/request-dump/`; keep at `0` in production |
 
-## 1. Measured effect
+## 1. Measured Effect
 
-The projection was evaluated in small paired runs on RoboDojo (15 cases from three
-tasks, single runs, block mode with `lean_projection_block = 8` and
-`lean_projection_k = 1`, against both switches off). Those runs combined the projection
-with the unmerged `lean_profile`, so they do not isolate the projection. Equivalent cost
-below = uncached input + cached input / 20 (the rate card of the model used prices cached
-input at 1/20).
+The projection was evaluated in small paired runs on RoboDojo (15 cases across three tasks, single runs, block mode with `lean_projection_block = 8` and `lean_projection_k = 1` vs. all switches off). Note that those runs combined `lean_projection` with the unmerged `lean_profile`, so they do not isolate the effect of `lean_projection` alone. Equivalent cost below is defined as `uncached_input_tokens + cached_input_tokens / 20` (matching the 1/20 cached-input rate on the model's rate card):
 
-- Input tokens per episode fell by about 30% and the equivalent cost per call by about a
-  quarter; the per-call saving was stable across later reruns.
-- Mean context per call fell from about 88k to about 68k tokens at the same ~91% cache
-  hit rate, and Codex context compactions disappeared (about one per episode without the
-  projection).
-- The largest request body stayed at or below 2.3 MB, against 3.4–8 MB without the
-  projection.
-- The success rate on 15 cases was not distinguishable from the baseline; it has not
-  been re-checked on a larger set.
+- Total input tokens per episode fell by ~30% and equivalent cost per model call fell by ~25%, with per-call savings remaining consistent across reruns.
+- Mean context length per call dropped from ~88k to ~68k tokens at the same ~91% prompt cache hit rate, and native Codex context compactions dropped to zero (compared to roughly one compaction per episode without projection).
+- Maximum outbound request body size stayed at or below `2.3 MB`, compared to `3.4–8.0 MB` without projection.
+- Task success rate across the 15 cases was indistinguishable from the baseline, though it has not yet been evaluated on a larger benchmark panel.
 
-Full `robot_action` replies were about half of the equivalent cost.
+Full `robot_action` replies accounted for roughly half of the equivalent token cost.
 
-## 2. `lean_projection` (`auriga/core/presentation/lean_projection.py`)
+## 2. How `lean_projection` Works (`auriga/core/presentation/lean_projection.py`)
 
-**The problem it addresses.** The actor is a Codex thread, so every model call resends
-the whole conversation: the static prefix, every tool reply so far (a `robot_action`
-reply is about 8k tokens of JSON plus 3–4 images) and the model's own messages. Over
-an episode of 60–80 calls the context grows from 35k to 150k+ tokens, Codex compacts it
-once or twice (a 227k-token request that is almost entirely uncached), and on some
-Responses relays the request body eventually exceeds the upload limit (section 3.2).
-Most of that volume is old: the model acts on the latest feedback and rarely reads the
-full JSON of a step it took twenty calls ago.
+### The Problem It Addresses
 
-**Where it hooks in.** Codex does not expose its thread history, but every request it
-sends goes through Auriga' local model proxy (`model_proxy.py` →
-`codex.py:_present_model_request`). The projection is a pure function applied to that
-outgoing request body: given the same history item it always produces the same bytes,
-and it never changes Codex's stored thread. Switching it off restores the original
-request byte for byte.
+Because the actor runs as a single Codex thread, every model call resends the entire conversation history: the static developer prefix, every tool reply accumulated so far (a single `robot_action` reply carries ~8k tokens of JSON plus 3–4 camera images), and the model's own reasoning and tool-call items. Over a 60–80-call episode, the context grows from ~35k to 150k+ tokens, triggering one or two native Codex compactions (each sending a ~227k-token request that is almost entirely uncached) and eventually exceeding the upload size limit on some upstream Responses relays (Section 3.2). Most of that historical volume is stale: the model acts primarily on the latest observation feedback and rarely re-reads the full trajectory JSON from twenty turns earlier.
 
-**What it does to each history item.** Items are classified by type:
+### Where It Hooks In
 
-| Item in the thread | Sent as |
+Codex does not expose its internal thread storage for mutation, but every outbound model request passes through Auriga's local HTTP proxy (`model_proxy.py` → `codex.py:_present_model_request`). `lean_projection` is implemented as a pure function over the outbound request body: given the same history item, it always emits the exact same bytes without mutating Codex's stored thread state. Disabling the flag restores the original outbound request byte for byte.
+
+### How History Items Are Transformed
+
+Each item in the outbound conversation history is classified by role and tool type:
+
+| Thread History Item | Outbound Representation |
 |---|---|
-| Replies of the six high-volume tools (`robot_action`, `program_run`, `robot_observe`, `robot_wait`, `geometry_query`, `history_view_observation`) from *closed* blocks (except the block's first step) | a deterministic one-paragraph summary: outcome, the numbers the model is likely to need (end-pose errors, grasp contact, budget), anomalies; `program_run` keeps up to 700 characters of stdout |
-| Images inside those replies | a fixed placeholder line naming the camera and observation id ("pixels omitted from older history") |
-| Replies of the same tools in the *open* block, and the first step of every block | unchanged, text and images |
-| Everything else — the static prefix, the model's reasoning items and tool arguments, replies of other tools, Codex compaction summaries | unchanged |
+| Replies from the six high-volume tools (`robot_action`, `program_run`, `robot_observe`, `robot_wait`, `geometry_query`, `history_view_observation`) inside **closed** blocks (excluding the block's first anchor step) | Replaced by a deterministic single-paragraph summary retaining the outcome, key numeric measurements (terminal pose residuals, grasp contact, remaining step budget), and any anomalies (`program_run` retains up to 700 characters of `stdout`) |
+| Inline images inside those summarized replies | Replaced by a fixed single-line text placeholder recording the camera ID and `observation_id` (`"pixels omitted from older history"`) |
+| Replies from the same six tools inside the currently **open** block, plus the **anchor** (first step) of every closed block | Sent unchanged (full text and inline images preserved) |
+| All other items—static developer prefix, model reasoning items, tool call arguments, replies from low-volume tools, and native Codex compaction summaries | Sent unchanged |
 
-A "step" is one model reply and the tool outputs it produced. A summary is written from
-the reply's own fields only (no model call), so it is identical every time the item is
-projected.
+Here, one "step" comprises a model turn and the tool outputs it produced. Because summaries are formatted deterministically from the reply's own structured fields without calling a model, projecting the same historical item always yields identical bytes.
 
-**Why blocks, and why anchors.** The upstream cache rules decide the shape. Some
-Responses relays reuse a cached request only if the new request *contains it entirely*;
-changing any item in the middle, or even dropping the last one, loses the cache for
-everything after that point (section 3.3). Summarising each step as soon as it is one
-step old would therefore cost a cache miss on every call (measured hit rate: 68%). So
-steps are grouped into blocks of `lean_projection_block` (default 8):
+### Why Block Mode and Anchor Steps Are Used
 
-```
+Upstream prompt-cache matching rules dictate the block structure. Several Responses relays reuse a cached prefix from a prior request only if the new request **contains the prior request's prefix in its entirety**; modifying any item in the middle of the history—or even dropping the final item—invalidates the cache for everything after that position (Section 3.3). Summarizing every step as soon as it becomes one turn old would therefore cause a cache miss on every single call (reducing the measured cache hit rate to 68%). Instead, steps are grouped into fixed-size blocks of length `lean_projection_block` (default `B = 8`):
+
+```text
 block 1              block 2              block 3 (open)
 ┌───────┬─────────┐  ┌───────┬─────────┐  ┌───────┬─────┬─────┐
 │anchor │ 7 steps │  │anchor │ 7 steps │  │anchor │ ... │ now │
 │ full  │ summary │  │ full  │ summary │  │ full  │full │full │
-└───────┴─────────┘  └───────┴─────────┘  └───────┴─────┴─────┘
+└───────┴─────────┘  └───────┴─────────┘  └───────┴─────┬─────┘
 ```
 
-- Inside a block, each request is the previous request plus new items — a pure
-  extension, so the cache hits on everything but the new step (≈6k tokens).
-- When a block closes (every 8 steps) its seven non-anchor steps are rewritten into
-  summaries and placeholders in one go. That request misses the cache from the start of
-  the rewritten block onward: the summaries (≈1.2k), the block's reasoning and tool
-  arguments (≈1.9k, unchanged but behind the changed items) and the new step. Measured:
-  a rewrite request costs about 3.2k tokens more than an extension, i.e. 3.7% of the
-  episode's equivalent cost.
-- The anchor (first step of each block) is never rewritten. It is what the rewritten
-  request still shares with the previous one: without it the cache would have to restart
-  from the static prefix at every rewrite (simulated: 4.5% more expensive).
+- **Within an open block**, each request is a pure append extension of the previous request, so the upstream prompt cache hits on the entire history except for the newly appended step (~6k tokens).
+- **When a block closes** (every 8 steps), its seven non-anchor steps are rewritten into compact summaries and image placeholders in a single batch. That rewrite request misses the cache from the start of the newly closed block onward: the seven new summaries (~1.2k tokens), the block's unchanged model reasoning and tool arguments (~1.9k tokens sitting after the modified items), and the newest step. Empirically, a block-rewrite request costs ~3.2k more uncached tokens than a pure extension—roughly 3.7% of an episode's total equivalent cost.
+- **The anchor step** (the first step of each block) is never rewritten. Preserving the anchor ensures that when block `k` is rewritten, its anchor step still matches the end of the previous request's cached prefix; without anchors, every block rewrite would invalidate the cache all the way back to the static prefix (costing ~4.5% more in simulation).
 
-On the recorded trajectories a request then carried on average about 16k tokens of
-anchors, 20k of open block, 3.5k of summaries and 8k of the model's own history on top
-of the static prefix, with the same ~91% hit rate and no Codex compaction. Block length
-8–12 is the optimum on the recorded trajectories; 4 keeps too many anchors, 16 carries
-too much open block.
+Across recorded trajectories, projected requests carried an average of ~16k tokens of anchors, ~20k tokens in the open block, ~3.5k tokens of closed-block summaries, and ~8k tokens of model reasoning/tool calls atop the static prefix—maintaining a ~91% cache hit rate with zero native Codex compactions. A block length of `8–12` steps is empirically optimal (`B = 4` retains too many full anchor steps, while `B = 16` carries too large an open block).
 
-**What the model is told.** Two short lines in the developer instructions explain that
-older tool replies appear as summaries and that `history_view_observation` can fetch an
-old observation in full. Nothing else in the prompts changes (adding sentences that
-describe reply formats changed the model's tool use, see section 4).
+### What the Model Is Told
 
-**Trailing mode** (`lean_projection_block = 0`). History is summaries from the start;
-the latest step's full reply and the images of the last `lean_projection_k` steps go
-into one trailing user message that is replaced every call. Every request is then
-"the previous request minus its last item, plus new items", which some backends still
-serve from cache but relays with the containment rule of section 3.3 do not. On a backend that allows it, the per-request context drops to
-roughly 43k (no anchors, no open block), an estimated further −15–18% per call on top of
-block mode, with the current step's feedback unchanged. Keep block mode on relays with
-the containment rule.
+Two concise lines are added to the developer instructions noting that older tool replies appear as summaries and that `history_view_observation` can retrieve any historical observation in full. No other prompt text is changed (adding detailed descriptions of reply formatting altered the model's tool-calling behavior; see Section 4).
 
-## 3. Upstream behaviour to know before comparing runs
+### Trailing Mode (`lean_projection_block = 0`)
 
-### 3.1 Provider drift
+In trailing mode, all historical steps are summarized immediately from step 1, while the latest step's full reply and the inline images from the last `lean_projection_k` steps are placed into a single trailing user message that is replaced on every call. Each request is therefore `"the previous request minus its final item, plus new items"`. On upstream backends that cache prefixes up to the penultimate item, per-request context drops to ~43k tokens (eliminating both anchors and the open block) for an estimated additional 15–18% per-call cost reduction while keeping current-step feedback identical. However, on relays that enforce the strict containment rule (Section 3.3), dropping the trailing item invalidates the cache; keep block mode (`lean_projection_block = 8`) on such relays.
 
-With the same code and configuration on the same cases, success on one upstream
-endpoint dropped by about half within a day, with failed episodes running to 100–170
-calls without errors and with unchanged per-call latency and reasoning tokens, so proxy
-logs showed nothing. Configurations must therefore be compared side by side in the same
-time window with a control, judged by the paired success difference and the per-call
-cost. The per-call cost is the most stable metric across upstream states, because
-failed episodes are 1.6–2× more expensive than successful ones.
+## 3. Upstream Relay Behavior to Account For in Comparisons
 
-### 3.2 Request-body size limits
+### 3.1 Provider Drift
 
-Some relays reject requests of roughly 3.8–5 MB or more with HTTP 400
-`image_compression_failed` (not retryable; the episode is terminated unscored). Keeping
-every image in history reaches that size mid-episode; with the projection the body
-stayed at or below 2.3 MB. The default oversized-request trimming
-(`images.trim_oversized_requests`, see the image-pipeline link above) addresses the
-same limit without the projection.
+Even with identical code, configuration, and benchmark cases, task success rates on one upstream endpoint dropped by roughly half within a 24-hour window—with failed episodes running for 100–170 calls without HTTP errors and exhibiting unchanged per-call latency and reasoning-token counts in proxy logs. Consequently, any ablation must compare configurations **side by side within the same time window** against a concurrent control group, evaluating both paired task success differences and per-call token cost (per-call cost is much more stable across upstream drift than per-episode cost, because failed episodes consume 1.6–2.0× as many calls as successful ones).
 
-### 3.3 Cache rule and usage reporting
+### 3.2 Request Body Size Limits
 
-- Some relays reuse a previous request only if the new request contains it entirely.
-  Any in-place change, including dropping the trailing message, loses the suffix.
-  That is why block mode exists and why trailing mode needs a backend that serves
-  "previous request minus its last item" from cache.
-- A relay's reported token usage can differ from the actual request on some days (one
-  relay reported input and output about ×1.5 on some requests); compare days only with
-  a consistent token count.
-- The native-memory thread adds a few requests per episode (about 9% of the episode's
-  equivalent cost in these runs); it stays on.
+Some upstream relays reject HTTP POST bodies exceeding ~3.8–5.0 MB with HTTP 400 `image_compression_failed`. Retaining every full-resolution camera image across a long episode hits this ceiling mid-episode, whereas `lean_projection` kept request bodies at or below `2.3 MB`. In the default configuration (where `lean_projection` is off), `images.trim_oversized_requests` prevents this same HTTP 400 limit by pruning middle images only when the byte or image-count threshold is approached.
 
-## 4. Tried and not adopted
+### 3.3 Cache Containment Rules and Usage Reporting
 
-All of these reduce the cost of a single call by 5–8% but made episodes longer in the
-side-by-side runs, so the per-episode cost did not fall:
+- Some relays reuse a cached prefix only when the new request contains the previous request's entire input array as an exact prefix. Any in-place modification—including removing a trailing message—loses the cache suffix from that index onward.
+- Certain relays occasionally misreport token usage (for instance, reporting ~1.5× the actual input and output tokens on specific days); always cross-check comparisons using consistent local tokenizer counts (`o200k_base`).
+- Codex's native background memory thread adds a small number of auxiliary requests per episode (~9% of equivalent episode cost in these runs) and remains enabled in both conditions.
 
-- dropping `key_poses`, `trajectory_feedback.measured` and similar evidence from
-  successful `robot_action` replies;
-- no trajectory overlay after successful execution and `cam_head` only in the
-  `program_run` final observation (success fell on one task);
-- a 4.6k-character `robot_action` description;
-- thinning trajectory samples and keeping `derived_motion` only on the last sample:
-  uncached per call −8%, but 89 vs 57 calls per episode in the paired run.
+## 4. Alternatives Tested and Rejected
 
-The common pattern: summarising old steps is fine; thinning the feedback of the current
-step makes the model inspect and retry more.
+Each of the following modifications reduced single-call token cost by 5–8%, but increased the average number of calls per episode in side-by-side runs, yielding no net episode savings:
 
-Adding sentences to the developer instructions that describe reply formats changed the
-model's tool use (it stopped using `program_run` and previewed every action); beyond a
-two-line context-format note in the developer instructions, the projection therefore
-announces itself only through markers inside the replies.
+- Dropping `key_poses`, `trajectory_feedback.measured`, and related diagnostic fields from successful `robot_action` replies.
+- Omitting the trajectory overlay image after successful execution and returning only `cam_head` in the final observation of `program_run` (which reduced task success on one task).
+- Condensing the `robot_action` tool schema description to 4.6k characters.
+- Thinning trajectory samples and retaining `derived_motion` only on the final sample (which reduced uncached tokens per call by 8%, but increased mean calls per episode from 57 to 89 in paired runs).
 
-## 5. Open questions
+The consistent lesson is that **summarizing old historical steps is benign, whereas thinning feedback on the current step forces the model to inspect and retry more often**.
 
-- Success rate of the projection against the baseline on a larger set (≥30 cases side
-  by side) under a stable upstream.
-- Trailing mode (`lean_projection_block = 0`, `lean_projection_k = 1–2`) vs block mode
-  on a backend that serves trailing requests from cache. Expected mean context
-  70k → 40–45k and another −25–30% per call, with the same full feedback for the
-  current step.
+Similarly, adding extra instructions describing compressed reply formats caused the model to stop using `program_run` and preview every motion individually; therefore, beyond the two-line note in the developer instructions, `lean_projection` signals itself solely through inline `[summary ...]` markers inside projected tool outputs.
 
-## 6. Decision-boundary reminder under block mode
+## 5. Open Questions
 
-The actor's decision-context hook (`CodexSession._task_decision_context`) removes any
-earlier "Current task decision boundary" assistant message and appends a fresh one. By
-default it does so only on compaction requests (`/responses/compact`), so ordinary
-`/responses` calls stay pure prefix extensions. With `lean_projection` in block mode
-(`lean_projection_block` > 0) it also runs on every actor `/responses` request; appended
-as the last input item, request n+1 would then lack the last item of request n, and
-under the containment rule of section 3.3 no request would be a prefix of the next one.
-The hook's text is therefore kept unchanged and only where and how often it is placed
-changes (`lean_projection.place_block_reminders`):
+- Evaluating `lean_projection` against the unprojected baseline across a larger paired benchmark panel ($\ge 30$ cases side by side) under a stable upstream provider.
+- Comparing trailing mode (`lean_projection_block = 0`, `lean_projection_k = 1–2`) against block mode on an upstream backend that supports prefix caching after dropping the final input item (projected to reduce mean context from ~70k to ~40–45k tokens and cut per-call cost by another 25–30% while preserving full current-step feedback).
 
-- a reminder is never the last input item: relays with the containment rule rarely reuse
-  the cache entry of a request that ends with an assistant message (measured: 3 of 36
-  such entries reused, against 170 of 170 for requests ending with a tool output);
-- slot 0 directly before the task message of the first request (the last item of a
-  request without tool steps, when it is a user message), so request 1 ends with the
-  task message as without the hook;
-- one slot per block (anchor steps 1, B+1, 2B+1, ...), created on the first request of
-  the block for which a plan is stored, directly before the model turn of the newest
-  step, i.e. after the previous step's output. The previous request ended there, so
-  the creating request extends it and ends with a tool output;
-- each slot keeps the snapshot it was created with; reminders of earlier slots stay
-  where they were sent, so the anchor request of the previous block is still a prefix
-  of the rewrite request;
-- the "no plan stored" variant is carried only by slot 0. A block without a stored plan
-  gets no slot; the first plan appears in the next slot created, so no slot is ever
-  rewritten (an earlier variant re-took the open slot once after the first `task_plan`,
-  one extra re-read per episode when the plan landed inside block 1);
-- a slot whose preceding item changed (Codex compaction, new thread) is dropped.
+## 6. Decision-Boundary Reminder Placement in Block Mode
 
-Cost: one reminder (plan + attention + ledger JSON, typically 0.3-1k tokens) per block
-stays in the context, read from cache. Behavioural difference: inside a block the
-reminder can be up to B-1 steps older than the latest `task_plan` update; that update is
-itself visible as the `task_plan` call and reply. Trailing mode (`lean_projection_block = 0`)
-and `lean_projection = false` keep the default placement (compaction requests only).
+By default, the actor's decision-context hook (`CodexSession._task_decision_context`) strips any earlier `"Current task decision boundary"` assistant message and appends a fresh snapshot **only on `/responses/compact` requests**, keeping ordinary `/responses` calls pure prefix extensions. When `lean_projection` is active in block mode (`lean_projection_block > 0`), the hook also runs on ordinary `/responses` calls. However, if the reminder were appended as the very last input item of request $n$, request $n+1$ would strip it before appending new items—violating the strict containment rule of Section 3.3 on every call. Therefore, `lean_projection.place_block_reminders` keeps the reminder text unchanged but places it into fixed, immutable block slots:
 
-In request dumps of block-mode runs with the slot rule no request ended with a
-reminder, and most requests were exact extensions of the previous one; the breaks were
-the block rewrites.
+- **Never end a request with an assistant reminder**: Relays enforcing the containment rule rarely reuse cache entries for requests that end with an assistant message (empirically reusing only 3 of 36 such entries, vs. 170 of 170 when the request ends with a tool output).
+- **Slot 0**: Placed immediately before the initial user task message on request 1 (when the request has no tool steps yet), so request 1 still ends with the user task message.
+- **One slot per block** (at anchor steps `1, B+1, 2B+1, ...`): Created on the first request in that block for which a `task_plan` exists, inserted immediately before the model turn of the newest step (i.e., right after the previous step's tool output). Because the previous request ended at that tool output, inserting the slot there remains a pure prefix extension and the new request still ends with the newest step's tool output.
+- **Immutable once placed**: Each slot permanently retains the plan snapshot it was created with, and reminders in earlier slots remain at their original indices so that prior anchor prefixes remain bit-identical across block rewrites.
+- **No-plan handling**: The `"no plan stored"` reminder variant is placed only in Slot 0. If a block has no stored plan yet, no slot is created for that block; once the first `task_plan` is submitted, it populates the next block slot created without rewriting any existing slot.
+- **Compaction reset**: Any slot whose preceding item changed (due to native Codex compaction or a new thread) is dropped cleanly.
+
+This slot strategy adds one reminder snapshot (`plan` + `attention` + `ledger` JSON, typically `0.3–1.0k` tokens) per 8-step block, served from the prompt cache on subsequent turns. Within an open block, the slotted reminder can be up to $B - 1$ steps older than the latest `task_plan` call, though the newer `task_plan` call and its reply remain directly visible in the open block's conversation history. Trailing mode (`lean_projection_block = 0`) and `lean_projection = false` retain the default behavior (injecting only on `/responses/compact`).

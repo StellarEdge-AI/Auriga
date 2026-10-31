@@ -1,23 +1,23 @@
-# RoboDojo 10 任务复现协议：GPT-as-Policy 对齐集
+# RoboDojo 10-Task Reproduction Protocol: GPT-as-Policy Alignment Panel
 
-核对日期：2026-10-02。本文件记录 GPT-as-Policy 在 RoboDojo 上的原始 10 任务评估协议，供其他框架使用相同 case 复现与比较。**每种方法运行 50 回合**。
+Verified: `2026-10-02`. This document specifies the original 10-task RoboDojo evaluation protocol used in **GPT-as-Policy** so that Auriga and other frameworks can evaluate and compare against the exact same case set. **Each method runs 50 episodes.**
 
-## 原始实验的范围与结果
+## Scope and Published Results of the Original Study
 
-[GPT-as-Policy 仓库](https://github.com/anonymous-report-421/GPT-as-Policy/blob/main/README.md)报告两种方法：`gpt`（GPT-6 Astra Direct）和 `mix`（GPT-6 Astra 审核、必要时纠正 π0.5 候选动作）。两种方法使用**相同的 50 个 case**：10 个任务，每任务 5 个 case。因此作者共记录 **2 × 50 = 100 条评估结果**；这不等于单个方法跑 100 次，也不等于 100 个不同初始场景。公开的[逐回合记录](https://github.com/anonymous-report-421/GPT-as-Policy/blob/main/public_results/evaluation_cases.json)给出 `case_id`、方法、任务、场景变体、seed、成功与原生 Score。
+The [GPT-as-Policy repository](https://github.com/anonymous-report-421/GPT-as-Policy/blob/main/README.md) evaluates two methods: `gpt` (**GPT-6 Astra Direct**) and `mix` (**Hybrid**: GPT-6 Astra reviewing and, when necessary, overriding candidate actions proposed by pi0.5). Both methods are evaluated on the **exact same 50 cases** (10 tasks × 5 cases per task), yielding **2 × 50 = 100 recorded evaluation episodes** in total (rather than 100 episodes per method or 100 distinct initial scenes). The published [per-episode records](https://github.com/anonymous-report-421/GPT-as-Policy/blob/main/public_results/evaluation_cases.json) list the `case_id`, method, task, scene variant, seed, binary success, and native process `Score`.
 
-| 方法 | 成功数 / 回合数 | SR | 作者报告的平均原生 Score |
+| Method | Successes / Episodes | Success Rate (SR) | Author-Reported Mean Native `Score` |
 | --- | ---: | ---: | ---: |
-| Direct (`gpt`) | 13 / 50 | 26% | 37.81 / 100；仅 48 个 case 有原生 Score |
-| Hybrid (`mix`) | 24 / 50 | 48% | 62.60 / 100；50 个 case 均有原生 Score |
+| Direct (`gpt`) | 13 / 50 | 26% | 37.81 / 100 (computed over 48 cases with a recorded native `Score`) |
+| Hybrid (`mix`) | 24 / 50 | 48% | 62.60 / 100 (all 50 cases have a recorded native `Score`) |
 
-两种 SR 的分母都是 50；缺少 Score 的 2 个 Direct case **仍计入 SR**。作者另报告 Hybrid 在已执行控制步中有 14.4% 使用 GPT 修正。仓库中的其他官方模型对照是重加权公开参考，不能视为同 seed 重跑。上述数值均为作者结果，尚非本项目本地复现。
+Both success rates use the fixed denominator of 50 episodes; the 2 Direct cases lacking a native `Score` **remain in the 50-episode SR denominator**. The authors additionally report that in the Hybrid (`mix`) condition, 14.4% of executed control steps used a GPT correction. Other baseline model figures cited in that repository are reweighted public leaderboard references rather than same-seed reruns. All figures above are the original authors' published results, not local reproductions from this repository.
 
-## 评估任务与回合：每方法 50 回合
+## Evaluated Tasks and Cases (50 Episodes per Method)
 
-`standard` 与 `random` 是 RoboDojo 场景变体，布局编号相同也代表**不同 case**。下表的任务顺序和布局依据作者[公开 case manifest](https://github.com/anonymous-report-421/GPT-as-Policy/blob/main/public_results/evaluation_cases.json)；[cases.csv](cases.csv)列出所有 50 个完整 `case_id` 和 seed。
+In RoboDojo, `standard` and `random` denote distinct scene variants—even when sharing the same numeric `layout_id`, they represent **different physical cases**. The task ordering and layout assignments below follow the authors' [published case manifest](https://github.com/anonymous-report-421/GPT-as-Policy/blob/main/public_results/evaluation_cases.json), and [`cases.csv`](cases.csv) enumerates all 50 full `case_id` identifiers and seeds.
 
-| 任务 ID | 能力维度 | `standard` 布局 | `random` 布局 | 每方法回合 | 作者步数上限 | Direct 成功 | Hybrid 成功 |
+| Task ID | Capability Dimension | `standard` Layouts | `random` Layouts | Episodes / Method | Author Step Limit | Direct Successes | Hybrid Successes |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: |
 | `organize_table` | Long-Horizon | 0–4 | — | 5 | 1000 | 0/5 | 0/5 |
 | `classify_objects_by_language` | Open | 0–4 | — | 5 | 1100 | 2/5 | 1/5 |
@@ -29,26 +29,26 @@
 | `make_kong` | Long-Horizon | 0–4 | — | 5 | 600 | 0/5 | 2/5 |
 | `fold_clothes` | Generalization | 0–1 | 0–2 | 5 | 500 | 2/5 | 5/5 |
 | `put_bottles_into_dustbin` | Long-Horizon | 0–4 | — | 5 | 700 | 1/5 | 5/5 |
-| **合计** | | | | **50** | | **13/50** | **24/50** |
+| **Total** | | | | **50** | | **13/50** | **24/50** |
 
-计算方式：7 个非 Generalization 任务 × 5 个 `standard` 布局 = 35；3 个 Generalization 任务 ×（2 个 `standard` + 3 个 `random`）= 15；**35 + 15 = 50**。公开记录中所有 case 的 `eval_seed=0`、`simulator_initial_seed=0`、`policy_rng_seed=0`，且 `reset_seed=layout_id`；控制步长 `dt=0.04 s`。`case_id` 如 `fold_clothes__random__g0__l2`，必须保留任务、变体和布局三个部分。两方法在 `case_id` 和 seed 上一一配对；复现其他框架时也使用这 50 个 case。步数上限是作者记录的原生值，移植其他框架时应记录实际上限；若要严格对照，须统一这些上限及步长。
+**Case breakdown**: 7 non-Generalization tasks × 5 `standard` layouts = 35 cases; 3 Generalization tasks × (2 `standard` + 3 `random` layouts) = 15 cases; **35 + 15 = 50 cases**. Across all published records, `eval_seed=0`, `simulator_initial_seed=0`, `policy_rng_seed=0`, `reset_seed=layout_id`, and control timestep `dt=0.04 s`. Each `case_id` (for example, `fold_clothes__random__g0__l2`) encodes the task, scene variant, and layout index. Both methods are paired 1-to-1 by `case_id` and seed. Step limits reflect the native task horizons recorded by the authors; when evaluating another framework, log its active step limits and align both horizons and control timesteps for strict comparisons.
 
-## 执行与报告约定
+## Execution and Reporting Conventions
 
-1. 固定同一 RoboDojo 代码与资产版本、任务成功判据、机器人、相机和动作步长；先用 [cases.csv](cases.csv)按 `case_id` 建立任务队列。GPT-as-Policy 作者的[来源记录](https://github.com/anonymous-report-421/GPT-as-Policy/blob/main/hybrid_rollout/robodojo/SOURCE.json)记录了 RoboDojo/OpenPI commit 和 π0.5 checkpoint 配置；仓库本身不附仿真资产或权重，需从上游准备。不同版本只能称同任务重新评估，不能称逐 case 精确复现。
-2. 对每个框架固定并记录精确模型版本、prompt/示范、策略权重、观测和动作接口、最大控制步数、超时及恢复预算。GPT-as-Policy 仓库使用 Isaac Sim 5.1、GPT-6 Astra `xhigh`，Hybrid 还需 OpenPI/JAX 和 π0.5 权重；Direct 无 π0.5 推理。其运行变量 `ROLLOUT_EVALUATION_METHOD` 对应 `gpt_only`（Direct）或 `pi05_plus_gpt`（Hybrid）。[运行说明](https://github.com/anonymous-report-421/GPT-as-Policy/blob/main/README.md#run-a-new-evaluation)。
-3. 每个 `case_id` 保存原始 `success`、原生 `Score`、是否有效、终止原因、步数、模型调用数、耗时以及轨迹文件路径。对仿真/资产故障单独标记；不要静默删除失败回合或把缺失 Score 补零。
-4. 结果按**任务 5 回合成功数**和**50 回合总成功数 / 50**报告；10 个任务均为 5 回合，因此任务 SR 宏平均等于总 SR。Score 单独报告均值及有效样本数 `n`，不要将它与 SR 混用。每任务只有 5 回合，一次成功即改变 20 个百分点。
+1. **Pin simulator code and assets**: Use a fixed RoboDojo commit, asset bundle, task evaluator, robot model, camera setup, and control timestep, and build the evaluation queue from [`cases.csv`](cases.csv) by `case_id`. The GPT-as-Policy [`SOURCE.json`](https://github.com/anonymous-report-421/GPT-as-Policy/blob/main/hybrid_rollout/robodojo/SOURCE.json) records the exact RoboDojo/OpenPI commits and pi0.5 checkpoint configuration used by the authors (simulation assets and model weights must be obtained from upstream). Runs on different simulator commits constitute a same-task re-evaluation rather than a bit-exact reproduction.
+2. **Record full method metadata**: For each evaluated framework, pin and log the exact model identifier, reasoning effort, prompts/instructions, policy checkpoint weights, observation and action profiles, maximum control steps, timeouts, and recovery budgets. The original GPT-as-Policy codebase used Isaac Sim 5.1 and GPT-6 Astra at `xhigh` reasoning effort (plus OpenPI/JAX and pi0.5 weights for Hybrid), controlled via `ROLLOUT_EVALUATION_METHOD=gpt_only` (Direct) or `pi05_plus_gpt` (Hybrid); see their [execution guide](https://github.com/anonymous-report-421/GPT-as-Policy/blob/main/README.md#run-a-new-evaluation).
+3. **Preserve complete per-case evidence**: For every `case_id`, archive raw `success`, native process `Score`, validity status, termination reason, executed native steps, model call count, wall-clock duration, and trajectory artifact paths. Flag simulator or asset crashes explicitly—never silently drop failed episodes from the denominator or backfill missing native scores as `0`.
+4. **Report fixed-denominator metrics**: Report both **per-task successes out of 5** and **overall successes out of 50** (since all 10 tasks have 5 cases, the macro-average task SR equals overall SR). Report mean native `Score` alongside its valid sample count `n` rather than conflating `Score` with binary SR. Note that with 5 cases per task, a single episode outcome shifts a task's SR by 20 percentage points.
 
-资料入口：[GPT-as-Policy 代码与说明](https://github.com/anonymous-report-421/GPT-as-Policy)、[100 条作者结果](https://github.com/anonymous-report-421/GPT-as-Policy/blob/main/public_results/evaluation_cases.json)。
+Reference links: [GPT-as-Policy Repository](https://github.com/anonymous-report-421/GPT-as-Policy) | [Published 100-Episode JSON Results](https://github.com/anonymous-report-421/GPT-as-Policy/blob/main/public_results/evaluation_cases.json).
 
-## Auriga benchmark 组入口
+## Running the `gpt-as-policy-10` Benchmark Group in Auriga
 
-固定组名：**`gpt-as-policy-10`**。后续可以直接说：**“用 `gpt-as-policy-10` 组的 setting 跑 Auriga，每个 case 一次，共 50 回合。”** 这表示采用本文件和 [group.json](group.json) 中的目标协议，以及 [cases.csv](cases.csv) 中的完整 case 集；方法实现与任何协议偏差另行记录。比较两种方法时分别生成两份 50 回合队列，使用不同运行根目录，按 `case_id` 配对。
+The registered benchmark group name is **`gpt-as-policy-10`**. This group combines the target protocol in [`group.json`](group.json) with the 50-case manifest in [`cases.csv`](cases.csv). When comparing two conditions or methods, generate two separate 50-episode queue manifests pointing to distinct run root directories paired by `case_id`.
 
-**模型和推理档位使用我们自己的配置。** 实验组不覆盖 Auriga 的模型或 reasoning effort，也不要求切换为作者的 `xhigh`。作者档位仅保留为来源信息；本地报告记录本次实际模型与推理档位。
+**Model and reasoning effort follow your active Auriga configuration.** The group generator does not override Auriga's configured model or reasoning effort (nor does it force `xhigh`); the original authors' settings are stored purely as reference metadata while local reports record the actual model and effort served.
 
-从仓库根目录离线生成可供现有队列使用的 manifest（只需 Python 标准库，不启动 GPU、模型或通知）：
+First, generate a queue manifest offline from the repository root (uses only the Python standard library and launches no GPUs, models, or hooks):
 
 ```sh
 mamba run -n Auriga python scripts/benchmark_group.py --group gpt-as-policy-10 \
@@ -56,9 +56,9 @@ mamba run -n Auriga python scripts/benchmark_group.py --group gpt-as-policy-10 \
   --output /tmp/gpt-as-policy-10-auriga-001.json
 ```
 
-输出文件必须尚不存在。每条运行目录和标签都保留完整 `case_id`；`standard` 直接使用任务 ID，`random` 映射为 `<task>_random`，例如 `fold_clothes_random`。manifest 同时保存完整目标条件、来源版本和文件校验值，运行时不需要再访问 GitHub。
+The `--output` path must not already exist. Every generated run directory and label preserves the full `case_id`: `standard` variants map to `<task>`, and `random` variants map to `<task>_random` (e.g., `fold_clothes_random`). The generated manifest embeds the complete target protocol metadata, source revisions, and file digests so no network access to GitHub is needed at runtime.
 
-后续明确开始实验时，用现有队列执行生成文件；`--output` 为新的队列状态目录，不能与 case 运行目录重叠：
+To launch the evaluation queue (`--output` specifies a fresh queue state directory that must not overlap with the per-case run directories):
 
 ```sh
 mamba run -n Auriga python -m auriga.apps.evaluation.queue \
@@ -66,31 +66,32 @@ mamba run -n Auriga python -m auriga.apps.evaluation.queue \
   --output ~/exp/auriga/queues/gpt-as-policy-10-auriga-001
 ```
 
-生成时可用 `--max-parallel N` 指定并发上限，默认取配置中的 `queue.max_parallel`（仓库默认 60）；实际并发由剩余 case 数、GPU 显存和共享租约准入共同决定，完成通知沿用现有队列。`--pi05` 生成启用 Auriga π0.5 工具的另一方法队列，须另选输出文件和运行根目录；它不自动成为作者的 `mix`。作者的 `gpt`/`mix` 成绩仅作参考，不写入本地运行结果。
+Pass `--max-parallel N` during manifest generation to override the concurrency cap (which defaults to `queue.max_parallel = 60` from configuration; actual runtime concurrency is dynamically bounded by remaining cases, available GPU VRAM, and shared lease admission). Passing `--pi05` to `benchmark_group.py` generates a queue with Auriga's `robot_policy_step` pi0.5 tool enabled (use a separate manifest path and `--run-root`; note that enabling Auriga's `robot_policy_step` tool is distinct from the authors' `mix` rollout controller).
 
-### 操作经验的共享与持久化
+### Shared vs. Isolated Operation Memory
 
-后续重建 benchmark 使用 [`configs/benchmark-shared-memory.json`](../../configs/benchmark-shared-memory.json)，通过 `--config configs/benchmark-shared-memory.json` 传给组生成器。该配置将 `features.grasp_memory_dir` 固定为 `~/.local/share/auriga/grasp-memory`，其余设置继承仓库配置。普通组生成器沿用这个共享目录，不创建逐 case 副本。模型调用 `operation_memory` 时，`scope='shared'` 的记录进入该目录的 `events.sqlite`，后续任务可以检索；`scope='task'` 的记录只进入当前 run。共享配置不会自动提炼经验，模型仍须成功调用 `kind='record'`，并提供实际动作、观察 ID 和适用条件。
+Standard benchmark group runs can pass `--config configs/benchmark-shared-memory.json` (see [`configs/benchmark-shared-memory.json`](../../configs/benchmark-shared-memory.json)), which sets `features.grasp_memory_dir` to `~/.local/share/auriga/grasp-memory` while inheriting all other repository defaults. When the model invokes `operation_memory` with `scope="shared"`, entries are persisted to `events.sqlite` in that shared directory and become retrievable by subsequent cases, whereas `scope="task"` entries remain isolated to the current episode. Shared memory never distills experiences automatically—the model must explicitly call `kind="record"` with valid action/observation provenance and applicability conditions.
 
-使用共享库的面板应在 manifest 中记录实际路径、起始库快照和跨 case 学习条件。共享写入会使后启动 case 读取到更早 case 的经验，运行顺序及并发因此成为评估条件；比较不同模型时应分别声明初始库和共享策略。
+Because shared memory allows later-starting episodes to read entries recorded by earlier episodes, execution order and concurrency become part of the experimental condition; manifests and reports using shared memory should log the shared directory path, initial database state, and cross-case learning policy.
 
-### 当前适配范围与严格对照前检查
+### Scope of Protocol Alignment and Pre-Comparison Checklist
 
-生成器直接应用任务/变体映射、`eval_seed`、`layout_id` 和方法开关；`reset_seed` 由现有 worker 按 `layout_id` 使用。CSV 中的其余作者条件保存为 **`reference_protocol` / `protocol_cases` 目标元数据**，不宣称由队列强制执行。当前 Auriga 使用安装的原生任务上限和控制配置；建立组入口时静态核对过所用 RoboDojo 中 13 个任务类的上限与表中一致，控制频率为 25 Hz。生成 manifest 不等于运行时已验证这些条件。
+`benchmark_group.py` maps task/variant names, `eval_seed`, `layout_id`, and method switches directly into the queue manifest, and the RoboDojo worker uses `layout_id` as `reset_seed`. Additional author metadata in `cases.csv` is recorded under `reference_protocol` / `protocol_cases` for auditability rather than enforced by the queue runner. Static verification against the installed RoboDojo checkout confirmed matching native step horizons across all 13 task classes (`standard` + `random`) at a 25 Hz control frequency.
 
-严格逐 case 复现前仍需处理这些差异，并保存实际运行配置：
+Before claiming a strict apples-to-apples reproduction against the original authors' environment, account for the following implementation differences:
 
-- 作者来源记录固定 RoboDojo `ee67a1468510da7624a089164402359f2afc72c8`、OpenPI `432f82b1758c5b1202e42a3dfe014546dbc50871`。资产、机器人、相机和成功判据也必须核对；组生成器不切换外部源码或下载资产。
-- 当前 [worker](../../auriga/robot/backends/robodojo/robot_worker.py) 用 `[layout_id]` 初始化 simulator；作者记录 `simulator_initial_seed=0`，因此非零布局的初始化设置尚未对齐。不能把 `--seed 0`（eval seed）误当作已经统一所有 RNG。
-- 作者 `policy_rng_seed=0` 指新进程、无 warmup 推理时的 OpenPI JAX 初始 key，不是 GPT 的采样 seed；当前 Auriga π0.5 工具没有统一落实这项 RNG 约定。组名不覆盖方法自身的 prompt、权重或 RNG 实现。
-- 当前 Auriga 原生动作、EE 工具、可选 π0.5 工具及预算仍按项目[固定运行规则](../../docs/development/configuration.md#统一记录但不开放的协议与边界)执行：180 次有效模型返回（`model_request_limit`）、单次请求无硬期限、明确可重试的 API 错误默认最多 12 次退避重试、启动 900 秒/运行中连续 1800 秒无实际活动保护，没有整局墙钟上限。这些须作为被测方法的实际条件披露，不能仅凭原生步数一致宣称与作者执行协议完全一致。
+- **Upstream source commits**: The authors' `SOURCE.json` pins RoboDojo `ee67a1468510da7624a089164402359f2afc72c8` and OpenPI `432f82b1758c5b1202e42a3dfe014546dbc50871`. `benchmark_group.py` does not check out external repositories or download simulator assets.
+- **Simulator initialization seed**: Auriga's [`robot_worker.py`](../../auriga/robot/backends/robodojo/robot_worker.py) initializes the simulator with `[layout_id]`, whereas the authors recorded `simulator_initial_seed=0` alongside `reset_seed=layout_id`; passing `--seed 0` (`eval_seed`) alone does not unify every internal simulator RNG for non-zero layouts.
+- **Policy RNG seed**: The authors' `policy_rng_seed=0` denotes the initial JAX PRNG key in a fresh OpenPI process with no warmup inference, which is not identically wired in Auriga's `robot_policy_step` worker.
+- **Harness runtime boundaries**: Auriga runs under its standard [Runtime Configuration and Supervision Boundaries](../../docs/development/configuration.md): a 180-request model budget (`model_request_limit`), no per-request cutoff deadline, up to 12 backoff retries on explicit retryable API errors, a 900-second startup timeout, and an 1,800-second global inactivity timeout with no total episode wall-clock limit.
 
-因此当前生成队列标记为 **`same_case_set_re_evaluation`（同一 case 集重新评估）**。本次只建立协议文档、case 清单和组入口，没有开展本地复现实验。
+Accordingly, queues generated here are tagged as **`same_case_set_re_evaluation`** in their manifest metadata.
 
-### 来源冻结与统计核对
+### Frozen Source Provenance and Statistical Verification
 
-本次核对固定 GPT-as-Policy commit [`8f3d362b077d8efb77e2a7274d5b2c20e2243846`](https://github.com/anonymous-report-421/GPT-as-Policy/tree/8f3d362b077d8efb77e2a7274d5b2c20e2243846)；[group.json](group.json) 保存 README、公开结果及 SOURCE.json 的固定 URL 和 SHA256。CSV 从该公开结果按方法配对、去重生成，共 50 行，按上述任务顺序再按变体和布局排序。
+This protocol definition is pinned to GPT-as-Policy commit [`8f3d362b077d8efb77e2a7274d5b2c20e2243846`](https://github.com/anonymous-report-421/GPT-as-Policy/tree/8f3d362b077d8efb77e2a7274d5b2c20e2243846), with exact URLs and SHA-256 digests recorded in [`group.json`](group.json). Note that `evaluation.py` in that upstream commit defaults to a different 60-case panel; always use [`cases.csv`](cases.csv) to match the published 50-case results. Also note that in `classify_objects_by_language`, the category-to-basket assignment in the instruction varies by layout and must come live from the native environment at reset rather than a static prompt string.
 
-该 commit 的 `evaluation.py` 默认生成另一套 60-case panel，不能用它替代本文件指定的公开 50-case 清单。CSV 还保留每 case 的原生任务指令用于核对；其中 `classify_objects_by_language` 的类别/篮子指令随布局变化，执行时应由原生环境提供，不能写成一个固定任务 prompt。
-
-独立重算公开结果：Direct 13/50，48 个 Score 的均值为 37.8125/100；Hybrid 24/50，50 个 Score 的均值为 62.60/100。Direct 缺 Score 的 case 是 `classify_objects_by_language__standard__g0__l1` 和 `pack_objects_into_box__random__g0__l2`，保留在 CSV 和 50 回合分母中。公开原始 Score 为 0–1，本文件展示时乘 100；保存本地结果时保留原始量纲。
+Independent verification of the published `evaluation_cases.json` confirms:
+- **Direct (`gpt`)**: `13 / 50` successes (26% SR); mean native `Score` over the 48 scored episodes = `37.8125 / 100` (the two episodes missing a native `Score` are `classify_objects_by_language__standard__g0__l1` and `pack_objects_into_box__random__g0__l2`, both retained in `cases.csv` and the 50-case denominator).
+- **Hybrid (`mix`)**: `24 / 50` successes (48% SR); mean native `Score` over all 50 episodes = `62.60 / 100`.
+(Raw scores in `evaluation_cases.json` are on a `0–1` scale and multiplied by 100 in the table above for readability; local archives preserve raw native evaluator units.)

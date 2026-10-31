@@ -1,98 +1,74 @@
-# Object table (features.object_table, on by default)
+# Object Table (`features.object_table`, Enabled by Default)
 
-`geometry_query` kind `object_table` returns an estimated table of the objects on the support surface, so the
-model does not have to read heights and footprints off the image itself. The tool reports geometry only; it does
-not name objects or choose targets.
+Calling `geometry_query` with `kind="object_table"` returns an estimated 3D geometric table of objects on the support surface so the model does not have to eyeball object heights and footprints from 2D images alone. The tool reports 3D geometry only; it never names objects on its own or selects manipulation targets.
 
-## Request
+## Request Format
 
-    {kind: "object_table", observation_id, camera_id?: "cam_head", pixels?: [[u, v], ...], labels?: ["..."], target_camera_ids?: [...]}
+```json
+{
+  "kind": "object_table",
+  "observation_id": "obs-...",
+  "camera_id": "cam_head",
+  "pixels": [[u, v], ...],
+  "labels": ["..."],
+  "target_camera_ids": ["cam_left_wrist", "cam_right_wrist"]
+}
+```
 
-- `camera_id`: the camera that is segmented (default `cam_head`).
-- `pixels` (optional, up to 16): points on objects the model wants included even if the automatic segmentation
-  missed them; each gets one SAM 2.1 point-prompt mask. `value.requested` maps each pixel to its id.
-- `labels` (optional, up to 16 strings, each cut to 80 characters): noun phrases chosen by the model. They are forwarded
-  verbatim; the service (object table v5) segments each phrase with SAM 3.1 text prompts. The automatic part of the
-  table comes from the fixed class-agnostic prompt "object" (unlabelled rows); labelled instances are added first and a
-  generic instance that repeats or lies inside one of them is skipped. Rows then carry an extra column
-  `label` (the best-scoring phrase of that object, null for pixel-only objects) and `value.labels` lists per phrase
-  `{label, status: ok|no_match|filtered|backend_unavailable|unsupported_backend, ids}`; one phrase can match several ids
-  and one id can match several phrases (only the best is shown in the row). The harness never names objects itself.
-  If the SAM 3.1 process is down the service falls back to the automatic SAM 2.1 table (status `backend_unavailable`).
-- `target_camera_ids` (optional, up to 3): other cameras of the same observation (wrist views). The same ids are
-  drawn there at the projection of each object's 3D centre with the calibrated camera (a projection, not a detection;
-  occlusion is not checked). `value.projected_ids[camera]` lists the ids that fall inside that image.
+- **`camera_id`**: Camera view to segment (defaults to `"cam_head"`).
+- **`pixels`** (optional, up to 16 `[u, v]` pairs): Specific image coordinates on objects the caller wants guaranteed in the table even if automatic segmentation missed them. Each pixel triggers a SAM 2.1 point-prompt mask, and `value.requested` maps each requested pixel to its resulting object ID.
+- **`labels`** (optional, up to 16 noun phrases, truncated to 80 characters each): Free-text noun phrases chosen by the model and forwarded verbatim to the VGGT service (`object-table-v5`), which segments each phrase using SAM 3.1 text prompts. Automatic unlabelled rows come from the fixed class-agnostic prompt `"object"`; labelled instances are inserted first, and any generic `"object"` instance that duplicates or lies inside a labelled instance is suppressed. Returned rows include an extra `label` column (the highest-scoring matching phrase for that object, or `null` for pixel-only objects), and `value.labels` reports `{label, status: "ok" | "no_match" | "filtered" | "backend_unavailable" | "unsupported_backend", ids}` for each phrase. One phrase may match multiple object IDs, and one object ID may match multiple phrases (displaying the highest-scoring phrase in the row). The Harness never invents object labels itself. If the SAM 3.1 sidecar is unreachable, the service automatically falls back to the SAM 2.1 point grid (`status: "backend_unavailable"`).
+- **`target_camera_ids`** (optional, up to 3 cameras): Additional synchronized cameras from the same observation (typically wrist cameras). Each object's estimated 3D center is projected into those views using their calibrated intrinsics and extrinsics (this is a geometric 3D-to-2D center projection without occlusion checking), and `value.projected_ids[camera_id]` lists the object IDs whose projected centers fall within that camera's image bounds.
 
-## Result (model-facing)
+## Model-Facing Result
 
-`value.columns` / `value.rows`, one row per object, ids `o1..oN` (N <= `object_table_max_objects`, default 20;
-`value.omitted` = objects dropped by the cap):
+`value.columns` and `value.rows` contain one row per detected object with IDs `o1..oN` ($N \le$ `object_table_max_objects`, default `20`; `value.omitted` reports the count of additional objects dropped by the cap):
 
-| column | meaning |
+| Column | Description |
 |---|---|
-| `centre_m` | [x, y, z] env_origin: footprint centre of the visible points; z = (top + bottom) / 2 |
-| `top_z`, `bottom_z` | 98th-percentile height of the visible mask points; bottom = table height, the top of the supporting object, or the lowest visible point when no support was found |
-| `length`, `width`, `yaw_deg` | extent of the visible points along / across the principal horizontal axis (PCA), yaw of that axis in [-90, 90) |
-| `tilt_deg` | angle of the 3D principal axis from vertical; only for elongated point sets (ratio >= 1.8), else null |
-| `support` | `table`, the id of the object below, or `unknown` |
-| `quality` | `ok` or `low:<flags>` (see below) |
+| `centre_m` | `[x, y, z]` in `env_origin` meters: horizontal footprint center of the visible mask points, with $z = (\text{top\_z} + \text{bottom\_z}) / 2$ |
+| `top_z`, `bottom_z` | `top_z` is the 98th-percentile height of visible mask points; `bottom_z` is the table height, the top of a supporting object underneath, or the lowest visible point when no support is found |
+| `length`, `width`, `yaw_deg` | Horizontal extents along and across the 2D principal axis (PCA) of visible points, and the yaw angle of that principal axis in $[-90^\circ, 90^\circ)$ |
+| `tilt_deg` | Angle of the 3D principal axis from vertical (populated only for elongated point sets with aspect ratio $\ge 1.8$, otherwise `null`) |
+| `support` | `"table"`, the object ID (`oK`) of the supporting object directly underneath, `"held_<arm>"`, or `"unknown"` |
+| `quality` | `"ok"`, `"held_fk_depth"`, or `"low:<flags>"` (see quality flags below) |
 
-Plus one overlay image per camera: contours and ids on `camera_id`; ids at projected centres on each target camera.
-Service diagnostics (mask size, point counts, depth-confidence rank, timing) stay in the stored result
-(`diagnostics`) and are not sent to the model.
+Each call also returns one overlay image per camera: object contours and IDs drawn on `camera_id`, plus projected object IDs drawn at their 3D centers on each requested `target_camera_id`. Internal service diagnostics (mask pixel counts, 3D point counts, depth-confidence percentiles, and stage latencies) are saved in the Store under `diagnostics` and omitted from model-facing responses.
 
-Quality flags (computed by the service, no truth): `height_above_max` (top more than
-`object_table_max_height_m`, default 0.30 m, above the table), `low_depth_confidence` (median VGGT depth confidence of
-the mask pixels in the lowest 25 % of the image), `contact_mismatch` (the lowest mask pixels, back-projected onto the
-table plane, lie more than 3 cm farther from the camera than the estimated centre: the depth under the mask places
-the object too high or too near), `no_support_below` (lowest visible point more than 2 cm above the table and no
-object below), `few_points`, `fragmented_points`.
+### Quality Flags
 
-## Service side (VGGT service v2, POST /object_table)
+Computed purely from visual and geometric consistency without simulator ground truth:
+- `height_above_max`: `top_z` exceeds the table height by more than `object_table_max_height_m` (default `0.30 m`).
+- `low_depth_confidence`: Median VGGT depth confidence of mask pixels falls in the bottom 25% of the image.
+- `contact_mismatch`: The lowest mask pixels, when back-projected onto the table plane, lie more than `3 cm` farther from the camera than the estimated 3D center (indicating that monocular depth placed the object too high or too close to the camera).
+- `no_support_below`: The lowest visible point lies more than `2 cm` above the table with no supporting object detected underneath.
+- `few_points` / `fragmented_points`: Sparse or spatially disconnected 3D point clusters.
 
-1. VGGT-Omega depth of the image, back-projected with the calibrated K and camera rotation, scaled so that the
-   RANSAC table plane lies at `vggt_support_z_m` (same reconstruction and cache as `/height`).
-2. SAM 2.1 point prompts on an 8 px grid, restricted to pixels whose VGGT point is 4 mm to 45 cm above the table;
-   3 masks per prompt; kept when predicted IoU >= 0.5, stability >= 0.8, 40 px <= area <= 8 % of the image,
-   >= 60 % of the mask above the table, not touching the image border or the configured exclusion box.
-3. Greedy selection, larger masks first, skipping masks more than 30 % covered by selected ones; dropped: masks
-   whose points are mostly within 6 cm of the robot links (FK of the measured joints, sent by the harness), top more
-   than 45 cm above the table (background), fragmented point sets, and masks with less than 4 mm relief over the ring
-   of pixels around them (table texture).
-4. Per mask: VGGT points (eroded mask, depth confidence above the image p10, DBSCAN 1 cm largest cluster) -> the
-   columns above.
-5. Floating objects (object-table-v2): when the lowest visible point is more than 3 cm above the table, no
-   supporting object is found, and that gap also exceeds the visible thickness of the point set (top - lowest
-   point), the point set is rescaled along the camera rays so its lowest point lies on the table (flag
-   `floating_rescaled_to_table`; VGGT places thin objects such as test tubes too near the camera). Objects whose
-   gap is smaller than their visible thickness (bottom hidden, e.g. spheres) keep the measured geometry and get the
-   flag `floating`; v1 rescaled every floating object (service parameter `reanchor_mode = "always"`).
+## Service Pipeline (`POST /object_table`)
 
-Latency on an RTX 4090: about 1-2 s for a new image, about 1 s when the image is cached.
+1. **VGGT-Omega Reconstruction**: Runs a single VGGT-Omega forward pass on the image, back-projects depth using the calibrated camera intrinsics `K` and rotation `T_world_camera`, and scales the point cloud so the RANSAC-fitted tabletop plane sits at `vggt_support_z_m` (sharing the per-image reconstruction cache with `/height` and `/points`).
+2. **Candidate Segmentation**:
+   - **v5 default (`seg_backend = "sam31"`)**: Queries the SAM 3.1 text-prompt sidecar (`sam31_service.py` on `127.0.0.1:8333`) with any caller-supplied `labels` plus the generic prompt `"object"` (score threshold `0.4`).
+   - **v2–v4 fallback (`seg_backend = "sam21"`)**: Evaluates SAM 2.1 point prompts on an `8 px` grid restricted to pixels whose VGGT height lies between `4 mm` and `45 cm` above the table (3 candidate masks per point; keeping masks with predicted IoU $\ge 0.5$, stability $\ge 0.8$, area between `40 px` and 8% of the image, $\ge 60\%$ of pixels above the table, and not touching image borders or the head camera mount exclusion box).
+3. **Filtering and Deduplication**: Selects masks greedily from largest to smallest, skipping masks with $> 30\%$ overlap against already selected masks. Discards masks overlapping the robot arm (via the rendered FK pixel mask in `v5-hp1`, or within `6 cm` of FK link capsules in fallback mode), background masks whose top exceeds `45 cm` above the table, fragmented clusters, and flat table-texture masks with less than `4 mm` height relief over their surrounding border ring.
+4. **Per-Object 3D Geometry**: Erodes each mask, keeps pixels with depth confidence above the image 10th percentile, extracts the largest `1 cm` DBSCAN 3D cluster, and computes the table columns above.
+5. **Floating-Object Re-Anchoring (`object-table-v2`)**: Monocular VGGT depth often places thin, reflective, or transparent tabletop objects (such as test tubes) too close to the camera so their 3D points appear to float in mid-air. When an unheld object's lowest visible point lies more than `3 cm` above the table with no supporting object underneath **and** that vertical gap exceeds the object's visible thickness ($\text{top\_z} - \text{lowest\_z}$), the point cluster is rescaled along camera rays until its lowest point rests on the table (annotated with `floating_rescaled_to_table`). Objects whose vertical gap is smaller than their visible thickness (such as spheres whose bottom hemisphere is self-occluded) keep their unscaled geometry and receive the `floating` flag.
 
-### Service v4 / v5
+Typical latency on an RTX 4090 is **~0.5 s** with SAM 3.1 (**~1–2 s** with the SAM 2.1 grid), and faster when the VGGT reconstruction is already cached.
 
-- v4: a requested pixel reuses an existing object only when the pixel lies in that mask's largest connected component
-  and the SAM 2.1 point-prompt mask at the pixel has IoU >= 0.5 with it; otherwise the point mask becomes a new object.
-  (v1-v3 reused any automatic object whose mask contained the pixel; a rack mask with a detached tube component made a
-  tube click resolve to the rack.) Two pixels resolving to one object get status `ok_same_object`.
-- v5: `labels` (above). Backend switch: service param `seg_backend` = `sam31` (default) or `sam21`; SAM 3.1 runs in a
-  second process (`sam31_service.py`, 127.0.0.1:8333, own venv) and the main service calls it per request.
-  Default segmentation (with or without labels) is SAM 3.1 text prompting (threshold 0.4) instead of the SAM 2.1 point
-  grid; offline on 28 frames: task objects found 146/191 vs 138/191, false-positive ids 0 vs 24, centre xy p90 2.0 vs
-  3.7 cm, top p90 2.5 vs 3.0 cm, latency p50 0.46 vs 2.07 s. `seg_backend: "sam21"` reproduces v4 exactly.
+### Evolution from v4 to v5
+
+- **v4 (Connected-component point matching)**: A caller-requested `[u, v]` pixel reuses an existing segmented object only when the pixel lies inside that mask's largest connected component and the SAM 2.1 point-prompt mask at `[u, v]` has IoU $\ge 0.5$ with it; otherwise, the point mask is added as a separate row (fixing cases in v1–v3 where clicking a test tube inside a rack resolved to the rack's mask). Two requested pixels resolving to the same object receive status `ok_same_object`.
+- **v5 (SAM 3.1 text backend)**: Switching default segmentation from the SAM 2.1 point grid to SAM 3.1 text prompting improved offline recall on 28 benchmark frames from `138/191` to `146/191` task objects, reduced false-positive background IDs from `24` to `0`, improved center XY p90 error from `3.7 cm` to `2.0 cm` and top-Z p90 error from `3.0 cm` to `2.5 cm`, and reduced median latency from `2.07 s` to `0.46 s`. Passing `seg_backend: "sam21"` reproduces v4 behavior exactly.
 
 ## Configuration
 
-| key | default | meaning |
+| Configuration Key | Default | Description |
 |---|---|---|
-| `features.object_table` | `true` | publish and serve kind `object_table` |
-| `features.object_table_max_objects` | `20` | cap on returned objects |
-| `features.object_table_max_height_m` | `0.30` | threshold of the `height_above_max` flag |
-| `features.object_table_head_exclude_px` | `200,405,440,480` | image box of the head view showing the camera mount; empty = none |
-| `features.vggt_endpoint`, `vggt_support_z_m`, `vggt_timeout_s` | shared with `vggt_height` | service address, table height, timeout |
+| `features.object_table` | `true` | Publishes and serves `geometry_query` `kind="object_table"` |
+| `features.object_table_max_objects` | `20` | Maximum number of object rows returned per call |
+| `features.object_table_max_height_m` | `0.30` | Height threshold above the table for the `height_above_max` quality flag |
+| `features.object_table_head_exclude_px` | `"200,405,440,480"` | Pixel bounding box `[u_min, v_min, u_max, v_max]` excluded in `cam_head` to mask out the fixed camera mount (empty string disables) |
+| `features.vggt_endpoint`, `vggt_support_z_m`, `vggt_timeout_s` | Shared with `vggt_height` | VGGT HTTP service URL, nominal tabletop height (`0.765 m`), and request timeout (`60 s`) |
 
-With the switch off the tool catalog is byte-identical to the build without this module (tests/test_object_table.py).
-Without a reachable service the query returns status `unknown` with `reason: object_table_unavailable:<error>`.
-Truth scoring: `scripts/score_geometry_truth.py` scores each reported object centre (`plane_source = object_table`)
-and `ot_top_minus_truth_top_z_m` when `analysis.scene_truth_log` is on.
+When `features.object_table` is `false`, the published tool catalog is byte-identical to a build without this module (`tests/test_object_table.py`). If the VGGT service is unreachable at runtime, the query degrades gracefully by returning `status: "unknown"` with `reason: "object_table_unavailable:<error>"`. When `analysis.scene_truth_log` is enabled, `scripts/score_geometry_truth.py` evaluates every reported object center (`plane_source = "object_table"`) and top-height error (`ot_top_minus_truth_top_z_m`) offline.

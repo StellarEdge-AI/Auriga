@@ -1,34 +1,34 @@
-# 腕部相机视角解算
+# Wrist Camera Viewpoint Solver (`robotic_view`)
 
-`robotic_view` 将调用者选定的相机位置、观看目标和图像朝上方向换算为机械臂 link6 目标姿态，省去手工组合相机安装变换的步骤。它是只读计算工具：不自动检测遮挡、选择空闲机械臂或视点，不调用运动预览、执行或观察。
+`robotic_view` converts a caller-specified camera optical center, look-at target point, and image-up direction into the corresponding robotic arm `link6` target pose, eliminating the need to manually chain camera mount transforms. It is a purely read-only geometric solver: it does not detect occlusion, pick an idle arm or viewpoint automatically, or invoke motion preview, physical execution, or camera capture.
 
-## 开启方式
+## Enabling the Tool
 
-设置 `features.robotic_view=true` 或使用 Gateway 参数 `--robotic-view`；`--no-robotic-view` 可显式关闭。默认 `false`，与 `stereo_guide` 相互独立。队列 manifest 的 case 接受布尔字段 `robotic_view`，省略时继承统一配置。恢复和回放沿用归档开关，旧档缺失字段时按关闭解释，完整优先级见[配置说明](configuration.md#可选视角工具)。
+Set `features.robotic_view=true` in configuration or pass `--robotic-view` to the Gateway CLI (`--no-robotic-view` explicitly disables it). It defaults to `false` and is independent of `stereo_guide`. Benchmark queue manifest cases accept a boolean `robotic_view` field and inherit from the unified configuration when omitted. Session resume and replay honor the archived flag (treating older archives without the field as disabled); see the [Configuration Guide](configuration.md) for full precedence rules.
 
-关闭时不导入或装配插件，不注册对应 actor/program 工具，也不交付该工具的使用说明。开启后仍可用 `features.disabled_tools` 或 `--disabled-tools robotic_view` 禁用。说明随工具自身的 ToolSpec 交付，不添加特定任务 prompt，也不修改 Task Notes。
+When disabled, the plugin is neither imported nor wired, no `robotic_view` tool is registered for actor or program callers, and no tool instructions are added to the prompt. Even when enabled, the tool can still be suppressed via `features.disabled_tools` or `--disabled-tools robotic_view`. Usage instructions are delivered exclusively through the tool's own `ToolSpec` without adding task-specific prompts or modifying Task Notes.
 
-## 输入与输出
+## Inputs and Outputs
 
-五个参数均必填：
+All five input parameters are required:
 
-| 字段 | 含义 |
+| Field | Description |
 | --- | --- |
-| `observation_id` | 当前空闲状态下的正式观察 ID；历史或动作进行中的观察不适用。 |
-| `camera_id` | 该观察中的已标定腕部相机，须通过公开固定关节链连接到 link6；固定头部相机不适用。 |
-| `eye_position_m` | 期望相机光心的 `[x,y,z]` 米制坐标，使用观察标定参考系，原生为 `env_origin`；不是 link6 位置。 |
-| `target_position_m` | 光轴要指向的 `[x,y,z]` 米制坐标，与光心使用同一参考系。它是调用者从许可证据得到的估计或假设，不是工具测得的物体位置。 |
-| `up_vector` | 希望图像上方对应的三维方向，使用同一参考系；只取方向，长度不参与计算，无默认值。 |
+| `observation_id` | Formal observation ID captured while the robot is idle; historical observations or observations taken mid-action are rejected. |
+| `camera_id` | Calibrated wrist camera from that observation connected to `link6` through a public fixed-joint chain; fixed head cameras are not supported. |
+| `eye_position_m` | Desired `[x, y, z]` camera optical center in meters in the observation's calibrated reference frame (`env_origin` natively)—this is the camera optical center, not the `link6` origin. |
+| `target_position_m` | `[x, y, z]` point in meters that the camera optical axis should point toward, in the same reference frame. This is a hypothesis or estimate supplied by the caller from permitted evidence, not an object position measured by the tool. |
+| `up_vector` | 3D direction vector in the same reference frame that should align with the top of the image; only its direction is used (magnitude is ignored, and there is no default). |
 
-三个向量都要求有限数。光心与目标相距至少 `1e-6 m`；`up_vector` 非零，且它与观看方向夹角的正弦须大于 `1e-6`。光学轴采用 +x 向右、+y 向下、+z 向前的约定。
+All three 3D vectors must contain finite numbers. `eye_position_m` and `target_position_m` must be separated by at least `1e-6 m`, `up_vector` must be non-zero, and the sine of the angle between `up_vector` and the viewing direction must exceed `1e-6`. The camera optical frame follows the standard `+x` right, `+y` down, `+z` forward convention.
 
-成功返回 typed `kind="robotic_view"`、`data.status="calculated"`。`data.robot_action_preview` 包含 `tool="robot_action"` 和 `arguments`：其中 `mode="preview"`，`stages` 只有一个 `move`，给出对应机械臂、link6 的 `position_m` 与 `quaternion_xyzw`。`frame_id` 和 `tcp_config_id` 保留坐标与 TCP 约定。
+On success, the tool returns a typed response with `kind="robotic_view"` and `data.status="calculated"`. `data.robot_action_preview` provides a ready-to-call template with `tool="robot_action"` and `arguments` pre-populated for `mode="preview"` containing a single `move` stage with the target arm's `link6` `position_m` and `quaternion_xyzw`, preserving `frame_id` and `tcp_config_id` conventions.
 
-`checks.ik`、`checks.collision` 为 `not_checked`，`checks.visibility`、`checks.retention` 为 `unknown`。`calculated` 只表示坐标变换完成，不证明机械臂可达、路径无碰撞、目标可见或持物稳定。
+In the returned `checks` block, `checks.ik` and `checks.collision` are marked `not_checked`, while `checks.visibility` and `checks.retention` are marked `unknown`. A status of `calculated` indicates only that the rigid-body coordinate transformation succeeded; it does not prove that the pose is kinematically reachable, that the path is collision-free, that the target will be visible unoccluded, or that a held object will remain stable.
 
-## 调用与动作衔接
+## Calling the Tool and Chaining with `robot_action`
 
-下面的函数可在 `program_run` 中使用；从当前正式观察填入相机 ID、参考系内的视点/目标和朝上方向。它只计算并请求预览，不执行运动：
+Inside `program_run`, callers can compute a wrist camera pose from the current formal observation and immediately request a motion preview without moving the robot:
 
 ```python
 from auriga_client import AurigaClient
@@ -48,14 +48,14 @@ def preview_view(observation_id, camera_id, eye, target, up):
     return client.call("robot_action", result["data"]["robot_action_preview"]["arguments"])
 ```
 
-主模型也可直接调用同名工具，使用相同字段。查看预览的轨迹、成本和未知项后，若决定移动，再单独调用 `robot_action(mode="execute", plan_id=...)`，使用预览返回的计划 ID。程序入口同样通过 `AurigaClient.call("robot_action", {"mode": "execute", "plan_id": ...})` 请求，遵循原有审批与预算；细节见[统一动作与程序审批](unified-actions.md)。执行结果按 typed `kind/data.receipt` 判断，不从 stdout 推断。
+The primary actor model can also invoke `robotic_view` directly with the exact same arguments. After inspecting the previewed trajectory, step cost, and advisories, the caller can execute the motion by calling `robot_action(mode="execute", plan_id=...)` with the `plan_id` returned by the preview (or via `AurigaClient.call("robot_action", {"mode": "execute", "plan_id": ...})` inside a program, subject to standard action approval and step budgets; see [Unified Actions and Program Approval](unified-actions.md)). Execution outcomes must always be read from the typed `kind` and `data.receipt` fields rather than inferred from `stdout`.
 
-尽量选择能提供互补观察的空闲腕部，并检查其移动路径。正在持物的机械臂移动时会同时改变物体姿态；工具不把相机当作能独立移动的自由视点。动作消耗正常运动预算。发生其他动作后，重新使用最新观察计算；视角变化后还要从实际新图像确认是否获得所需信息。
+Callers should prefer an idle wrist camera that offers a complementary viewpoint and verify its swept path. Moving an arm that is currently holding an object simultaneously changes the held object's pose—the tool never treats a wrist-mounted camera as a free-flying sensor. Moving to a new viewpoint consumes normal native step budget. After any subsequent action executes, callers must recompute viewpoint poses from the latest observation and inspect the newly captured image to verify whether the desired visual evidence was actually obtained.
 
-## 实现与验证边界
+## Implementation and Validation Boundaries
 
-实现位于 [`auriga/runtime/tools/plugins/robotic_view.py`](../../auriga/runtime/tools/plugins/robotic_view.py)。相机标定的 `link_name` 不必等于 link6，工具沿公开机器人模型中的固定关节链组合安装变换，再求相机目标到 link6 目标的变换。Gateway 通过 `make_robotic_view_tool(read)` 注入窄读取回调，不向插件开放任意 Store 路径或 worker 控制。
+The plugin is implemented in [`auriga/runtime/tools/plugins/robotic_view.py`](../../auriga/runtime/tools/plugins/robotic_view.py). Because a wrist camera's calibrated parent `link_name` need not be `link6` directly, the solver chains fixed-joint transforms from the public robot model to compute the rigid transform between the camera optical frame and `link6`, then inverts that mount transform to map the desired camera pose to the `link6` target pose. The Gateway injects a narrow read callback via `make_robotic_view_tool(read)` without exposing raw Store paths or worker control to the plugin.
 
-计算前后检查正式观察的身份、时效及当前空闲状态；仅使用许可标定、机器人模型与本体状态。工具不会解除 unknown/stop 门禁。后续运动仍通过原有 `robot_action` 和唯一的 `Harness.execute` 入口。
+Both before and after computing the transform, the tool verifies formal observation identity, freshness, and current idle status, reading only permitted camera calibration, the public robot model, and proprioceptive state. Calling `robotic_view` never clears an `unknown` or `stopped` execution gate, and any subsequent physical motion still routes through `robot_action` and the single `Harness.execute` entrypoint.
 
-坐标变换、退化输入、信息边界和两端契约的回归见 [`tests/test_robotic_view.py`](../../tests/test_robotic_view.py)。软件几何正确不等于视角一定有用，也不证明任务成功率提高；任务效果须以冻结条件下的独立原生评分为依据。
+Regression tests covering coordinate transforms, degenerate inputs, information boundaries, and actor/program contracts live in [`tests/test_robotic_view.py`](../../tests/test_robotic_view.py). Verified geometric math does not guarantee that a chosen viewpoint will be informative in practice or improve task success rates, which must be evaluated under frozen benchmark conditions with the official native evaluator.

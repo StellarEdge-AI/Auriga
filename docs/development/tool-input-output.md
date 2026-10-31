@@ -1,60 +1,60 @@
-# 工具成本摘要、按需帮助与输入错误
+# Tool Cost Summaries, On-Demand Help, and Actionable Input Errors
 
-工具的展示层不改变运动执行、准入、重试或原生任务判定。摘要中的可行性、预算、实际执行量和错误必须来自原返回值；完整证据继续可读。
+The tool presentation layer never alters motion execution, admission checks, retries, or native task evaluation. Feasibility flags, budgets, executed step counts, and errors in a summary must come directly from the underlying return value, while complete evidence remains accessible on demand.
 
-## 当前调用入口
+## Current Invocation Entry Point
 
-所有公开工具通过 `ToolRegistry.invoke` 校验 role、同源 JSON Schema、禁用配置、观察 profile 与后端/服务可用性，再进入 handler。模型看到的目录使用相同声明；目录不是仅供提示的宽松参数说明。额外字段、错误类型和非有限数值都在执行前返回结构化 `invalid_tool_arguments`，并附 JSON Pointer `field_path`。不可用工具返回具体能力或配置原因。底层继续校验当前观察、动作所有权和预算，不因 schema 通过而跳过。
+Every public tool passes through `ToolRegistry.invoke` to validate caller role, single-source JSON Schema, disabled-tool configuration, observation profile, and backend/service availability before entering its handler. The catalog presented to the model is generated from the exact same declarations—it is not a loose advisory description. Extra fields, wrong types, and non-finite numbers are rejected before execution with a structured `invalid_tool_arguments` error and a JSON Pointer `field_path`. Unavailable tools return specific capability or configuration reasons. Downstream domain owners continue to verify current observations, action ownership, and budgets regardless of schema validation passing.
 
-当前 actor 运动接口是 `robot_action`；下述 `robot_preview_cost`、`manipulation_run` 等章节描述的旧工具及 `motion_cost_output.py`、模板模块已在 2026-10 重构中删除，仅保留作历史回包解释，这些名称不重新开放给 actor/program。新增只读工具通过 `ToolSpec` 注册，目录、执行和程序权限不再维护三份名单，详见[工具注册与扩展](tool-plugins.md)。
+The current actor motion interface is `robot_action`. The `robot_preview_cost` and `manipulation_run` sections below—along with `motion_cost_output.py` and the template modules—describe legacy tools removed in the 2026-10 refactor. They are retained here solely to document historical reply formats; those tool names are no longer exposed to actors or programs. New read-only tools are registered via `ToolSpec` without maintaining separate allowlists across the catalog, dispatcher, and program broker; see [Tool Registration and Extensions](tool-plugins.md).
 
-## 运动成本预览
+## Motion Cost Preview (Historical)
 
-`robot_preview_cost`默认`detail="summary"`。每个候选保留`label`、`status`、`feasible`、`reason`、编译的native步数／时长、各臂运动／夹爪／等待成本、最大及总关节行程、预算、异常guard和轨迹关键证据。规划结果仍不是未来实测结果，也不保证到位、接触、保持或连续时间避碰。
+`robot_preview_cost` defaulted to `detail="summary"`. Each candidate retained `label`, `status`, `feasible`, `reason`, compiled native steps/duration, per-arm motion/gripper/wait costs, maximum and total joint travel, budgets, failing guards, and key trajectory evidence. A planning preview is not a future measurement and does not guarantee target arrival, contact, grasp retention, or continuous-time collision avoidance.
 
-`motion_cost_output.py`（已删除）精简已知通过的关节guard明细、拒绝guard中重复的正常检查、重复来源说明与存储摘要。拒绝的所有witness、阈值、原因、超预算明细及不合资格的周期检查逐值保留；未知策略、未知状态、异常形状和新扩展字段保守保留。轨迹采样、命名关节、单位、关键位姿、最小模型间距、异常及overlay元信息不能因成本压缩丢失。完整结果在`full_result_ref`指向的actor JSON artifact内，可用`AurigaClient.artifact`读取，既不重跑preview也不执行动作。显式`detail="full"`保留原完整对象；程序子调用没有显式detail时默认full。
+`motion_cost_output.py` (removed) compacted per-joint details for known passing guards, repetitive normal checks inside failing guards, duplicate provenance descriptions, and storage metadata. Every rejection witness, threshold, failure reason, over-budget breakdown, and ineligible periodic check was preserved value-for-value; unknown policies, unknown statuses, anomalous shapes, and new extension fields were retained conservatively. Trajectory samples, named joints, units, key poses, minimum model clearances, anomalies, and overlay metadata were never dropped by cost compaction. The full payload was stored in an actor JSON artifact referenced by `full_result_ref` and readable via `AurigaClient.artifact` without re-running preview or executing motion. Passing `detail="full"` explicitly returned the complete original object, and internal program sub-calls defaulted to `full` when `detail` was omitted.
 
-对历史已交付的preview回包做只读静态重投影时，UTF-8总体积约降至原来的62%，所有完整artifact均逐值还原原结果，通过与拒绝的guard分别得到上述摘要。这只描述相同旧数据经过成本投影的大小；后续新增轨迹采样／图片会改变实际新回包成本，不能视为新实验token收益或任务效果。
+In read-only static re-projection over historical delivered preview replies, total UTF-8 byte volume dropped to roughly 62% of the original size, every full artifact reconstructed the exact original result value-for-value, and passing vs. rejected guards produced the summaries described above. That figure reflects only cost projection over identical historical payloads; adding trajectory samples or overlay images changes actual reply sizes and does not establish token savings or task gains in live experiments.
 
-## 模板帮助按需展开
+## On-Demand Template Help (Historical)
 
-`manipulation_run`的help不启动程序或动作：
-
-```json
-{"parameters":{"kind":"help"}}
-```
-
-返回当前允许的模板名、用途和逐模板help入口。选定后读取该模板的参数schema和结构例子：
+Requesting help from `manipulation_run` neither launched a program nor executed robot motion:
 
 ```json
-{"parameters":{"kind":"help","template":"place_release_observe"}}
+{"parameters": {"kind": "help"}}
 ```
 
-返回值只包含选定模板的schema、一个例子及适用语义。重复的pose/move schema通过本地`$defs`／`$ref`复用；place／handover不列lift参数，grasp将lift列为必需。示例中的占位符必须用本回合真实观察、演员判断及调用者选择的姿态替换，不包含固定任务坐标。
-
-需要原完整catalog时显式读取：
+This returned the permitted template names, their purposes, and per-template help handles. Selecting a specific template retrieved its parameter schema and a structural example:
 
 ```json
-{"parameters":{"kind":"help","detail":"full"}}
+{"parameters": {"kind": "help", "template": "place_release_observe"}}
 ```
 
-旧Python接口`catalog_for(...)`继续返回完整catalog。禁用的模板不会因help选择而解锁。只读help带未知字段时返回具体字段路径，避免调用者误以为其他参数已被执行。
+The response contained only the selected template's schema, one structural example, and its applicability semantics. Repeated pose and move schemas were deduplicated via local `$defs` / `$ref`; place and handoff templates omitted lift parameters, whereas grasp templates marked lift as required. Placeholders in examples had to be replaced with live observations, actor reasoning, and caller-chosen poses from the current turn rather than fixed task coordinates.
 
-启用airborne时，当前UTF-8序列化大小为：短catalog 1,002 bytes，完整catalog 14,583 bytes；单模板grasp／place／handover分别为8,647／8,372／8,528 bytes。单模板仍包含足够的参数约束和语义，避免只给模板名而迫使调用者猜测输入。
+To retrieve the complete catalog explicitly:
 
-## 可操作的输入错误
+```json
+{"parameters": {"kind": "help", "detail": "full"}}
+```
 
-[`tool_errors.py`](../../auriga/core/tool_errors.py)在模型tool handler和程序broker原有异常边界生成`success=false`，保留原`error`字符串及稳定code，并附：
+The legacy Python helper `catalog_for(...)` continued to return the full catalog. Disabled templates were never unlocked by querying help, and passing unknown fields alongside a read-only help request returned the exact offending `field_path` so callers would not mistakenly assume other parameters had been executed.
 
-- `field_path`：JSON Pointer字段路径；没有足够证据定位时为空字符串，表示参数根，不伪造更精确位置。
-- `actual`：实际错误值、缺失标记或有界shape说明，避免回显完整程序源码／大对象。
-- `suggestion`：基于已有validator的修正说明。
-- `minimal_example`：局部结构例子或占位符，不是已验证可执行动作，也不是自动重试命令。
+With airborne handoff enabled, UTF-8 serialized sizes were 1,002 bytes for the short catalog, 14,583 bytes for the full catalog, and 8,647 / 8,372 / 8,528 bytes for the single-template grasp, place, and handover schemas, respectively. Each single-template response retained full parameter constraints and semantics so callers never had to guess inputs from a template name alone.
 
-例如，模板`move`缺位置时，仍返回`invalid_manipulation_template_parameters`，同时指出`/parameters/move/grasp_position_m`及`actual={"present":false}`。paired路线数量不等时，返回实际左右数量，解释补充真实同步目标或在意图确为独立工作时使用independent；不会自动填充姿态。
+## Actionable Input Errors
 
-`released_unverified`和`retained`均要求实际已存在的release观测ID，后者还需要可见证据支持。缺少release证据时，修正提示只能保留`unknown`及实际不确定性，不会建议伪造ID或仅改为`released_unverified`来绕过检查。
+At the exception boundary of both model tool handlers and the program broker, [`tool_errors.py`](../../auriga/core/tool_errors.py) returns `success=false`, preserves the original `error` string and stable error code, and attaches:
 
-普通运行时异常也维持`success=false`，不能据此推断零运动或任务失败／成功。建议明确要求在执行可能已开始时先核对原状态；展示层不会重放动作。`Harness.dispatch`仍按原约定抛异常，程序调用幂等记录继续保存同一个失败回包。
+- `field_path`: A JSON Pointer to the offending field, or `""` (indicating the parameter root) when evidence is insufficient to pinpoint a deeper path—never fabricating a narrower pointer.
+- `actual`: The offending value, a missing-field marker, or a bounded shape summary (avoiding echoing full program source code or large objects).
+- `suggestion`: A corrective hint derived from the existing validator.
+- `minimal_example`: A local structural snippet or placeholder—never a pre-validated executable action or an automatic retry command.
 
-CPU验证入口：`tests.test_motion_cost_output`、`tests.test_template_help`、`tests.test_tool_errors`、`tests.test_tool_output_integration`，以及原有`test_motion_cost`、模板、程序和Codex回归。其中 `test_motion_cost_output`、`test_template_help` 和 `test_motion_cost` 已随旧工具删除。无需模型或真实仿真。
+For example, omitting position in a template `move` returned `invalid_manipulation_template_parameters` alongside `/parameters/move/grasp_position_m` and `actual={"present": false}`. When `paired` waypoint lists had unequal lengths, the error reported the actual left and right counts and explained either supplying matching synchronized targets or switching to `independent` when independent progression was intended, without auto-padding poses.
+
+Both `released_unverified` and `retained` required an existing release observation ID, with `retained` additionally requiring visible evidence. When release evidence was missing, the corrective hint instructed keeping status as `unknown` with honest uncertainty rather than suggesting a fabricated ID or downgrading to `released_unverified` just to bypass validation.
+
+Ordinary runtime exceptions likewise return `success=false`, which does not imply zero physical motion or task failure/success. When execution may have already started, the suggestion explicitly instructs checking live action status first; the presentation layer never replays an action. `Harness.dispatch` continues to raise exceptions per its legacy contract, and program call idempotency records persist the same failed reply.
+
+CPU validation entry points: `tests.test_tool_errors` and `tests.test_tool_output_integration`, alongside existing program and Codex regression suites (`test_motion_cost_output`, `test_template_help`, and `test_motion_cost` were removed along with the legacy tools). No live model or simulator is required.

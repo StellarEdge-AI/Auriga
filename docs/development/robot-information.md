@@ -1,42 +1,42 @@
-# 统一机器人资料接口
+# Unified Robot Information Interface
 
-`robot_information` 默认返回当前机器人的**完整物理简报、原始 URDF 文本、补充参数 JSON、可直接读取的原生几何文件引用，以及本局最新已发布观察的相机和基座标定**。JSON 不再扩充部件形状文字，也不默认发送图片。URDF 原文默认直接交给模型，完整表面几何通过它引用的 mesh 文件读取。
+By default, `robot_information` returns the active robot's **complete physical briefing, verbatim URDF text, supplementary parameter JSON, directly readable native geometry file references, and camera/base calibration from the latest published observation in the current episode**. The JSON payload no longer expands verbose prose descriptions of link shapes or sends static diagram images by default. Instead, the raw URDF is delivered directly to the model, and full surface geometry is accessible through the mesh files it references.
 
-资料读取不重新观察、不移动机器人、不推进时间、不联网。当前注册 ID 为 `arx-x5`；未知机器人明确返回不可用，不回退到 X5。静态资料可用与 `calibration.available` 分别判断。
+Reading robot information never triggers a new sensor observation, moves the robot, advances simulation time, or makes network requests. The currently registered model ID is `arx-x5`; querying an unknown robot ID explicitly returns unavailable rather than falling back to X5. Static documentation availability and `calibration.available` are evaluated independently.
 
-## 初始化与任务顺序
+## Launch Injection and Prompt Ordering
 
-gateway 在机器人、运行能力和初始观察建立后，直接调用与工具共用的默认读取方法。`developerInstructions` 最前面是完整简报、补充参数 JSON（含几何文件引用与本局标定）以及独立的 URDF 原文块；随后保留既有 Harness 指令，再发送用户任务，Task Notes 位于任务正文最末。`task_notes_source` 仅归档，不发给模型。
+Once the robot backend, runtime capabilities, and initial observation are established at startup, the gateway invokes the same default reader used by the `robot_information` tool. `developerInstructions` begins with the full physical briefing, the supplementary parameter JSON (including geometry file references and current-episode calibration), and a standalone verbatim URDF block, followed by the standard Harness instructions; the user task prompt is sent next, with Task Notes appended at the end of the task body (`task_notes_source` is archived only and never sent to the model).
 
-URDF 从注册 ZIP 的装配入口读取，保留原始数值、空白和换行；初始化放入独立文本块一次，不在 JSON 中再转义复制。工具默认结果的 `urdf` 字段返回同一份原文，供程序解析。
+The URDF is extracted verbatim from the registered ZIP archive's assembly entry point—preserving exact numeric literals, whitespace, and line breaks—and placed once into its own text block at launch rather than being JSON-escaped and duplicated inside the JSON payload. When the `robot_information` tool is called with default arguments, its `urdf` field returns that exact same string for programmatic parsing.
 
-ZIP 二进制不编码进 prompt；`reference.geometry.resource_ref` 是模型可通过 `client.artifact` 直接读取的文件地址。初始化不新增模型回合，也不伪造模型工具调用。工具表兼容的 resume 会重新注入资料而不重发初始任务；旧线程若因工具表不兼容报 `resume_tool_registry_conflict`，应新建 run。replay 保持只读。
+Binary ZIP contents are never base64-encoded into the prompt; instead, `reference.geometry.resource_ref` provides an artifact handle that the model can read directly via `client.artifact` inside `program_run`. Launch injection adds no extra model turns and fabricates no synthetic tool calls. Resuming a session with a compatible tool catalog re-injects the robot information without re-sending the initial user prompt; if an older thread fails with `resume_tool_registry_conflict` due to catalog changes, start a fresh run. Replay mode remains strictly read-only.
 
-## 默认内容与按需查询
+## Default Payload and On-Demand Sections
 
-关节链、固定变换、局部轴、声明限位、逐连杆惯量及 mesh 装配位置由 URDF 原文提供，精简 JSON 不再重复这些数据。JSON 仅补充末端接口约定、接触参考偏移、夹爪命令映射与有效控制参数，并提供 mesh 文件引用。原始 USD 字段、碰撞球及其他数值明细按需查询，完整简报保留运动含义与不确定性。
+Because kinematic chains, fixed transforms, local joint axes, nominal limits, per-link inertias, and mesh assembly origins are already defined in the verbatim URDF, the compact `reference` JSON does not duplicate them. Instead, `reference` supplies end-effector interface conventions, contact-reference offsets, gripper command mappings, effective controller parameters, and mesh file references. Raw USD properties, collision spheres, and other detailed tables remain queryable on demand by section, while the full briefing explains motion semantics and physical uncertainties.
 
-| `section` | 返回内容 |
+| `section` | Returned Content |
 | --- | --- |
-| `default` 或省略 | 完整 `briefing`、原文 `urdf`、补充参数 `reference`、原生几何文件引用与当前 `calibration` |
-| `calibration` | 再读当前最新已发布观察的相机内外参、手眼与基座变换 |
-| `kinematics` | 完整关节与运动学数值 |
-| `geometry` | 完整几何记录及原生模型资源说明 |
-| `dynamics` | 质量、质心、惯量及适用边界 |
-| `control` | 完整控制、仿真配置、动作时钟和命令语义 |
-| `hardware` | 可选硬件比较、冲突规格与未知项 |
-| `all` | 完整简报和全部详细静态物理资料；本局标定通过默认或 `calibration` 读取 |
-| `resources` | 注册文件资源清单，包含 `resource_id`、格式与说明 |
-| `resource` | 指定 `resource_id` 的文件引用 |
-| `geometry_image` | 按需读取的旧静态示意图；默认不发送 |
+| `"default"` or omitted | Full `briefing`, verbatim `urdf`, supplementary `reference` parameters, native geometry file reference, and current `calibration` |
+| `"calibration"` | Re-reads camera intrinsics/extrinsics, hand-eye transforms, and base transforms from the latest published observation |
+| `"kinematics"` | Complete joint and kinematic tables |
+| `"geometry"` | Complete geometry records and native model resource descriptors |
+| `"dynamics"` | Link masses, centers of mass, inertias, and applicability boundaries |
+| `"control"` | Complete controller gains, simulation settings, action clock, and command semantics |
+| `"hardware"` | Optional hardware comparisons, conflicting datasheet specs, and unconfirmed items |
+| `"all"` | Full briefing plus all detailed static physical sections (read live episode calibration via `"default"` or `"calibration"`) |
+| `"resources"` | Manifest of registered file resources with `resource_id`, format, and description |
+| `"resource"` | Artifact reference for the specified `resource_id` |
+| `"geometry_image"` | Legacy static diagram image, delivered only on demand |
 
-省略 `robot_id` 使用当前运行的 `robot_model_id`；显式指定只查询对应机器人，不切换实际机器人。不能为另一 `robot_id` 返回本局机器人的标定。资源不存在时明确返回不可用；`resource_id` 仅用于 `section="resource"`。
+Omitting `robot_id` queries the active run's `robot_model_id`; passing an explicit `robot_id` queries that model's static documentation without switching the active runtime robot, and never attaches the current episode's live calibration to a different `robot_id`. Requesting a non-existent resource returns unavailable, and `resource_id` is valid only when `section="resource"`.
 
-## 原生几何文件
+## Native Geometry Files
 
-X5 的 `geometry_model` 资源是 `geometry_model.zip`，包含 `X5A.urdf`、9 个 STL 和 2 个 GLB。底座、六段臂部、两指、相机支架和相机的原生几何均保留；相对目录、URDF 原点与比例、关节变换和 GLB 节点变换保持有效。清理只移除无用的文档元信息，不改变顶点、三角面或装配变换。两只机械臂共用这套本体几何，各自基座位姿通过本局标定获得。
+For ARX X5, the `geometry_model` resource is `geometry_model.zip`, containing `X5A.urdf`, 9 binary STL meshes, and 2 GLB assets. Native geometry for the base, all six arm links, both fingers, camera brackets, and camera housings is preserved intact along with relative directory paths, URDF origins/scales, joint transforms, and GLB node transforms. Asset cleanup strips only non-geometric document metadata without altering vertices, triangle faces, or assembly transforms. Both arms share this structural geometry, while their respective base poses in the world frame come from live episode calibration.
 
-在已有 `program_run` 中可直接读取默认回包的 ZIP：
+Inside `program_run`, a script can read the ZIP archive directly from the default tool reply:
 
 ```python
 import io, json, struct, zipfile
@@ -55,26 +55,26 @@ with zipfile.ZipFile(io.BytesIO(client.artifact(model["resource_ref"]))) as arch
     print({"links": len(assembly.findall("link")), "first_stl_triangles": triangle_count})
 ```
 
-此例仅演示读取 URDF 与二进制 STL；完整装配需应用 URDF 和 GLB 中的变换，保留各格式单位与坐标约定。原生外观 mesh 不等于 PhysX 最终碰撞体，也不证明连续运动净空或真实接触。
+This snippet illustrates parsing the URDF and reading a binary STL header; reconstructing the full 3D assembly requires applying the URDF and GLB node transforms while respecting each format's unit and axis conventions. Note that visual/nominal meshes do not equal PhysX's runtime convex-hull decomposition and do not certify continuous-time clearance or physical contact.
 
-可选 STEP 部件仍通过 `base_step`、`end_step`、`gripper_1_step`、`gripper_2_step` 读取。它们不是整臂 STEP 装配体；标准手指也不能替代上述原生几何中的修改手指。
+Optional individual CAD parts remain accessible via `base_step`, `end_step`, `gripper_1_step`, and `gripper_2_step`. Those STEP files represent individual components rather than a full-arm assembly, and nominal vendor finger CAD does not replace the modified fingers present in the native simulation meshes above.
 
-## 本局相机与基座标定
+## Episode Camera and Base Calibration
 
-默认 `calibration` 从最新已发布观察的许可 artifact 读取原始数值，包含 `available`、`observation_id`、`sim_step`、坐标和单位，以及每相机的 `K`、畸变、手眼 `T_link_camera`、本帧 `T_world_camera` / `T_world_link` 和每臂 `T_world_base`。读取前校验运行、episode、环境及 generation，检查步数、时钟域和相机帧一致；对模型使用可恢复的观察编号，省略内部运行标识。不同相机只返回其实际提供的字段，缺失基座变换会明确列为不可用；不拿静态默认挂载补齐，默认简报与精简 JSON 也不携带示例安装坐标。
+The default `calibration` block reads raw values from the permitted artifacts of the latest published observation, returning `available`, `observation_id`, `sim_step`, coordinate frame and unit conventions, per-camera intrinsics `K`, distortion coefficients, hand-eye transform `T_link_camera`, current-frame `T_world_camera` / `T_world_link`, and per-arm `T_world_base`. Before returning, the reader verifies run, episode, environment, and generation identities as well as step-counter, clock-domain, and camera-frame consistency, translating internal IDs into reversible short observation references and stripping internal run provenance. Each camera returns only the fields that actually apply to it (e.g., fixed vs. wrist-mounted), and missing base transforms are explicitly marked unavailable rather than backfilled from static example mounts; neither the default briefing nor the compact JSON embeds hardcoded installation coordinates.
 
-这些是本局模拟器的实际配置和采样/派生位姿，不是真机实验标定。腕相机的本帧位姿由本帧连杆实测变换与本局初始化手眼变换得到，接口直接传递原发布数值。默认的 calibrated 观察条件允许读取；旧 `rgb_proprio_v1` 条件、资料缺失或不一致时明确返回 `available=false`。`section="calibration"` 只读取最新已发布帧，不刷新传感器、不重新观察，因此必须结合返回的观察 ID 和步数判断时效。
+These values reflect the simulator's active configuration and sampled/derived poses for the current episode rather than empirical real-hardware calibration. Wrist camera world poses for the current frame are composed from that frame's measured link transform and the episode's static hand-eye mount, and the interface passes the published values through directly. Calibration is readable under the default calibrated observation profile (`rgb_proprio_calibrated_v1`); under the legacy uncalibrated profile (`rgb_proprio_v1`), or when data is missing or inconsistent, `available=false` is returned explicitly. Calling `section="calibration"` reads the latest already-published frame without triggering sensor capture, so callers must check the returned `observation_id` and `sim_step` to judge freshness.
 
-这一接口不提供隐藏任务物体状态、接触真值或评分信息。`robot_capabilities`、当前测量及当前工具约定继续优先；目标、规划、下发、实测和物体结果仍须分别判断。
+This interface never exposes hidden task object states, contact ground truth, or evaluator scores. `robot_capabilities`, live proprioceptive measurements, and active tool contracts remain authoritative, and target poses, planned trajectories, dispatched commands, measured states, and physical object outcomes must always be evaluated separately.
 
-## 输出边界与新增机器人
+## Output Boundaries and Registering a New Robot
 
-完整文件清单、环境/机械臂解耦、组合校验、控制适配与验收步骤见[机械臂与环境接入指南](robot-environment-integration.md)。这里的注册只提供资料，不代表后端已经支持该型号。
+For the complete file checklist, environment/robot decoupling, combination validation, control adaptation, and acceptance testing workflow, see the [Robot Arm and Environment Integration Guide](robot-environment-integration.md). Registering a data package here provides static documentation only and does not imply backend execution support for that robot model.
 
-模型输出清理 SHA/hash/digest 字段、文档出处和仓库溯源，保留物理精度、测量/命令/推导标记、坐标、观测与动作标识。长 artifact 地址转成可恢复的 `artifact:ref_N`；工具参数和程序源码中的别名在读取前还原，未知别名拒绝。Store 原件与内部完整性校验保留，用户自由文本不做泛化正则改写。
+Model-facing outputs strip SHA/hash/digest fields, document provenance, and repository metadata while preserving full numerical precision, measured/commanded/derived provenance tags, coordinate frames, and short observation/action IDs. Long artifact URIs are mapped to reversible `artifact:ref_N` short references that are resolved transparently when passed back in tool arguments or program source code (unknown aliases are rejected). Raw `Store` records and internal integrity checks remain untouched, and user free text is never rewritten by broad regex scrubbing.
 
-新增机器人时，在 [`robot_information.py`](../../auriga/robot/model/robot_information.py) 的 `ROBOT_INFORMATION_REGISTRY` 注册 ID 和 `robot_information_data/<目录名>/`，提供完整 `briefing.txt`、`physical.json` 及原生几何 ZIP。在 `physical.json` 的 `geometry.native_model` 声明资源 ID、装配入口、格式和坐标约定，并在 `resources.json` 注册 ZIP；保留装配文件的 mesh 相对路径。默认 URDF 直接读取 `assembly_member`，不解析后重写；JSON 只选取不与 URDF 重复的补充参数，不另维护形状文字文件。`hardware.json`、STEP 部件和示意图均可选。
+To register static documentation for a new robot, add its `robot_model_id` and `robot_information_data/<directory_name>/` mapping to `ROBOT_INFORMATION_REGISTRY` in [`robot_information.py`](../../auriga/robot/model/robot_information.py), supplying `briefing.txt`, `physical.json`, and the native geometry ZIP archive. Declare the resource ID, assembly entry point, mesh formats, and coordinate conventions under `geometry.native_model` in `physical.json`, and register the ZIP in `resources.json` while preserving relative mesh paths inside the assembly. The default URDF reader extracts `assembly_member` verbatim without parsing and re-serializing XML, and the compact JSON projection selects only supplementary fields that do not duplicate the URDF (avoiding separate prose shape catalogs). `hardware.json`, STEP component files, and static diagram images are optional.
 
-将资料纳入包数据并验证安装后可独立读取；新的机器人沿用同一工具接口，不添加型号专用工具。机器人 ID 必须与运行能力一致；本局标定始终由当前观察提供，不写进静态资料包。资料修改后使用新进程加载，并验证未知 ID 不回退、文件引用可读、数值与装配变换保留、缺失标定明确报告。
+Include the new data directory in package data and verify that it can be read from an installed wheel outside the Git checkout. New robots share the exact same `robot_information` tool rather than introducing model-specific tools. The active `robot_model_id` must match runtime capabilities, and live episode calibration must always come from current observations rather than static data files. After modifying documentation files, load them in a fresh process and verify that unknown IDs do not fall back, file references resolve cleanly, numeric values and assembly transforms survive intact, and missing calibration is reported honestly.
 
-这些资料接口的验证不启动仿真，也不测量载荷、摩擦、顺应性、停止响应或整局任务收益。
+Validating the `robot_information` interface does not start the simulator or measure payload capacity, friction, compliance, stopping latency, or end-to-end task performance.

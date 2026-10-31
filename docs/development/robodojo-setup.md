@@ -1,32 +1,32 @@
-# RoboDojo 运行环境
+# RoboDojo Runtime Environment
 
-Auriga 自身只占一个 Python 环境（Miniforge `Auriga`）；机器人 worker 在单独安装的 RoboDojo / Isaac Sim 解释器里运行，两套依赖不合并。本文说明 RoboDojo 侧需要准备什么、要打哪些补丁，以及 Auriga 如何找到它。Harness 环境、网页构建和首次启动见[运行指南](running.md)。
+Auriga itself uses a single Python environment (Miniforge `Auriga`), while the robot worker runs in a separately installed RoboDojo / Isaac Sim interpreter so the two dependency trees remain isolated. This guide covers what needs to be prepared on the RoboDojo side, which patches are required, and how Auriga locates the installation. For setting up the Harness environment, building the web UI, and launching your first run, see the [Running Guide](running.md).
 
-## 固定版本
+## Pinned Revisions
 
-当前验证过的组合是 RoboDojo + 双臂 ARX X5。外部 checkout 固定到以下 revision：
+The currently validated hardware/simulation combination is RoboDojo with the dual-arm ARX X5. External checkouts are pinned to the following revisions:
 
-| 仓库 | 位置（相对 RoboDojo 根目录） | revision |
+| Repository | Location (relative to RoboDojo root) | Revision |
 | --- | --- | --- |
 | RoboDojo | `.` | `726e9aabfaa642203722eb126f5eaf0f37f3e1ad` |
-| IsaacLab | `third_party/IsaacLab`（子模块） | `afca7b09d60d8beb9c1cb28b43066499940b969b` |
-| cuRobo | `third_party/curobo`（子模块） | `d17b54ce32cba095c0b000c4c58777075d11de0e` |
+| IsaacLab | `third_party/IsaacLab` (submodule) | `afca7b09d60d8beb9c1cb28b43066499940b969b` |
+| cuRobo | `third_party/curobo` (submodule) | `d17b54ce32cba095c0b000c4c58777075d11de0e` |
 | XPolicyLab | `XPolicyLab` | `bb9a0b5f5136a74503b679af830bfd0a3a837d5c` |
 
-按 [RoboDojo 上游仓库](https://github.com/RoboDojo-Benchmark/RoboDojo) 在该 revision 的安装说明配置 Isaac Sim 5.1、CUDA 和任务资产，得到一个能独立运行 RoboDojo 评测的 Python 环境，再打下面的补丁。
+Follow the installation instructions in the [upstream RoboDojo repository](https://github.com/RoboDojo-Benchmark/RoboDojo) at that pinned revision to set up Isaac Sim 5.1, CUDA, and task assets until you have a Python environment capable of running standalone RoboDojo evaluations, then apply the patches below.
 
-## 补丁
+## Patches
 
-三份补丁都在 [`docs/development/patches/`](patches/)，只改运行兼容性，不包含任务解法，也不修改评分规则：
+All three patches live in [`docs/development/patches/`](patches/). They only address runtime compatibility—they contain no task solutions and do not alter scoring rules:
 
-| 补丁 | 应用位置 | 作用 |
+| Patch | Target Directory | Purpose |
 | --- | --- | --- |
-| [`robodojo.patch`](patches/robodojo.patch) | RoboDojo 根目录 | `src/eval_client/main.py`：CUDA 与 Vulkan 的 GPU 编号分离。 |
-| [`isaaclab.patch`](patches/isaaclab.patch) | `third_party/IsaacLab` | `app_launcher.py` 的 GPU 编号处理与 `setup.py` 中 Isaac Sim 5.1 的 Starlette 兼容。 |
-| [`native-runtime-compatibility.patch`](patches/native-runtime-compatibility.patch) | RoboDojo 根目录 | 相对位姿的环境原点跟随位姿 tensor 的 device/dtype；CUDA 布料在绑定 view 前注册 PhysX，并保留 reward 查询需要的原生位置与四元数。 |
+| [`robodojo.patch`](patches/robodojo.patch) | RoboDojo root | `src/eval_client/main.py`: decouples CUDA and Vulkan GPU index assignment. |
+| [`isaaclab.patch`](patches/isaaclab.patch) | `third_party/IsaacLab` | GPU index handling in `app_launcher.py` and Starlette version compatibility for Isaac Sim 5.1 in `setup.py`. |
+| [`native-runtime-compatibility.patch`](patches/native-runtime-compatibility.patch) | RoboDojo root | Aligns environment origin device/dtype with pose tensors for relative poses; registers PhysX before binding CUDA cloth views and preserves native positions and quaternions required by reward queries. |
 
 ```sh
-export AURIGA_REPO_ROOT="$PWD"                     # Auriga checkout 根目录
+export AURIGA_REPO_ROOT="$PWD"                     # Auriga checkout root
 export AURIGA_ROBODOJO_ROOT="$HOME/code/robodojo"  # RoboDojo checkout
 
 git -C "$AURIGA_ROBODOJO_ROOT" checkout 726e9aabfaa642203722eb126f5eaf0f37f3e1ad
@@ -40,37 +40,37 @@ git -C "$AURIGA_ROBODOJO_ROOT/third_party/IsaacLab" apply --check "$AURIGA_REPO_
 git -C "$AURIGA_ROBODOJO_ROOT/third_party/IsaacLab" apply "$AURIGA_REPO_ROOT/docs/development/patches/isaaclab.patch"
 ```
 
-`apply --check` 失败通常表示该补丁已经应用过，或 checkout 不在上表的 revision；不要强行合入。多 GPU 机器上需自行核对 Vulkan 与 `nvidia-smi` 的设备顺序。
+If `apply --check` fails, the patch has typically already been applied or the checkout does not match the pinned revisions in the table above; do not force-apply it. On multi-GPU machines, verify that Vulkan and `nvidia-smi` device ordering match your setup.
 
-## 让 Auriga 找到 RoboDojo
+## Pointing Auriga to RoboDojo
 
-后端位置来自统一配置的 `backend` 段，默认值为：
+Backend paths are configured under the `backend` section of the unified configuration with the following defaults:
 
-| 字段 | 默认值 | 环境变量 |
+| Field | Default | Environment Variable |
 | --- | --- | --- |
 | `backend.root` | `~/code/robodojo` | `AURIGA_ROBODOJO_ROOT` |
 | `backend.python` | `~/miniforge3/envs/RoboDojo/bin/python` | `AURIGA_ROBODOJO_PYTHON` |
 
-路径不同时，在 Git 忽略的 `configs/auriga.local.json` 或自己的配置文件里覆盖，例如：
+If your installation lives elsewhere, override these paths in a Git-ignored `configs/auriga.local.json` or in a custom configuration file:
 
 ```json
 {"version": 1, "backend": {"root": "/opt/robodojo", "python": "/opt/conda/envs/RoboDojo/bin/python"}}
 ```
 
-用 `mamba run -n Auriga python -m auriga.apps.gateway --print-config` 检查生效值；它不启动机器人、模型或服务。合并顺序见[配置说明](configuration.md#使用与覆盖顺序)。
+Run `mamba run -n Auriga python -m auriga.apps.gateway --print-config` to verify the resolved values without starting the robot, model, or server. For the full configuration precedence rules, see [Configuration](configuration.md#usage-and-override-precedence).
 
-## 检查原生环境
+## Verifying the Native Environment
 
-以下测试读取当前配置里的真实 backend 路径，只检查数值和接口，不运行任务：
+The following tests read the configured backend paths and validate numerical behavior and interfaces without running a full task:
 
 ```sh
 mamba run -n Auriga python -m unittest discover -s tests -p test_native_pose_devices.py
 mamba run -n Auriga python -m unittest discover -s tests -p test_native_garment_runtime.py
 ```
 
-跨设备检查另需设置 `AURIGA_NATIVE_TEST_CUDA=1` 和空闲的 `CUDA_VISIBLE_DEVICES`。这些检查通过不代表任务效果；真实运动请用[运行指南](running.md#启动单局任务)里的单局任务或 `scripts/robot_validation.py`。
+Cross-device checks additionally require `AURIGA_NATIVE_TEST_CUDA=1` and a free GPU in `CUDA_VISIBLE_DEVICES`. Passing these unit tests does not validate end-to-end task performance; use a single-run task from the [Running Guide](running.md#launching-a-single-run) or `scripts/robot_validation.py` to test real robot motion.
 
-## 可选组件
+## Optional Components
 
-- **外部感知服务**：默认配置开启 `features.external_perception`，会访问本机 `http://127.0.0.1:8331` 的 VGGT 服务；服务不在时对应结果标为不可用，运行继续。安装和启动见 [`services/vggt_height/README.md`](../../services/vggt_height/README.md)，不需要时可在配置中设 `"external_perception": false`。
-- **π0.5 局部策略**：默认关闭（`features.pi05=false`）。它使用 XPolicyLab 中的 OpenPI 和独立解释器（`policy.python` / `AURIGA_PI05_PYTHON`）以及匹配 ARX X5 的权重（`policy.checkpoint` / `AURIGA_PI05_CHECKPOINT`），权重来源和校验值见 [`pi05_arx_manifest.json`](../../auriga/runtime/policy/policy_workers/pi05_arx_manifest.json)，接口见 [π0.5 推理服务](pi05-inference-service.md)。
+- **External Perception Service**: The default configuration enables `features.external_perception`, which queries the local VGGT service at `http://127.0.0.1:8331`. If the service is not running, the corresponding fields are marked `unavailable` and the episode continues normally. See [`services/vggt_height/README.md`](../../services/vggt_height/README.md) for installation and startup instructions, or set `"external_perception": false` in your configuration when not needed.
+- **$\pi_{0.5}$ Local Policy**: Disabled by default (`features.pi05=false`). It uses OpenPI from `XPolicyLab` in a dedicated Python interpreter (`policy.python` / `AURIGA_PI05_PYTHON`) together with weights matching the ARX X5 (`policy.checkpoint` / `AURIGA_PI05_CHECKPOINT`). For weight provenance and checksums, see [`pi05_arx_manifest.json`](../../auriga/runtime/policy/policy_workers/pi05_arx_manifest.json); for the service interface, see [$\pi_{0.5}$ Inference Service](pi05-inference-service.md).

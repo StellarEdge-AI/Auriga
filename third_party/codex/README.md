@@ -1,22 +1,17 @@
-# Pinned native model catalog
+# Pinned Native Codex Model Catalog
 
-`auriga/codex_models.json` is an unmodified copy of OpenAI Codex's model
-catalog at `rust-v0.160.0`:
+`auriga/cortex/session/codex_models.json` is an unmodified copy of OpenAI Codex's upstream model catalog at tag `rust-v0.160.0`:
 
-https://raw.githubusercontent.com/openai/codex/rust-v0.160.0/codex-rs/models-manager/models.json
+- **Upstream URL**: `https://raw.githubusercontent.com/openai/codex/rust-v0.160.0/codex-rs/models-manager/models.json`
+- **SHA-256**: `fd219bd9f061278275f528939f82f54d2eb97df4b25c23b022adbe48813d920b`
+- **License**: Apache-2.0 (the upstream `LICENSE` and `NOTICE` files are retained in this directory).
 
-SHA-256: `fd219bd9f061278275f528939f82f54d2eb97df4b25c23b022adbe48813d920b`.
-The upstream Apache-2.0 LICENSE and NOTICE are retained in this directory.
+## How Auriga Uses This Catalog
 
-`write_direct_model_catalog` creates a run-private copy and changes only each
-entry's `tool_mode` to `direct`. Native model metadata takes precedence over
-code-mode feature flags. The explicit catalog uses Codex's static model manager,
-so network model discovery cannot silently undo the selected tool mode.
-Model identifiers, reasoning settings, context limits, instructions and other
-capability metadata remain unchanged. This fixes typed image delivery without
-substituting a model or requiring the actor to extract image URLs from text.
+At session startup, `write_direct_model_catalog` creates a run-private copy of this catalog and sets each entry's `tool_mode` to `"direct"`. Because native model metadata takes precedence over code-mode feature flags, passing an explicit catalog through Codex's static model manager ensures that network model discovery cannot silently override the selected tool mode.
 
-Update this snapshot together with the pinned SDK/CLI dependencies and
-`codex_responses.json`. Re-run the real native loopback transport test and the
-native preferences tests after any upgrade; a schema-only check does not prove
-the model-facing tool catalog or image payload.
+All model identifiers, reasoning settings, context window limits, system instructions, and capability metadata remain untouched. This guarantees reliable typed image delivery without substituting models or requiring the actor to parse image URLs from text.
+
+## Updating the Snapshot
+
+Update this snapshot in lockstep with the pinned Codex SDK/CLI dependencies and `auriga/cortex/session/codex_responses.json`. After any upgrade, re-run the native loopback transport tests and native preferences tests—a schema-only check is not sufficient to verify the model-facing tool catalog or image delivery payload.

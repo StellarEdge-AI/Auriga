@@ -1,10 +1,10 @@
-# Benchmark OOM 重试
+# Benchmark OOM Retries
 
-`scripts/benchmark_queue.py` 对**没有形成有效原生终态、且有原生 GPU OOM 证据**的失败安排新 episode。普通策略失败、`native_step_limit`、模型请求预算终止及已完成 episode 后的视频/清理 OOM 不重跑。首次未评分尝试仍保留；重试不会把它改写成首次成功。
+`scripts/benchmark_queue.py` schedules a new episode for failures that **did not reach a valid native terminal state and have native GPU OOM evidence**. Normal policy failures, `native_step_limit`, model request budget exhaustion, and video/cleanup OOMs occurring after a completed episode are never retried. The initial unscored attempt is always preserved; retrying never rewrites it into a first-attempt success.
 
-## 配置与调度
+## Configuration and Scheduling
 
-manifest 可配置：
+The queue manifest accepts an `oom_retry` block:
 
 ```json
 {
@@ -18,29 +18,34 @@ manifest 可配置：
 }
 ```
 
-`cases` 仍填写现有完整 case，不能留空。上例是默认策略：最多重试 2 次，共 3 次尝试，先等待 60 秒、再等待 120 秒。`max_retries: 0` 关闭自动重试，上限为 20；其余数值必须有限且至少为 1。等待退避不消耗 GPU 等待超时；到期后重新检查 GPU 利用率、剩余显存、共享预留、启动速率及 manifest 并发限制。当前默认 11 GiB/case、零额外余量，动态补位规则保持有效。其他待启动任务可先运行。
+Populate `cases` with your full case definitions (`cases` cannot be left empty in a real run). The example above shows the default policy: up to 2 retries (3 total attempts), waiting 60 seconds before the first retry and 120 seconds before the second. Setting `max_retries: 0` disables automatic retries, and the maximum allowed value is `20`; all other numeric fields must be finite and at least `1`. Backoff waiting does not consume the GPU wait timeout; once the backoff timer expires, the scheduler re-checks GPU utilization, free memory, shared reservations, launch rate limits, and manifest concurrency limits. The current defaults (11 GiB per case, 0 extra headroom, and dynamic slot backfilling) remain in effect, and other pending cases may launch while a failed case is cooling down.
 
-每次重试重新启动 gateway，保留原 case 的源码目录、任务、seed、layout、guidance 等参数，使用原始 `run_dir` 的兄弟目录 `<run_dir>.oom-retry-01`、`02` 等。目录已存在即拒绝，绝不复用轨迹，也不传 `--resume`。模型请求与动作预算按每个新 episode 的原规则重新计算，不改变预算值。
+Each retry launches a fresh gateway process preserving the original case's source checkout directory, task, seed, layout, guidance settings, and other parameters, while writing to a sibling directory of the original `run_dir` named `<run_dir>.oom-retry-01`, `.oom-retry-02`, and so on. If the target retry directory already exists, the launch is rejected—trajectories are never reused and `--resume` is never passed. Model request and action budgets are computed fresh for each new episode under the original rules without altering budget limits.
 
-只有 gateway 已退出且 worker 退出得到确认时才可重试。现有 worker PID 身份核对及租约隔离仍生效；退出不确定会保留显存预留、标记 `stop_unconfirmed` 并停止队列。SIGINT/SIGTERM 会取消尚未启动的重试，不触发新的尝试。
+A retry is only permitted after the gateway process has exited and worker termination has been confirmed. Existing worker PID identity checks and lease isolation remain enforced; if worker exit cannot be confirmed, the GPU memory reservation is retained, the attempt is marked `stop_unconfirmed`, and the queue halts. `SIGINT` / `SIGTERM` cancels pending retries without triggering new attempts.
 
-## 证据与结果
+## Evidence and Reporting
 
-OOM 检测优先采用 `summary.json` 的结构化 `infrastructure_error` 中原生错误标识，例如 `robot_gpu_out_of_memory:`。
+OOM detection primarily checks for native error identifiers inside the structured `infrastructure_error` field of `summary.json`, such as `robot_gpu_out_of_memory:`.
 
-运动规划器（cuRobo/torch）在 worker 内抛出的 `OutOfMemoryError` 会被 worker 捕获，成为 `backend_error: OutOfMemoryError: ...` 失败回执或 `OutOfMemoryError: ...` 错误回包，旧版本因此把它当作普通规划失败，整局可能以有效 0 分结束。现在 `RobotProcess` 按回包中的异常类型（不按引用的消息文字）以及 worker 日志中的 `CUDA out of memory`、`torch.OutOfMemoryError:` 等签名，把它与 Vulkan/PhysX 分配失败同样标记为 `robot_gpu_out_of_memory:`：该请求按 unknown 处理、不重放动作，`wait_turn` 以 `robot_gpu_out_of_memory` 停止本局，summary 的 `infrastructure_error` 写入同一标识，结果为 `unscored_infrastructure` 并可进入本页的 OOM 重试。原生 episode 已先结束时仍以原生终态为准。签名列表由 `auriga.robot.backends.robodojo.robot_process.native_gpu_oom_signature` 与队列证据共用。旧版本的 `bootstrap_failed` / worker disconnect 可由 `private/robot/robot-worker.log` 中 CUDA、Vulkan 或 PhysX 的明确分配失败补证。只在失败退出时读取一次最多 1 MiB 的日志尾部；保存源路径、签名、字节位置、摘要及 SHA-256，不反复全量扫描。不扫描 actor 对话或 queue stdout，不把任意 `oom` 文本、SIGKILL 或 exit 137 当作 OOM。超出日志尾部的旧错误可能无法识别；这种情况不会自动重试。
+Previously, `OutOfMemoryError` exceptions raised inside the worker by the motion planner (cuRobo / PyTorch) were caught by the worker and returned as `backend_error: OutOfMemoryError: ...` failure receipts or `OutOfMemoryError: ...` error responses, causing older versions to treat them as ordinary planning failures that could end the episode with a valid score of `0`. `RobotProcess` now inspects the exception type in the worker response (rather than matching quoted message text) alongside signatures in the worker log such as `CUDA out of memory` and `torch.OutOfMemoryError:`, classifying them identically to Vulkan/PhysX allocation failures under `robot_gpu_out_of_memory:`:
+- The action request is treated as `unknown` and is not replayed.
+- `wait_turn` stops the episode with `robot_gpu_out_of_memory`.
+- `summary.json` records the same identifier in `infrastructure_error`, producing an `unscored_infrastructure` outcome eligible for OOM retry.
 
-`state.json` / `events.jsonl` 持久保存每次尝试及重试决策：
+If the native episode had already reached its terminal state beforehand, the native terminal outcome takes precedence. The signature list in `auriga.robot.backends.robodojo.robot_process.native_gpu_oom_signature` is shared with queue evidence verification. For older runs, `bootstrap_failed` or worker disconnects can be corroborated by explicit CUDA, Vulkan, or PhysX allocation failures in `private/robot/robot-worker.log`. Only the last 1 MiB of the log file is read once upon failure exit, recording the source path, matched signature, byte offset, excerpt, and SHA-256 without repeated full-file scans. Neither actor conversation logs nor queue `stdout` are scanned, and generic `oom` substrings, `SIGKILL`, or exit code `137` alone are never treated as GPU OOMs. Allocation errors that scrolled past the 1 MiB log tail are not auto-retried.
 
-- `cases` 每行是一段独立轨迹，含 `logical_task_id`、`attempt_number`、前后 run 关联、原始 summary、OOM 证据、`retry_status`、退避秒数和 UTC epoch `retry_not_before`。
-- `logical_tasks` 按逻辑任务聚合，分别给出 `first_attempt_outcome` 与 `final_attempt_outcome`，保留全部 attempt、`had_oom` 与已启动重试数。
-- `retry_status` 的 `pending`、`scheduled`、`exhausted`、`blocked_cleanup`、`cancelled` 区分等待、已安排、用尽、清理阻塞和停止取消。重试用尽时队列返回非零；重试成功可返回零，但所有历史 OOM 与首次结果仍在报告中。
+`state.json` and `events.jsonl` persist every attempt and retry decision:
 
-旧分析脚本若逐行统计 `cases`，统计的是尝试数；逻辑任务成功率必须按 `logical_tasks` 聚合，并同时报告首次和最终有效尝试。恢复队列还把原始记录保存为 `prior_attempts`，其中包括源 queue 路径和 state/summary SHA-256。
+- Each entry in `cases` represents a distinct trajectory with `logical_task_id`, `attempt_number`, links to prior/subsequent runs, raw summary, OOM evidence, `retry_status`, backoff duration in seconds, and UTC epoch `retry_not_before`.
+- `logical_tasks` aggregates attempts by logical task, reporting both `first_attempt_outcome` and `final_attempt_outcome` while preserving all attempts, `had_oom`, and launched retry counts.
+- `retry_status` values (`pending`, `scheduled`, `exhausted`, `blocked_cleanup`, and `cancelled`) distinguish waiting, scheduled, exhausted, cleanup-blocked, and signal-cancelled states. The queue exits non-zero if any task exhausts its retries; if retries succeed, the queue can exit zero while retaining all historical OOM records and first-attempt outcomes in the report.
 
-## 已启动旧队列的接入与恢复边界
+Legacy analysis scripts that iterate over `cases` row-by-row count individual attempts; logical task success rates must aggregate over `logical_tasks` and report both first-attempt and final valid-attempt metrics. Recovery queues also record original attempts under `prior_attempts`, including the source queue path and state/summary SHA-256 digests.
 
-运行中的冻结队列继续使用旧调度器，不热改源码、不重启。等待其自然结束后，可用新调度器补排：
+## Recovering Completed Legacy Queues
+
+Active frozen queues continue running under their original scheduler without hot-patching source code or restarting. Once a queue finishes naturally, you can schedule OOM retries using the current scheduler:
 
 ```bash
 python -m scripts.benchmark_queue \
@@ -49,16 +54,16 @@ python -m scripts.benchmark_queue \
   --wake-thread ''
 ```
 
-上例以空字符串明确关闭完成通知，避免读取 `~/.config/auriga/completion-thread` 中保存的默认接收会话后通知旧会话。
+Passing an empty string to `--wake-thread` explicitly disables completion notifications so the recovery queue does not read the default recipient from `~/.config/auriga/completion-thread` and notify a stale session.
 
-恢复只选择每个逻辑任务最后一个已启动尝试：必须有 OOM 证据、gateway/worker 退出确认及剩余重试额度。已成功、普通失败、预算终止和清理未知均不进入新队列。恢复时重读磁盘 summary 并与队列 terminal state 核对，不一致即拒绝；旧缓存的 OOM 标签不能覆盖原生终态。源 manifest、state、summary、轨迹和协议只读；新队列保留 attempt 链和证据哈希。原 case 的 `cwd` 继续指向冻结实验源码，原 gateway 命令（包括解释器、观测协议和所有开关）只替换 GPU 与新 run 目录，并传递给后续重试，避免新调度器默认值改变旧协议。新队列的输出目录必须不存在；确定性的重试目录防止已运行尝试被再次覆盖。已有待重试记录保留其退避截止时间，旧队列没有重试时钟时从恢复调用开始计算。
+Recovery selects only the last launched attempt of each logical task that has verified OOM evidence, confirmed gateway/worker exit, and remaining retry budget. Succeeded runs, normal task failures, budget terminations, and attempts with unconfirmed cleanup are excluded. During recovery, `summary.json` is re-read from disk and cross-checked against the queue's terminal state, rejecting mismatches so stale cached OOM labels cannot override a native terminal state. Source manifests, state files, summaries, trajectories, and protocols are read-only, while the new queue preserves the attempt chain and evidence hashes. Each case's `cwd` continues to point to the frozen experiment checkout, and the original gateway command (including Python interpreter, observation profile, and feature flags) is reused with only the GPU index and new run directory substituted, preventing newer scheduler defaults from altering historical protocols. The recovery queue's `--output` directory must not exist yet, and deterministic retry directory names prevent overwriting previously executed attempts. Existing pending retry records retain their original backoff deadlines; if an older queue lacked a retry timestamp, the backoff clock starts from the recovery invocation time.
 
-恢复与重试绑定原 attempt 记录的 `settings_file`，核对 `codex_home` / `price_card` 路径与原记录一致；文件缺失或路径变化即拒绝。凭据内容不读入重试报告、不归档，路径内的配置/认证文件内容仍可能由用户更新。原 attempt 明确未使用 settings 时，不引入当前默认 settings 文件，报告以 `inherited_environment_unrecorded` 标明旧继承环境没有留档、无法重建。缺少原 gateway command 或 experiment settings 记录的旧队列不能自动恢复。
+Recovery and retries bind to the `settings_file` recorded on the original attempt and verify that `codex_home` and `price_card` paths match the original record, rejecting missing files or path changes. Credential contents are neither read into retry reports nor archived, and configuration/authentication file contents at those paths may still be updated by the user. If the original attempt explicitly ran without a settings file, the current default settings file is not injected; instead, the report records `inherited_environment_unrecorded` to indicate that the unarchived inherited environment cannot be reconstructed. Legacy queues lacking recorded gateway commands or experiment settings cannot be recovered automatically.
 
-现有队列不支持原地断点续跑。`--recover-oom-from` 只接受有 terminal state 的队列，拒绝仍为 `running` 的活跃队列或崩溃残留状态，也拒绝记录中仍有 `starting` / `running` 的队列；不凭陈旧 PID 接管进程。`stop_unconfirmed` 的尝试不能靠该接口解除隔离。没有合格 OOM 时明确报 `No cleanup-confirmed OOM attempts with retries remaining`，不会创建新队列。恢复是显式新调度调用；不会在用户停止队列后自行恢复。
+In-place checkpoint resumption of an existing queue directory is not supported. `--recover-oom-from` only accepts queues in a terminal state, rejecting active (`running`) queues, crashed queues with residual non-terminal state, or queues where any case is still marked `starting` or `running`; stale PIDs are never used to take over live processes. Attempts marked `stop_unconfirmed` cannot be cleared through this interface. If no qualifying OOM attempts remain, the command exits with `No cleanup-confirmed OOM attempts with retries remaining` without creating a new queue directory. Recovery is an explicit opt-in invocation and never triggers automatically after a user stops a queue.
 
-为既有实验补排时，应在实验记录中关联原队列、新队列与所用重试策略，并保留原协议中关于是否允许替换尝试的原文。运行中的实验不应因升级调度器而重新启动；没有 OOM 就不补排。
+When scheduling OOM recovery for an existing experiment batch, link the original queue, the recovery queue, and the retry policy in your experiment registry, preserving the protocol's rules on whether replacement attempts are permitted. Never restart a running experiment merely to upgrade the scheduler, and never run recovery when no OOM occurred.
 
-## CPU 验证
+## CPU Verification
 
-`python -m unittest tests.test_benchmark_queue -q` 覆盖原调度行为，以及原生 OOM 样本、普通失败/未知 kill 排除、原生终态优先、清理未知隔离、独立 run 和关联、退避与新 GPU 准入、等待超时边界、上限用尽、停止取消、terminal queue 恢复、历史哈希与目录防覆盖。使用合成 GPU 采样和 CPU 假进程，不启动仿真、模型或实际 GPU 分配。
+`python -m unittest tests.test_benchmark_queue -q` covers baseline scheduling behavior as well as native OOM signatures, exclusion of normal failures and unknown kills, native terminal state precedence, unconfirmed-cleanup isolation, independent retry run directories and linkage, backoff timing and fresh GPU admission, wait-timeout boundaries, retry exhaustion, stop cancellation, terminal queue recovery, historical hash verification, and directory overwrite protection. All tests use synthetic GPU sampling and lightweight CPU stub processes without launching simulators, models, or real GPU allocations.

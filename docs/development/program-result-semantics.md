@@ -1,33 +1,33 @@
-# 程序回包、动作完成与原生任务结果
+# Program Replies, Action Completion, and Native Task Outcomes
 
-`program_run` 中的 Python 必须检查每次动作的内层回执。`client.call(...)` 返回的外层 `success=true` 只表示工具分发正常返回；动作被拒绝、规划失败、部分执行后停止或结果未知，都可能包含在这个正常返回中。程序退出码0也不能证明动作成功或原生任务成功。
+Python code running inside `program_run` must inspect the inner receipt of every action. An outer `success=true` returned by `client.call(...)` only indicates that tool dispatch returned normally; an action that was rejected, failed planning, stopped after partial execution, or ended with an unknown outcome can still return `success=true` at the dispatch envelope. Similarly, a Python process exit code of `0` proves neither action completion nor native task success.
 
-这项要求来自实际运行中的失败：一个程序把总预算和各动作预算都设为120秒，25个动作全部因预算不足被拒绝，却因只检查外层 `success` 而报告程序成功。本文说明当前程序接口；历史冻结实验保留原接口和证据。
+This requirement comes directly from a real failure mode: a program set both its overall job budget and each per-action timeout to 120 seconds, causing all 25 actions to be rejected for insufficient remaining budget, yet reported program success because it only checked outer `success`. This document specifies the current program contract; frozen historical experiments retain their original interfaces and archived evidence.
 
-## Broker 内部证据
+## Internal Broker Evidence
 
-当前 `ProgramRunner` 在外部呈现之前读取 `ToolResponse.kind/data`：缓存计划使用 `plan`，原始动作回执使用 `action`，实时观察使用 `observation`。审核、动作统计、末帧观察不再通过反序列化 `contentItems` 获取。缺少内部动作值时只能记录未知结果；即使展示文字写着 completed 也不能升级。`AurigaClient.call()` 现在同时返回 `kind/data` 和兼容的 `success/contentItems`，程序直接读取结构化业务值，展示文本不再承担执行状态解析。数据先经过 producer 指定的元信息投影，再使用共享过滤与可逆短引用；不会公开原始归档。旧的 display-only 结果标为 `kind="untyped", data=null`，不能根据文本补造回执。幂等重放旧调用仍返回保存结果，不重新执行或把旧文本升级为 typed 证据。
+`ProgramRunner` reads `ToolResponse.kind/data` before external presentation formatting: cached plans use `plan`, raw action receipts use `action`, and live observations use `observation`. Action review, action summaries, and terminal observation tracking no longer deserialize `contentItems`. If the internal typed action payload is missing, the outcome is recorded as `unknown`—never upgraded to completed even if display text says `completed`. `AurigaClient.call()` returns `kind` and `data` alongside the compatibility `success` and `contentItems` fields so programs consume structured domain values directly rather than parsing execution status from display text. Data first passes through the producer-specified metadata projection and then through shared provenance filtering and reversible short-reference resolution, without exposing raw observer archives. Legacy display-only replies are marked `kind="untyped", data=null` and must never have receipts fabricated from text. Idempotent replay of an earlier call returns the saved reply without re-executing motion or upgrading legacy text into typed evidence.
 
-程序通过冻结的 `ProgramServices` 回调调用工具；Runner 不持有完整 Harness、robot 或 registry。Harness 在服务端绑定 program role，调用者不能通过参数提升权限。程序实际调用和 actor 目录均使用同一 `ToolRegistry` 的 schema、角色和运行能力判定。默认物理动作继续要求审核；新增 physical 插件若没有内建审核流程，只有该次程序预先取得直接动作授权后才能调用。旧 motion/scene 名称与嵌套 program 调用仍不允许。详见[工具注册与扩展](tool-plugins.md)。
+Programs invoke tools through frozen `ProgramServices` callbacks; `ProgramRunner` holds no direct reference to `Harness`, `robot`, or `ToolRegistry`. `Harness` binds the `program` role on the server side so callers cannot escalate privileges via tool arguments. Both live program calls and the actor catalog share the same `ToolRegistry` schema, role, and runtime capability checks. Physical actions require primary-model review by default; any new `physical` plugin without a built-in review flow can only be called if that program run was pre-authorized with `allow_direct_actions=true`. Legacy motion/`scene_*` tool names and nested `program_run` calls remain forbidden. See [Tool Registration and Extensions](tool-plugins.md).
 
-## 四层结果分别读取
+## Reading the Four Result Layers Separately
 
-| 层级 | 实际字段或返回形式 | 能说明什么 |
+| Layer | Actual Field or Return Shape | What It Establishes |
 | --- | --- | --- |
-| 程序通信 | `AurigaClient._request` 读取内部 `{ok, result}`；`ok=false` 抛异常 | 通信／broker是否交付结果；`client.call` 返回的是其中的 `result`，不要再读取 `r["result"]` |
-| 工具分发 | `r = {success, kind, data, contentItems}` | `kind="error"` 的 `data` 保存诊断；`success=true` 仍要检查业务类型和回执，`output_contract_error` 表示交付/契约问题，不能自动重发 |
-| 动作 | `kind="action"` 时读取 `r["data"]["receipt"]`，只有一层 receipt | 查看 `receipt.status`、`reason`／存在时的 `error`，以及执行量、停止确认、末帧观测；`completed` 仅代表该动作完成 |
-| 程序及任务 | `program_run`／`program_status` 返回的作业 `status`、`returncode`、`stop_confirmed`；任务结果由原生环境决定 | 程序 `succeeded` 来自进程退出码0；`failed`、`cancelled`、`unknown` 不得改称成功。动作 `completed` 和程序 `succeeded` 均不能替代原生任务终态 |
+| Program IPC | `AurigaClient._request` reads internal `{ok, result}` and raises on `ok=false` | Whether the broker delivered a reply; `client.call` returns the inner `result` dict directly, so do not index `r["result"]` again |
+| Tool dispatch | `r = {success, kind, data, contentItems}` | When `kind="error"`, `data` holds call diagnostics; when `success=true`, you must still inspect `kind` and the inner receipt (`output_contract_error` indicates a delivery/contract issue and forbids automatic replay) |
+| Physical action | When `kind="action"`, read `r["data"]["receipt"]` (single receipt layer) | Inspect `receipt.status`, `reason` / `error`, executed step counts, `stop_confirmed`, and `result_observation_id`; `completed` means only that this specific action finished |
+| Program & task | Job `status`, `returncode`, and `stop_confirmed` from `program_run` / `program_status`; native task outcome from the environment | Program `succeeded` means only that the Python process exited with `0` (`failed`, `cancelled`, and `unknown` must never be relabeled as success); neither action `completed` nor program `succeeded` establishes native task completion |
 
-`receipt.status` 不是布尔值。只有明确的 `completed` 才表示动作完成；`accepted`、`failed`、`stopped`、`rejected`、`unknown` 或缺失／未识别状态都应停止程序后续动作并返回控制。`stopped` 的原因可能是原生环境已经结束，也可能是取消等情况；不能自行把它转为任务成功。通信异常和未知结果也不能自动重放动作。
+`receipt.status` is not a boolean. Only an explicit `"completed"` indicates action completion; `"accepted"`, `"failed"`, `"stopped"`, `"rejected"`, `"unknown"`, or any missing/unrecognized status must halt subsequent actions in the program and return control to the primary model. A `"stopped"` status may be caused by native episode termination, cancellation, or an observation checkpoint—never treat it as task success on your own. Likewise, never automatically replay an action after an IPC exception or an `"unknown"` outcome.
 
-规划失败并不保证零执行：多路点动作可能已执行前几段才失败。保留完整回执，特别是 `executed_native_steps`、`completed_native_steps`、`executed_control_steps`、`execution_interval`、`failed_waypoint_index`、`waypoint_results`、`stop_confirmation` 及 trace引用。字段可能缺失，缺失不能当作零步或已确认停止。`executed_steps` 的具体含义见回执的 `step_semantics`，不能用程序调用次数代替仿真步数。
+A planning failure does not guarantee zero physical motion: a multi-waypoint or multi-stage action may have executed earlier segments before failing. Always preserve the complete receipt, especially `executed_native_steps`, `completed_native_steps`, `executed_control_steps`, `execution_interval`, `failed_waypoint_index`, `waypoint_results`, `stop_confirmation`, and trace references. Fields may be absent on some failure paths; a missing field must never be interpreted as zero executed steps or confirmed stopping. For the exact meaning of `executed_steps`, check `step_semantics` on the receipt rather than equating program tool-call counts with simulation steps.
 
-`path_infeasible` 的 `receipt.failure_feedback` 还提供失败点的原始抓取目标、转换后末端目标、求解器残差和可用的候选关节／碰撞诊断；程序应完整保留这些字段交还模型。具体字段、坐标系和证据边界见[运动规划失败反馈](motion-failure-feedback.md)。
+On `path_infeasible`, `receipt.failure_feedback` also provides the failed waypoint's requested grasp target, converted end-effector target, solver residuals, and available candidate joint/collision diagnostics; programs should preserve these fields in full when returning control to the model. For field definitions, coordinate frames, and evidence boundaries, see [Motion Planning Failure Feedback](motion-failure-feedback.md).
 
-## 处理一个已有动作回包的示例
+## Example: Inspecting an Action Reply
 
-以下函数只解析已经返回的动作结果，不选择目标、不执行动作，也不自动重试。它在非完成或缺少末帧引用时打印状态并以非零退出码返回控制；正常返回也只表示“动作完成且有观测引用”，下一步仍需检查实测反馈和RGB。
+The helper below only inspects an already returned action reply—it never selects targets, dispatches motion, or retries automatically. If the action did not complete or lacks a current terminal observation reference, it prints the diagnostic evidence and exits with a non-zero code to return control to the primary model. Even when it returns normally, that only establishes "the action completed and has a current observation reference"; the caller must still inspect measured feedback and RGB images before proceeding.
 
 ```python
 import json
@@ -60,70 +60,70 @@ def inspect_action_reply(reply):
     return receipt, after
 ```
 
-调用方式是 `receipt, observation_id = inspect_action_reply(reply)`，其中 `reply` 是一次已完成的 `client.call(action_tool, arguments)` 的返回值。将 `client.call` 的异常同样交还主actor处理，不捕获后继续执行下一动作。示例不会把失败或未知回执重新标记为成功；`SystemExit(1)` 使程序作业显示为 `failed`，具体动作状态仍保存在输出和Store中。
+Call `receipt, observation_id = inspect_action_reply(reply)` where `reply` is the return value of a completed `client.call(action_tool, arguments)`. Let any exception raised by `client.call` propagate back to the primary actor as well rather than catching it and issuing further actions. This pattern never relabels a failed or unknown receipt as a success; `SystemExit(1)` marks the program job as `failed` while preserving the exact action statuses in program output and the `Store`.
 
-完整回包的后续 `inputText` 项包含 `{bundle, robot_state}`，RGB在 `inputImage` 项中。按 `receipt.result_observation_id` 匹配动作末帧，不要把wait过程中的 `temporal_sample` 当最终观测，也不要沿用动作前的 `observation_id`。动作回执对应的末帧只证明捕获时的状态：若其他操作后来推进环境，它可能已过时；提交下一动作时仍以网关当前观测校验为准。
+In a full wire reply, subsequent `inputText` items carry `{bundle, robot_state}` and `inputImage` items carry RGB frames. Match the terminal frame using `receipt.result_observation_id`—never mistake an intermediate `temporal_sample` from `robot_wait` for the final observation, and never reuse the pre-action `observation_id`. A terminal observation attached to a receipt reflects the state at capture time; if later operations advance the environment, that observation becomes stale, and subsequent actions are still validated against the gateway's live current observation.
 
-程序子调用先把图像交给 `actor_program`。`program_run` 和 `program_status` 会自动将程序内只读或预览工具返回的 `inputImage` 作为独立图像项交给主actor，包括历史观察、预览和几何投影；待审核预览图与程序末帧观察也通过各自的回包流程交付。程序只需调用相应工具，无须把 `imageUrl` 或 base64 打印到 stdout 来显示图片。
+Program sub-calls deliver images to `actor_program` first. `program_run` and `program_status` automatically forward `inputImage` items returned by read-only or preview tools inside the program—including historical observations, motion previews, and geometry projections—as standalone image items to the primary actor, alongside review-pending preview overlays and terminal observations. Programs simply call the relevant tool without printing `imageUrl` or base64 data to `stdout`.
 
-补充图像的 `visual_feedback` 记录原工具、子调用标识、参数和保存的 `reply_ref`，让actor知道图像来自哪次操作及如何读取完整回包。转发保留工具返回的 `imageUrl`、ROI和label，不再重编码；图像保留此前采集、存储和工具交付已有的编码质量。历史图像的观测ID、裁剪坐标与捕获时刻仍对应原图，不会因为再次交付而变成当前观察。需要判断新状态时，actor仍须核对停止／执行状态，再按需调用 `robot_observe`；历史图像不能确认仍在运行的动作已停止。新鲜RGB、机械到位和夹爪命令也不能单独证明抓持、接触或原生任务完成。
+Each forwarded image's `visual_feedback` entry records the originating tool, sub-call ID, arguments, and saved `reply_ref` so the actor knows which operation produced the image and how to inspect the full reply. Forwarding preserves the tool's original `imageUrl`, ROI, and label without re-encoding, maintaining the exact encoding quality from capture and storage. Observation IDs, crop coordinates, and capture timestamps on historical images remain bound to the original frame and never become the current observation simply by being re-forwarded. To evaluate new physical state, the actor must verify stopping/execution status and call `robot_observe` as needed; a historical image cannot confirm that an in-flight action has stopped. Even fresh RGB frames, joint arrival, and completed gripper commands do not by themselves prove grasp retention, physical contact, or native task completion.
 
-## 面向模型的摘要与完整读取
+## Model-Facing Summaries and Full Reads
 
-公共 [`tool_output.py`](../../auriga/core/tool_output.py) 只统一输出构造、`detail`选择、文本片段与分页校验：第一个`inputText`仍是原有结果对象；存在详细证据时，第二个`inputText`给出详情；图像保持独立内容项及原顺序。它不新增执行器、动作门槛、自动重试或任务判断。
+The shared [`tool_output.py`](../../auriga/core/tool_output.py) module standardizes output construction, `detail` selection, bounded text excerpts, and pagination validation: the first `inputText` item remains the primary result object, a second `inputText` item carries detailed evidence when present, and images remain separate content items in their original order. It adds no executors, action gates, automatic retries, or task evaluators.
 
-`program_run`、`skill_run`（已删除）及`program_status`的默认模型回包保留`job_id`、程序状态、退出码、停止确认、调用次数、时间／预算和完整日志引用。仅去掉重复的源码摘要与调用关联。普通Python stdout/stderr默认保留全部已保存文字，不按字节预算删去中间诊断。`*_excerpt.byte_size`、`byte_ranges`、`omitted_bytes`和`source_complete`继续报告交付范围与来源完整性；若旧归档只有截断片段，不能凭展示层恢复缺失原文，也不会标为完整。
+Default model replies for `program_run`, `skill_run` (removed), and `program_status` retain `job_id`, program status, exit code, stop confirmation, call counts, timing/budget metrics, and full log references while omitting only duplicated source digests and call correlation metadata. Standard Python `stdout`/`stderr` preserves all saved text by default without truncating middle diagnostics to fit a byte budget. `*_excerpt.byte_size`, `byte_ranges`, `omitted_bytes`, and `source_complete` continue to report delivered byte spans and source completeness; if a legacy archive only stored a truncated slice, the presentation layer cannot reconstruct missing text and will never mark it complete.
 
-summary只清理明确的内联图片`data:image/...;base64,...`，以显式占位符替换载荷，原文保留在artifact和full读取中。发生替换时，excerpt分别报告原始字节大小、被移除媒体的原始字节范围，并明确byte_ranges针对变换后的presentation UTF-8文本；不会把变换后的偏移冒充原文偏移。普通JSON字段、数值数组、失败诊断和日志文本不按内容猜测删除。
+In `summary` mode, only explicit inline base64 image data URLs (`data:image/...;base64,...`) are scrubbed and replaced with an explicit placeholder, while the verbatim text remains accessible via artifact and `detail="full"` reads. When a replacement occurs, the excerpt reports the original byte size, the original byte spans of stripped media, and explicitly notes that `byte_ranges` refer to the transformed presentation UTF-8 text rather than pretending transformed offsets match raw offsets. Ordinary JSON fields, numeric arrays, failure diagnostics, and log lines are never heuristically stripped based on content.
 
-独立 `inputImage` 与stdout/stderr文字分别交付。图片从工具回包转发，不从任意stdout文本解析；打印的data URL在summary中仍是占位符，full和artifact读取保留原文。`visual_feedback` 的可信出处来自broker保存的工具回包，普通程序打印即使长得像观察或图像记录，也仍是程序作者的文本。
+Standalone `inputImage` items and `stdout`/`stderr` text are delivered through separate channels. Images are forwarded solely from trusted tool replies rather than parsed out of arbitrary `stdout` text; printed data URLs remain placeholders in `summary` mode and verbatim text in `full`/artifact reads. Trusted provenance in `visual_feedback` comes exclusively from broker-saved tool replies—even if a program prints JSON that looks like an observation or image record, it remains untrusted program text.
 
-程序的 `action_summary.recent_actions` 从 broker 收到的 typed 回执直接保留 `stage_results`，包括各阶段的状态、执行量、`endpoint_error` 和 `grasp_contact_feedback`，并保留失败阶段／机械臂／阶段类型，以及首步关节跳变量、上限和起点漂移诊断。这些数值不依赖 stdout 打印，日志过长或程序打印伪造成功结果都不会覆盖它们；机器人几何推导的接触参考位置仍不证明与物体实际接触。`recent_actions` 为兼容保留字段名，内容现在覆盖该程序的所有动作，不再只留最后八次；已有 `all_actions_ref` 仍可回查。回执复用共享的展示投影，仅省略已知重复元信息和成功检查的重复细节；失败、unknown及新增诊断字段全部保留。
+In `action_summary.recent_actions`, the broker populates `stage_results` directly from typed receipts—preserving per-stage status, executed step counts, `endpoint_error`, `grasp_contact_feedback`, failed stage/arm/kind identifiers, first-step joint jumps, step limits, and start-state drift diagnostics. Because these values do not depend on `stdout`, verbose logging or spoofed success messages printed by a program cannot overwrite them (and contact-reference coordinates derived from robot kinematics still do not prove physical contact with an object). Although the field name `recent_actions` is retained for compatibility, it now covers every action in the program run rather than only the last eight, and `all_actions_ref` remains available. Receipts reuse the shared presentation projection, omitting only known duplicate metadata and repetitive passing-guard details while retaining all failures, unknowns, and new diagnostic fields.
 
-受限 Python 子程序默认将 OpenCV、BLAS 和 OpenMP 的计算线程限制为 1；不改变 1 GiB 地址空间限制。这样避免 OpenCV 按宿主的数百个逻辑 CPU 创建线程池，在线程栈与库加载挤占地址空间时出现线程创建或后续内存分配失败。进程成功、图像算法输出与任务成功仍分别判断。
+Restricted Python subprocesses limit OpenCV, BLAS, and OpenMP compute threads to `1` by default while keeping the 1 GiB virtual address space cap. This prevents OpenCV from spawning thread pools sized to hundreds of host logical CPUs and exhausting the 1 GiB address space during thread stack allocation or library loading. Process exit status, vision algorithm outputs, and physical task success are still evaluated independently.
 
-同一模型上下文对同一job再次读取时，超过256字节且内容/引用/摘录完整性均未变化的stdout或stderr不重复内联，返回`*_delivery.status="unchanged"`、前次调用ID和full读取入口；短文本直接保留，避免标记比正文更长。新的状态、退出码、停止确认、动作事实及待审批信息仍返回。新的日志artifact、另一个job、上下文压缩、会话重连或不确定的发送都会重新内联。显式full读取不去重，同一次调用的重传不因该调用先前准备过结果而省掉正文；程序内部读取不消耗actor的交付基线。
+When the same model context polls the same job repeatedly, `stdout` or `stderr` payloads exceeding 256 bytes whose content, artifact reference, and excerpt completeness are unchanged are not re-inlined; instead, the reply reports `*_delivery.status="unchanged"`, the prior tool call ID, and the `detail="full"` handle (shorter texts remain inline so the marker is never longer than the text itself). Updated job status, exit code, stop confirmation, action facts, and pending review prompts are always returned in full. Any new log artifact, different `job_id`, context compaction, session reconnect, or uncertain transport delivery triggers full re-inlining. Explicit `detail="full"` reads never deduplicate, retransmitting the same call does not drop the body, and internal program reads never consume the actor's delivery baseline.
 
-补充图像使用独立的交付基线。同一模型上下文的summary回包可以省去内容与来源均未变化的补充图像，同时给出 `previous_tool_call_id` 和 `program_status(job_id=..., detail="full")` 恢复入口。显式full读取或模型上下文重置会再次交付补充图像；这只改变重复显示，不修改保存的图像、来源记录或程序／动作状态。
+Forwarded supplementary images track a separate delivery baseline. Summary replies within the same model context may omit supplementary images whose content and provenance are unchanged since a prior delivery, providing `previous_tool_call_id` and a `program_status(job_id=..., detail="full")` recovery handle. Explicit `detail="full"` reads or model context resets re-deliver the supplementary images; this deduplication affects only repeated display and never modifies stored images, provenance records, or program/action state.
 
-`stdout_ref`／`stderr_ref`始终指向完整不可变输出，可用`client.artifact(ref)`读取。`program_status(job_id=..., detail="full")`返回完整作业字段及完整stdout/stderr文本。其完整性来自artifact读取；若只有已截断文本，则仍显示`*_truncated=true`，不会宣称完整。程序`status="succeeded"`仍仅表示进程退出码0；摘要不依据stdout修改它，也不把任意JSON打印提升为机器人状态。
+`stdout_ref` and `stderr_ref` always point to complete immutable output artifacts readable via `client.artifact(ref)`. Calling `program_status(job_id=..., detail="full")` returns all job fields and full `stdout`/`stderr` text (if a legacy archive only captured truncated text, `*_truncated=true` is still reported truthfully). A program `status="succeeded"` still means only that the process exited with code `0`; the summary never alters job status based on `stdout` or elevates arbitrary printed JSON into robot state.
 
-仅当调用入口是已选择的内置`skill_run`版本时（该入口已在 2026-10 重构中删除，此投影当前没有调用方），[`program_result.py`](../../auriga/runtime/programs/program_result.py) 才从完整stdout读取固定技能JSON协议，并以`skill_output.source_kind="fixed_skill_program_output"`标注来源。该结构保留完整技能字段、每步回执诊断、未知扩展字段及像素对应点，不再用固定白名单或数组摘要移除有用证据。回执复用共享元信息投影；每步仍有兼容的 `receipt_ref`，整个原始输出保存在stdout artifact中。没有完整或可识别的技能输出时，`execution_outcome="unknown_from_output"`，不能推断没有动作发生。普通`program_run`即使打印完全相同的JSON，也仍是没有自动解释的程序文本。
+Only when invoked through the legacy built-in `skill_run` entry point (removed in the 2026-10 refactor; this projection currently has no live callers) did [`program_result.py`](../../auriga/runtime/programs/program_result.py) parse the fixed-skill JSON protocol from complete `stdout` and tag it with `skill_output.source_kind="fixed_skill_program_output"`. That structure retained all skill fields, per-step receipt diagnostics, unknown extension fields, and pixel correspondences without stripping evidence via fixed allowlists or array summaries, while keeping the raw output in the `stdout` artifact. If skill output was incomplete or unrecognized, `execution_outcome="unknown_from_output"` was reported without assuming zero motion occurred. Standard `program_run` calls—even if they print identical JSON—are treated purely as uninterpreted program text.
 
-## 状态和轨迹的按需详情
+## On-Demand Details for Status and Trajectories
 
-以下只读工具使用一致的`detail="summary"|"full"`。模型默认摘要；`AurigaClient`的程序子调用在未显式给出`detail`或分页选择时继续返回原有完整对象，保存证据及数值精度不变。
+The read-only tools below support a consistent `detail="summary" | "full"` parameter. Model calls default to `summary`, whereas `AurigaClient` sub-calls inside programs continue to receive the full original object when `detail` and pagination selectors are omitted, preserving stored evidence and full numerical precision.
 
-| 工具 | 默认摘要 | 完整读取 |
+| Tool | Default Summary (`detail="summary"`) | Full Read (`detail="full"`) |
 | --- | --- | --- |
-| `robot_action_status` | 保留原请求、动作结果、错误、时序、部分执行及未知诊断；省略已知存储重复项，并附`full_result` | `detail="full"`返回原`{request,receipt}` |
-| `history_list_actions` | 按记录顺序返回状态索引，`start=0`、`limit=25`，含`total`和`next_start`；每项标识动作、结果、执行量、停止状态及完整回执入口 | `detail="full"`返回原完整列表；不能与分页参数并用 |
-| `history_read_trace` | 小值原样；大于窗口上限的序列保留当前连续窗口，并列出每个窗口的JSON Pointer路径、总数和`next_start` | `detail="full"`返回原完整trace；不能与`path/start/limit`并用 |
+| `robot_action_status` | Retains original request, action outcome, errors, timing, partial execution, and unknown diagnostics; omits known storage duplicates and includes a `full_result` handle | Returns the complete original `{request, receipt}` |
+| `history_list_actions` | Returns a chronological status index (`start=0`, `limit=25`) with `total` and `next_start`; each entry identifies the action, outcome, executed counts, stop status, and full-receipt handle | Returns the complete unpaginated list; cannot be combined with pagination parameters |
+| `history_read_trace` | Returns small values verbatim; for sequences exceeding the window cap, returns the current contiguous window along with each window's JSON Pointer `path`, `total`, and `next_start` | Returns the complete original trace; cannot be combined with `path`, `start`, or `limit` |
 
-trace分页的`start`是所选JSON序列的零起始索引，**不是native step**。例如`path="/samples"`读取分发采样，`path="/segments/0/q_rad"`读取第0段规划关节序列。使用返回的`windows[].path`及`next_start`继续读取；`limit`范围1..100，默认25。窗口只切样本序列，每个样本完整保留，包括六维关节向量、三维位置、四维四元数和矩阵；`limit=1`仍返回完整的一条样本。默认窗口只识别顶层序列及已知trace时间序列，不递归截短任意数组。每条样本的真实`sim_step`、时间、状态和精确数值保持不变；窗口不会把规划命令改称实测轨迹，也不会插值或推断缺失样本。
+In trace pagination, `start` is a zero-based index into the selected JSON array—**not a native step number**. For example, `path="/samples"` paginates dispatched samples and `path="/segments/0/q_rad"` paginates the planned joint sequence of segment `0`. Follow `windows[].path` and `next_start` to read subsequent pages (`limit` ranges from `1` to `100`, defaulting to `25`). Windowing slices only along the sample axis while keeping every individual sample intact—including 6-DOF joint vectors, 3D positions, 4D quaternions, and matrices (`limit=1` still returns one complete sample). Default windowing recognizes only top-level arrays and known trace time series rather than recursively truncating arbitrary nested arrays. Every sample retains its exact `sim_step`, timestamp, status, and floating-point values; windowing never relabels planned commands as measured trajectories, interpolates, or fabricates missing samples.
 
-正常的`joint-travel-admission-v1`通过项可以省略重复关节向量和已通过的periodic检查明细，但仍保留检查顺序、编译时刻、阶段、剩余预算和被跳过的未知检查。`motion_safety_check_summary`注明总数、通过数、最后状态及完整动作读取入口。拒绝项、witness、失败反馈和未知策略保持完整；任何摘要都不更改运动准入。artifact访问仍由原有scope、类型及观察权限检查决定。
+Passing `joint-travel-admission-v1` checks may omit duplicate joint vectors and passing periodic-check breakdowns in `summary` mode while preserving check order, compilation timestamps, phases, remaining budgets, and any skipped unknown checks. `motion_safety_check_summary` reports the total check count, passing count, final status, and full-action read handle. Rejected checks, witnesses, failure feedback, and unknown policies are always retained in full, and summary formatting never alters motion admission. Artifact access remains governed by existing scope, type, and observation permission checks.
 
-## 动作预算小于程序剩余预算
+## Action Timeout Must Fit Within Remaining Program Budget
 
-网关接纳动作的实际条件是：
+The gateway admits an action from a program only when:
 
 ```text
 program_deadline - time.monotonic() >= action.timeout_s + 5
 ```
 
-这里是**接纳当时的剩余工作时间**，不是最初传给 `program_run` 的总 `timeout_s`；程序自己的模型和动作审核等待不计入工作时间。启动Python、导入模块、之前的工具调用和分发延迟都会消耗程序预算。显式设置总程序120秒、动作120秒必然不满足条件；动作115秒也没有启动余量。
+This check uses the **remaining active-work time at the moment of admission**, not the initial `timeout_s` passed to `program_run` (wall-clock time spent waiting on auxiliary models or primary-model action review is excluded from active-work time). Starting Python, importing libraries, running prior tool calls, and IPC dispatch all consume active-work budget. Setting both the program timeout and an action timeout to 120 seconds will therefore always fail admission, and even a 115-second action leaves zero margin for startup overhead.
 
-程序内部省略 `robot_action`（新 preview/direct）或 `robot_wait` 的 `timeout_s` 时，broker 在生成计划之前取该工具默认值（120／30秒）与 `剩余工作时间 - 5秒执行余量 - 1秒分发余量` 的较小值。显式值、已缓存计划和程序外 actor 调用保持原语义；审核通过后不会偷偷缩短计划中的截止时间。最终动作准入仍重新检查余量，耗时规划可能使动作被安全拒绝。若 broker 已无最小0.1秒动作的余量，direct／wait 返回 typed error、原因 `program_time_insufficient_for_action`，不创建计划或动作；若在动作准入时不足，保留 rejected 回执和 `action_not_executed` 证据。两种情况都不执行物理动作。只读 preview 无需预留执行时间：余量不足时仍可按原默认值生成只读计划，后续执行仍受最终准入约束。
+When a call inside a program omits `timeout_s` on `robot_action` (`preview` or `direct`) or `robot_wait`, the broker clamps the default timeout (120 s or 30 s) before plan generation to `min(tool_default, remaining_active_time - 5s_execution_margin - 1s_dispatch_margin)`. Explicit `timeout_s` values, already cached plans, and actor calls outside programs retain their exact semantics, and approving a review never silently shortens the deadline baked into a cached plan. Final action admission still re-verifies the margin, so slow planning can still cause an action to be safely rejected at dispatch time. If the broker has less margin than needed for a minimum 0.1-second action, `direct` and `wait` calls fail fast with a typed error (`reason="program_time_insufficient_for_action"`) without creating a plan or action record; if the margin runs out at final action admission, a `rejected` receipt with `action_not_executed` evidence is persisted. No physical motion occurs in either case. Read-only `preview` calls do not reserve execution time: even when remaining budget is low, a read-only plan can still be compiled with default timeouts, subject to final admission checks if executed later.
 
-例如总程序120秒、某次动作显式设置30秒，只有到达网关时至少还剩35秒才能被接纳。这是预算关系示例，不是通用动作时长或动作配方。后续动作必须重新考虑已消耗时间，并额外留出启动／分发余量；程序内自行开始的计时器不知道网关的精确截止时间，不能保证接纳。预算不足就停止并返回控制，不循环提交相同动作，不提高总预算来掩盖既有失败。
+For example, in a 120-second program, an action with an explicit 30-second timeout is admitted only if at least 35 seconds of active-work budget remain when the request reaches the gateway. Subsequent actions must account for elapsed work and leave margin for startup and dispatch; a timer started inside the Python script does not know the gateway's exact monotonic deadline and cannot guarantee admission. When budget is insufficient, stop and return control to the primary model rather than looping on the same rejected action or inflating timeouts to mask failures.
 
-## 实现与验证入口
+## Implementation and Validation Entry Points
 
-- [`harness.py`](../../auriga/runtime/harness.py)：`program_run`说明、`execute`的剩余预算门槛，以及`dispatch`的动作回执和观测内容。
-- [`auriga_client.py`](../../auriga/runtime/programs/auriga_client.py)：内部通信封装与原生dict返回。
-- [`programs.py`](../../auriga/runtime/programs/runner.py)：异常回包、程序状态与停止确认。
-- [`program_result.py`](../../auriga/runtime/programs/program_result.py)、[`history_output.py`](../../auriga/core/presentation/history_output.py)：模型展示和只读按需详情；不改程序执行及Store证据。
-- [`robot_worker.py`](../../auriga/robot/backends/robodojo/robot_worker.py)：动作失败、部分执行和回执字段。
-- 现有CPU检查：`tests.test_programs`、`tests.test_actor_payload`、`tests.test_framework_candidates`。这些检查使用隔离子进程或模拟机器人，不运行模型或仿真环境。
-- 摘要与完整读取检查：`tests.test_tool_output`、`tests.test_program_result`、`tests.test_history_output`覆盖日志末端、完整技能JSON、失败／未知状态、精确分页还原、成功guard明细与拒绝证据边界，以及artifact scope拒绝。
+- [`harness.py`](../../auriga/runtime/harness.py): `program_run` contract, remaining-budget admission gate in `execute`, and action receipts/observations in `dispatch`.
+- [`auriga_client.py`](../../auriga/runtime/programs/auriga_client.py): internal IPC client and native `dict` return values.
+- [`runner.py`](../../auriga/runtime/programs/runner.py): exception replies, job status tracking, and stop confirmation.
+- [`program_result.py`](../../auriga/runtime/programs/program_result.py), [`history_output.py`](../../auriga/core/presentation/history_output.py): model presentation and read-only on-demand details (never mutating program execution or `Store` evidence).
+- [`robot_worker.py`](../../auriga/robot/backends/robodojo/robot_worker.py): action failure handling, partial execution tracking, and receipt fields.
+- CPU regression tests: `tests.test_programs`, `tests.test_actor_payload`, and `tests.test_framework_candidates` (using isolated subprocesses or mock robots without requiring a live model or simulator).
+- Summary and full-read tests: `tests.test_tool_output`, `tests.test_program_result`, and `tests.test_history_output` (covering log tails, full skill JSON, failed/unknown statuses, exact paginated reconstruction, passing-guard compaction vs. rejection-evidence preservation, and artifact scope enforcement).
