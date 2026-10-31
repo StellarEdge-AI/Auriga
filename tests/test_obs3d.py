@@ -33,7 +33,7 @@ from test_scene3d import TABLE, synthetic_cloud
 class FakeService:
     """/object_table and /points of the VGGT service; status != 'ok' answers an error, delay_s sleeps first."""
     def __init__(self, status="ok", delay_s=0.0):
-        self.requests, owner = [], self
+        self.requests, self.windows, owner = [], [], self
         objects = [fake_object((0.0, 0.0, 0.05), 0.10, 0.0),
                    fake_object((0.1, 0.05, 0.12), 0.14, 0.10, support=0, flags=("contact_mismatch",), label=(370, 215))]
         cloud = synthetic_cloud()
@@ -45,8 +45,10 @@ class FakeService:
             def do_POST(self):
                 body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
                 owner.requests.append((self.path, body))
+                started = time.monotonic()
                 if delay_s:
                     time.sleep(delay_s)
+                owner.windows.append((started, time.monotonic()))
                 if status != "ok":
                     answer, code = dict(status="error", error=status), 422
                 elif self.path == "/object_table":
@@ -501,11 +503,10 @@ class Obs3dCheck(unittest.TestCase):
         fake = FakeService(delay_s=0.12)
         self.addCleanup(fake.close)
         runtime = self.runtime(ot=True, s3o=True, endpoint=fake.url)
-        t0 = time.monotonic()
         parts = obs3d.attachments(runtime, self.bundle, {})
-        elapsed = time.monotonic() - t0
         self.assertCountEqual([path for path, _ in fake.requests], ["/object_table", "/points"])
-        self.assertLess(elapsed, 0.22)
+        (first_start, first_end), (second_start, second_end) = fake.windows
+        self.assertLess(max(first_start, second_start), min(first_end, second_end))
         self.assertEqual(parts[0].value["scene3d"]["points"], 3000)
         self.assertEqual(len(parts[0].value["object_table"]["rows"]), 2)
 

@@ -22,7 +22,12 @@ jobs:
           fi
       - run: python -m pip install -r requirements.lock.txt
       - run: npm ci --prefix web
-      - run: python -m unittest discover -s tests
+      # The sandbox refuses user namespaces while supplementary groups are held, and Ubuntu's AppArmor bwrap
+      # profile blocks its sudo fallback, so the tests run as the runner user without supplementary groups.
+      - run: >-
+          sudo env "PATH=$PATH" "HOME=$HOME" "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+          setpriv --reuid="$(id -u)" --regid="$(id -g)" --clear-groups
+          python -m unittest discover -s tests
       - run: npm run check --prefix web
       - run: npm run build --prefix web
       - run: python scripts/build_package.py --output dist
