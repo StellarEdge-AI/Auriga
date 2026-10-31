@@ -1,10 +1,12 @@
 <div align="center">
 
-<img src="docs/assets/stellaredge-logo.png" alt="StellarEdge AI" width="170" />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/auriga-lockup-dark.svg" />
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/auriga-lockup-light.svg" />
+  <img src="docs/assets/auriga-lockup-light.svg" alt="Auriga" width="320" />
+</picture>
 
-# Auriga
-
-**面向具身操作的智能体执行框架（Agent Harness for Embodied Manipulation）**
+<p><b>面向具身操作的智能体执行框架（Agent Harness for Embodied Manipulation）</b></p>
 
 [![Project Page](https://img.shields.io/badge/Project%20Page-auriga.stelledge.com-0A66C2.svg)](https://auriga.stelledge.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
