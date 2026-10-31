@@ -255,21 +255,12 @@ Auriga 以 [MIT 许可证](LICENSE) 发布。[`third_party/`](third_party) 保�
 
 </details>
 
-如果本项目或技术报告对你的工作有帮助，欢迎引用：
+如果本项目对你的工作有帮助，欢迎引用：
 
 ```bibtex
-@techreport{stellaredge2026auriga,
-  title       = {Auriga Technical Report: A Task-Agnostic Agent Harness for Zero-Shot Embodied Manipulation},
-  author      = {{StellarEdge AI Technical Team}},
-  institution = {StellarEdge AI},
-  year        = {2026},
-  month       = nov,
-  url         = {https://auriga.stelledge.com/}
-}
-
 @software{auriga2026code,
   title        = {Auriga: An Agent Harness for Embodied Manipulation},
-  author       = {Wang, Chengcheng and {StellarEdge AI Technical Team}},
+  author       = {{StellarEdge AI Technical Team}},
   year         = {2026},
   url          = {https://github.com/lose4578/Auriga},
   version      = {0.2.0},

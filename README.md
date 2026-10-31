@@ -255,21 +255,12 @@ In the northern winter sky, **Auriga** is the Charioteer (home to the bright sta
 
 </details>
 
-If you use Auriga in your research or engineering work, please cite our technical report and repository:
+If you use Auriga in your research or engineering work, please cite the repository:
 
 ```bibtex
-@techreport{stellaredge2026auriga,
-  title       = {Auriga Technical Report: A Task-Agnostic Agent Harness for Zero-Shot Embodied Manipulation},
-  author      = {{StellarEdge AI Technical Team}},
-  institution = {StellarEdge AI},
-  year        = {2026},
-  month       = nov,
-  url         = {https://auriga.stelledge.com/}
-}
-
 @software{auriga2026code,
   title        = {Auriga: An Agent Harness for Embodied Manipulation},
-  author       = {Wang, Chengcheng and {StellarEdge AI Technical Team}},
+  author       = {{StellarEdge AI Technical Team}},
   year         = {2026},
   url          = {https://github.com/lose4578/Auriga},
   version      = {0.2.0},
