@@ -9,11 +9,13 @@
 <p><b>An Agent Harness for Embodied Manipulation</b></p>
 
 [![Project Page](https://img.shields.io/badge/Project%20Page-auriga.stelledge.com-0A66C2.svg)](https://auriga.stelledge.com/)
+[![Demo](https://img.shields.io/badge/Demo-Videos%20%26%20Rollouts-008080.svg)](https://auriga.stelledge.com/demos.html)
+[![Tech Report](https://img.shields.io/badge/Tech%20Report-PDF-B31B1B.svg)](docs/Auriga-Technical-Report.pdf)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB.svg)](environment.yml)
 [![Node.js 22](https://img.shields.io/badge/Node.js-22-339933.svg)](web/package.json)
 
-[English](README.md) · [简体中文](README.zh-CN.md) · [Documentation](docs/README.md) · [Contributor Guide](AGENTS.md) · [Contributing](CONTRIBUTING.md) · [Citation](#-citation)
+[English](README.md) · [简体中文](README.zh-CN.md) · [Tech Report (PDF)](docs/Auriga-Technical-Report.pdf) · [Demo](https://auriga.stelledge.com/demos.html) · [Documentation](docs/README.md) · [Contributor Guide](AGENTS.md) · [Contributing](CONTRIBUTING.md) · [Citation](#-citation)
 
 </div>
 

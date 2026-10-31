@@ -1,6 +1,6 @@
 # Documentation Index
 
-If you are new to Auriga, start with the main [README](../README.md) ([English](../README.md) / [简体中文](../README.zh-CN.md)).
+If you are new to Auriga, start with the main [README](../README.md) ([English](../README.md) / [简体中文](../README.zh-CN.md)) and the [Auriga Technical Report (PDF)](Auriga-Technical-Report.pdf).
 
 The tables below organize all documentation by topic. Development rules and architectural boundaries are governed by [AGENTS.md](../AGENTS.md), while the authoritative runtime tool contracts live in [`auriga/runtime/tools/definitions.py`](../auriga/runtime/tools/definitions.py) and [`auriga/runtime/tools/builtins.py`](../auriga/runtime/tools/builtins.py).
 
