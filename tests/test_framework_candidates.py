@@ -145,7 +145,7 @@ class CandidateHarnessTests(unittest.TestCase):
         self.assertEqual([value["sim_step"] for value in temporal], [100, 200])
         self.assertEqual([value["sim_time_s"] for value in temporal], [.4, .8])
         self.assertTrue(all(value["current"] is False and value["camera_id"] == "cam_head" for value in temporal))
-        final = values[-1]["bundle"]
+        final = next(value for value in reversed(values) if "bundle" in value)["bundle"]
         self.assertEqual(final["sim_step"], 250)
         self.assertEqual(final["observation_id"], harness.latest["observation_id"])
         self.assertTrue(values[0]["result_observation_is_current"])
@@ -160,7 +160,8 @@ class CandidateHarnessTests(unittest.TestCase):
         self.assertEqual(harness.latest["observation_id"], current)
         self.assertFalse(replay_values[0]["result_observation_is_current"])
         self.assertEqual(replay_values[0]["current_observation_id"], current)
-        self.assertEqual(replay_values[-1]["bundle"]["observation_id"], final["observation_id"])
+        self.assertEqual(next(value for value in reversed(replay_values) if "bundle" in value)["bundle"]["observation_id"],
+                         final["observation_id"])
         self.assertEqual(store.read("action_receipt", "first"), stored)
         with self.assertRaisesRegex(ValueError, "action_id_content_conflict"):
             harness.dispatch("robot_wait", dict(arguments, native_steps=26), dict(tool_call_id="conflict"))
@@ -178,7 +179,7 @@ class CandidateHarnessTests(unittest.TestCase):
         self.assertEqual(receipt["executed_native_steps"], 12)
         self.assertEqual(receipt["completed_native_steps"], 12)
         self.assertEqual([value["sim_step"] for value in values if value.get("temporal_sample")], [100])
-        self.assertEqual(values[-1]["bundle"]["sim_step"], 120)
+        self.assertEqual(next(value for value in reversed(values) if "bundle" in value)["bundle"]["sim_step"], 120)
         self.assertEqual(harness.native_action_count, 12)
         self.assertEqual(store.read("action_receipt", "cancelled")["result_observation_id"], harness.latest["observation_id"])
 

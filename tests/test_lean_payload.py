@@ -206,7 +206,7 @@ class LeanHarnessTests(unittest.TestCase):
                                                      dict(tool_call_id="read-" + kind)))[0]
             expected = json.loads(self.store.resolve_artifact(receipt[kind + "_ref"])[1])
             self.assertEqual(trace, expected)
-        model_observation = model_values[-1]
+        model_observation = next(value for value in reversed(model_values) if "bundle" in value)
         self.assertEqual(model_observation["robot_state"]["arms"]["left"]["q_rad"], [.123456789] * 6)
         self.assertTrue(model_observation["bundle"]["robot_state_available"])
         program_values = text_values(self.harness.dispatch("robot_wait", args, dict(tool_call_id="program", program_id="p")))

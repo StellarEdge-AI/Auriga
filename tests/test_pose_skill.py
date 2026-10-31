@@ -58,7 +58,7 @@ def runtime(on=True, yaw=0.0, arm="right", table=TABLE, observation_id="obs-1"):
 
 
 def catalog_runtime(on):
-    config = Config().with_overrides({"features": {"pose_skill": on, "trajectory_preview": False}})
+    config = Config().with_overrides({"features": {"external_perception": False, "pose_skill": on, "trajectory_preview": False}})
     return SimpleNamespace(disabled_tools=(), observation_profile="rgb_proprio_calibrated_v1", motion_review=True,
                            enable_wait=True, vision_compare=True, visual_reviewer=True, action_policy=None,
                            capabilities=None, programs=True, config=config, features=config.features)

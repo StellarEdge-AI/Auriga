@@ -1,7 +1,6 @@
 """Official actor inputs and development evidence must never share a publication path."""
 from copy import deepcopy
 import asyncio
-import os
 import sqlite3
 from unittest.mock import patch
 import json
@@ -11,6 +10,7 @@ import unittest
 
 from auriga.apps.gateway.workbench import Workbench
 from auriga.runtime.harness import Harness
+from auriga.core.config import Config
 from auriga.core.observation_policy import (ACTOR_PROFILE, LEGACY_ACTOR_PROFILE, ACTOR_POLICY,
     DEVELOPMENT_TOOLS, actor_robot_state, actor_policy, require_actor_observation, reject_privileged)
 from auriga.core.storage.store import Store
@@ -115,8 +115,9 @@ class ObservationPolicyTest(unittest.TestCase):
     def test_gateway_filters_controls_and_owns_shared_memory(self):
         with tempfile.TemporaryDirectory() as directory:
             memory = Path(directory) / "memory"
-            with patch.dict(os.environ, {"AURIGA_GRASP_MEMORY_DIR": str(memory)}):
-                workbench = Workbench(Path(directory) / "calibrated", robot=FixtureRobot(directory))
+            with patch("auriga.core.config.LOCAL_CONFIG_PATH", Path(directory) / "absent.local.json"):
+                config = Config.load(environ={}, overrides={"features": {"grasp_memory_dir": str(memory)}})
+                workbench = Workbench(Path(directory) / "calibrated", robot=FixtureRobot(directory), config=config)
                 try:
                     self.assertEqual(workbench.observation_profile, ACTOR_PROFILE)
                     names = {tool["name"] for tool in workbench.actor_tools()}
@@ -134,7 +135,7 @@ class ObservationPolicyTest(unittest.TestCase):
                 with self.assertRaises(sqlite3.ProgrammingError):
                     shared.db.execute("SELECT 1")
                 for profile in (ACTOR_PROFILE, LEGACY_ACTOR_PROFILE):
-                    control = Workbench(Path(directory) / profile, robot=FixtureRobot(directory),
+                    control = Workbench(Path(directory) / profile, robot=FixtureRobot(directory), config=config,
                                         observation_profile=profile, motion_review=False)
                     try:
                         names = {tool["name"] for tool in control.actor_tools()}
