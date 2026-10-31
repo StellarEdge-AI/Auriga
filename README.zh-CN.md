@@ -247,14 +247,6 @@ Auriga 以 [MIT 许可证](LICENSE) 发布。[`third_party/`](third_party) 保�
 
 ## 🌟 引用
 
-<details>
-<summary><b>彩蛋：为什么叫 “Auriga（御夫座）”？</b></summary>
-<br>
-
-在北天冬季星空中，**Auriga** 是“御夫座”（主星为五车二 *Capella*），双手持缰驾车而不失平衡。在 `v0.2.0` 之前，本仓库曾用名 *Daedalus*（代达罗斯）；当这套双臂 Harness 拆掉后台黑箱规则、把控制缰绳真正交还给模型时，它走出了迷宫并更名为 **Auriga**。
-
-</details>
-
 如果本项目对你的工作有帮助，欢迎引用：
 
 ```bibtex

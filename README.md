@@ -247,14 +247,6 @@ Auriga is released under the [MIT License](LICENSE). [`third_party/`](third_part
 
 ## 🌟 Citation
 
-<details>
-<summary><b>Easter Egg: Why "Auriga"?</b></summary>
-<br>
-
-In the northern winter sky, **Auriga** is the Charioteer (home to the bright star *Capella*), holding twin reins to steer cleanly without losing balance. Before `v0.2.0`, this repository was internally named *Daedalus*; once the dual-arm harness learned to drop hidden black-box heuristics and hand the reins to the model, it graduated from the labyrinth to **Auriga**.
-
-</details>
-
 If you use Auriga in your research or engineering work, please cite the repository:
 
 ```bibtex
