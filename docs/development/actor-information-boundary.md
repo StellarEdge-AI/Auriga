@@ -27,7 +27,7 @@ benchmark 任务说明使用[官方任务原文与得分表](public-task-rules.m
 
 默认启用 `robot_wait`，`--no-enable-wait` 保留显式无等待对照。默认 `--motion-review` 开启运动预览、审查后执行计划及抓取规划／经验工具。`--no-motion-review` 关闭这组工具，保留相同相机标定及 geometry / scene 工具，用于比较工具干预。旧 profile 自动关闭依赖标定的工具。预览不推进仿真；计划仍需通过 Harness 唯一动作入口执行。碰撞模型范围和估计障碍的来源必须明确；机器人自身与静态桌面的规划通过不能保证持物、其他物体或另一只手无碰撞。
 
-抓取经验默认持久化到 `~/.local/share/auriga/grasp-memory`，可用 `AURIGA_GRASP_MEMORY_DIR` 指定独立库。经验保留对象类别／实例、适用条件和观测／动作来源，不作为旧场景坐标复用。配对评估通过 queue 每局的绝对路径 `grasp_memory_dir` 隔离读写经验，避免条件间相互污染。
+抓取经验默认持久化到 `~/.local/share/auriga/grasp-memory`，可用配置 `features.grasp_memory_dir` 或命令行 `--grasp-memory-dir` 指定独立库（仓库默认配置已设置该路径，`AURIGA_GRASP_MEMORY_DIR` 环境变量不会覆盖它）。经验保留对象类别／实例、适用条件和观测／动作来源，不作为旧场景坐标复用。配对评估通过 queue 每局的绝对路径 `grasp_memory_dir` 隔离读写经验，避免条件间相互污染。
 
 Gateway CLI、Workbench 构造和 benchmark queue 均默认使用标定 profile，并在 manifest 中记录实际 profile、信息策略、motion review 开关和源码 hash。恢复会话只接受与归档相符的信息策略和 profile；缺策略标记的旧会话不能自动升级，须另建 run/thread。离线 replay 可查看原证据。
 
