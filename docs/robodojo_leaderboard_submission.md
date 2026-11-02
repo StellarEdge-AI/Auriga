@@ -10,7 +10,7 @@
 |---|---|---|
 | 公开版 | StellarEdge-AI/Auriga `main` @ `3e1be75` | 开源发布版。代码树等于内部仓库 Daedalus `9b3ad08`，差别只有目录和命名 |
 | v5 私有版 | 内部仓库 Daedalus `94f5e45`（= tag `v0.0.3`）+ fill_pen_holder 任务文本 override，模型请求上限 170 | v5 三 seed 结果（6300 局）主体的模型可见版本 |
-| 提交版 | Auriga：本分支 `robodojo-leaderboard` @ `5563f83`（= `3e1be75` + `1d219c7` + `5563f83`）<br>XPolicyLab：StellarEdge-AI/XPolicyLab 分支 `policy/auriga` @ `816a60d`，目录 `policy/Auriga/` | `policy/Auriga/deploy.yml` 的 `auriga_commit` 钉在 `5563f83` |
+| 提交版 | Auriga：本分支 `robodojo-leaderboard` @ `5563f83`（= `3e1be75` + `1d219c7` + `5563f83`）<br>XPolicyLab：StellarEdge-AI/XPolicyLab 分支 `policy/auriga` @ `83f3f72`，目录 `policy/Auriga/` | `policy/Auriga/deploy.yml` 的 `auriga_commit` 钉在 `5563f83` |
 
 v5 主体以外的偏离格：G4 有 1000 局的记忆模型配成了 gpt-6-sol，G2 seed 0 有 380 局多带一个未合入的 PR，G2 有 4 格开了 self-briefing。这些格子任何单一冻结版本都复现不了，提交版也不去对齐它们。提交版对齐的是 v5 主体。
 
