@@ -10,7 +10,7 @@
 |---|---|---|
 | 公开版 | StellarEdge-AI/Auriga `main` @ `3e1be75` | 开源发布版。代码树等于内部仓库 Daedalus `9b3ad08`，差别只有目录和命名 |
 | v5 私有版 | 内部仓库 Daedalus `94f5e45`（= tag `v0.0.3`）+ fill_pen_holder 任务文本 override，模型请求上限 170 | v5 三 seed 结果（6300 局）主体的模型可见版本 |
-| 提交版 | Auriga：本分支 `robodojo-leaderboard` @ `5563f83`（= `3e1be75` + `1d219c7` + `5563f83`）<br>XPolicyLab：StellarEdge-AI/XPolicyLab 分支 `policy/auriga` @ `a4f4050`，目录 `policy/Auriga/` | `policy/Auriga/deploy.yml` 的 `auriga_commit` 钉在 `5563f83` |
+| 提交版 | Auriga：本分支 `robodojo-leaderboard` @ `5563f83`（= `3e1be75` + `1d219c7` + `5563f83`）<br>XPolicyLab：StellarEdge-AI/XPolicyLab 分支 `policy/auriga` @ `80c3d83`（单个 commit），目录 `policy/Auriga/` | `policy/Auriga/deploy.yml` 的 `auriga_commit` 钉在 `5563f83` |
 
 v5 主体以外的偏离格：G4 有 1000 局的记忆模型配成了 gpt-6-sol，G2 seed 0 有 380 局多带一个未合入的 PR，G2 有 4 格开了 self-briefing。这些格子任何单一冻结版本都复现不了，提交版也不去对齐它们。提交版对齐的是 v5 主体。
 
@@ -75,7 +75,7 @@ v5 是 Auriga 在 Isaac 进程旁边起一个 worker 直接驱动仿真。提交
 | 运行时 `auriga_xpl/runtime.py` | 等价于 Auriga 的 `serve --benchmark`：官方任务文本、override、completion hook 全部注入。每局串行执行，每局开始都新建空 grasp memory、复位 planner | 配置三层叠加：Auriga 默认值、所钉 commit 的 `configs/auriga.json`、`auriga_eval.json`（只放部署项：sandbox、视频、PTY、scene_truth 关闭） |
 | 规划器 `vendor/robodojo_planner/` | vendored RoboDojo 自己的 `CuroboPlanner` 和 ARX X5 机器人描述，cuRobo 用 RoboDojo 钉的 `d17b54c`。加了一个 NumPy 2 兼容子类，按 NumPy 1 的类型提升规则重算目标四元数 | 与仿真内 planner 逐点相同（见 §5） |
 | 标定 `assets/arx_x5_calibration.json` + `auriga_xpl/calibration.py` | 头相机用冻结常量；腕相机用常量加 URDF 正运动学，输入是实测关节角 | 与 worker 输出的 `calibration_id` 相同 |
-| 感知 `auriga_xpl/perception.py` | policy server 自己启动、做 health 检查、停止 VGGT-Omega 和 SAM 3.1 服务。服务代码是所钉 Auriga commit 里的 `services/vggt_height`（点选和文本 mask 都走 SAM 3.1），启动参数与它的 `start.sh` 相同；adapter 里不放服务代码 | 与 v5 G4（1500 局）所用版本相同；v5 G1–G3 用的是 hp 版（点选走 SAM 2.1），对比见 §5。hp 版的提交分支存档在 `policy/auriga-hp`（`b59af89`） |
+| 感知 `auriga_xpl/perception.py` | policy server 自己启动、做 health 检查、停止 VGGT-Omega 和 SAM 3.1 服务。服务代码是所钉 Auriga commit 里的 `services/vggt_height`（点选和文本 mask 都走 SAM 3.1），启动参数与它的 `start.sh` 相同；adapter 里不放服务代码 | 与 v5 G4（1500 局）所用版本相同；v5 G1–G3 用的是 hp 版（点选走 SAM 2.1），对比见 §5。hp 版提交分支（`b59af89`）不在公开仓库，内部存档为 git bundle |
 | 模型 API | 每个 server 写一份私有 Codex provider 配置，走 Responses API，key 只从环境变量或 0600 文件读，不写进任何文件 | endpoint 和 key 由我们提供，仓库里留空 |
 | 安装 | `install.sh` 依次完成：clone 钉好的 Auriga，安装 XPolicyLab（editable），装 planner，从 HF 固定 revision 下载机器人 mesh，安装感知环境，下载 8.1 GB 权重（VGGT-Omega + SAM 3.1）；所有下载都做 SHA-256 校验 | — |
 
