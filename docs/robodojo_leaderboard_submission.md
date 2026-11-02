@@ -2,6 +2,8 @@
 
 日期：2026-11-02。本文给复核人用：提交版相对公开版和 v5 私有版改了什么、做了哪些测试、哪些没有覆盖，以及怎么复核。
 
+向 XPolicyLab 提交的 PR 正文草稿见 [robodojo_leaderboard_pr_draft.md](robodojo_leaderboard_pr_draft.md)（尚未提交）。
+
 ## 1. 三个版本
 
 | 名称 | 位置 | 说明 |
