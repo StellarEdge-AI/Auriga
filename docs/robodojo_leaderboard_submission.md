@@ -10,11 +10,11 @@
 |---|---|---|
 | 公开版 | StellarEdge-AI/Auriga `main` @ `3e1be75` | 开源发布版。代码树等于内部仓库 Daedalus `9b3ad08`，差别只有目录和命名 |
 | v5 私有版 | 内部仓库 Daedalus `94f5e45`（= tag `v0.0.3`）+ fill_pen_holder 任务文本 override，模型请求上限 170 | v5 三 seed 结果（6300 局）主体的模型可见版本 |
-| 提交版 | Auriga：本分支 `robodojo-leaderboard` @ `5563f83`（= `3e1be75` + `1d219c7` + `5563f83`）<br>XPolicyLab：StellarEdge-AI/XPolicyLab 分支 `policy/auriga` @ `80c3d83`（单个 commit），目录 `policy/Auriga/` | `policy/Auriga/deploy.yml` 的 `auriga_commit` 钉在 `5563f83` |
+| 提交版 | Auriga：本分支 `robodojo-leaderboard` @ `7fabe90`（= `3e1be75` + `1d219c7` + `5563f83` + 文档 commit + `7fabe90`）<br>XPolicyLab：StellarEdge-AI/XPolicyLab 分支 `policy/auriga` @ `67e8df8`（单个 commit），目录 `policy/Auriga/` | `policy/Auriga/deploy.yml` 的 `auriga_commit` 钉在 `7fabe90` |
 
 v5 主体以外的偏离格：G4 有 1000 局的记忆模型配成了 gpt-6-sol，G2 seed 0 有 380 局多带一个未合入的 PR，G2 有 4 格开了 self-briefing。这些格子任何单一冻结版本都复现不了，提交版也不去对齐它们。提交版对齐的是 v5 主体。
 
-## 2. 相对公开版的改动（Auriga 仓库，2 个 commit）
+## 2. 相对公开版的改动（Auriga 仓库，3 个代码 commit）
 
 ### 2.1 `1d219c7`：冻结 leaderboard 配置
 
@@ -41,6 +41,11 @@ v5 主体以外的偏离格：G4 有 1000 局的记忆模型配成了 gpt-6-sol�
 - `tests/test_injected_environment.py`：新增 7 个测试。
 
 这两处都不改模型可见内容，prompt、developer instructions、工具定义、任务文本都不受影响。
+
+### 2.3 `7fabe90`：感知服务点选 mask 扣除机器人像素
+
+- `services/vggt_height/vggt_height_service.py`：`/object_table` 的点选路径在客户端同时发送 `robot_mask_b64` 和 `robot_segments_m` 时，原来不使用像素 mask（只在没有 segments 时用），而 `screen()` 的 3D+2D segment 检查也不在这条路径上，所以点在夹爪上或旁边时，会把手臂当作被点的物体返回。现在只要有像素 mask，就从点选 mask 里扣掉机器人像素，剩余不足 `min_area`（40 px）时回 `no_object_mask`。这是 v5 hp 版的做法。文本 mask 和自动 mask 路径不变，health 版本字符串不变。
+- 问题由 Auriga `b1adc51` 引入，v5 G4 的 1500 局带着这个问题跑。
 
 ## 3. 相对 v5 私有版的差异
 
@@ -90,6 +95,7 @@ v5 是 Auriga 在 Isaac 进程旁边起一个 worker 直接驱动仿真。提交
 | 执行层等价性 | 不调用模型，把 12 个任务（覆盖 5 个维度）的 v5 真实工具调用按原顺序分别送进 v5 私有版和提交版 | 闭源重放 12/12 复现原局的评分和动作数（说明重放方法可靠）。提交版对 v5 私有版：12/12 评分和动作数相同，机器人测量状态逐步相同（最大差 0），native step 逐步相同。初始 prompt 和 20 个工具定义逐字相同。工具返回只在感知字段有出入，v5 私有版自己跑两遍也一样有 |
 | 感知两版离线精度 | 230 帧初始布局图，按仿真真值对比 hp 版和 Auriga 仓库版 | 两版总体持平。hp 版错检更少、点选长尾误差更小；仓库版按物体名查找的召回更高、mask 略贴合 |
 | 操作中途点选对比 | v5 G3 中途帧上模型实际点击的约 1200 个像素，按 FK 投影的机械臂轮廓判定返回 mask 是否落在机械臂上 | 中途结果（580 个配对点击）：返回机械臂 mask 的比例 hp 版 0%、仓库版 2.8%（16 个，全部单向，p≈3e-5）。只出现在离机械臂 10 px 以内的点击（这类点击占 10%）且都在头相机；点在机械臂上时 hp 版多回 no_object，仓库版多返回夹爪 mask，报出的高度与夹爪顶差约 3 cm。其余情况两版持平。据此选用 3.1-only |
+| 点选修复验证 | 同一批 800 个中途点击、530 个请求，用 `7fabe90` 的服务全量重跑，与未修 repo 版、v5 hp 版逐点击对比 | 返回机械臂 mask：21 → 2（v5 为 0；剩下 2 个点击落在已由文本或自动 mask 找到的物体上，走复用路径，不经过点选检查）。`no_object_mask`：5 → 23（v5 为 31，对 v5 配对 11 对 3，p = 0.057）。另有 108 个点击保留物体但扣掉了部分机器人像素。selfcheck 通过。先试的整块拒绝方案把 `no_object_mask` 推到 40，弃用 |
 | XPolicyLab debug 闭环 | `EVAL_ENV_TYPE=debug`，plain 和 `DEBUG_OBS_ENCODED=1` 各一次 | 都到 `[MAIN] eval finished`，0 traceback |
 | 真实闭环 smoke | 标准 `eval.sh`（`EVAL_ENV_TYPE=sim`）+ 真实模型，跑 4 局 | 4/4 跑通。同一 server 连续多局后无进程、显存、fd 泄漏 |
 | 端到端验证 | 未改动的上游 RoboDojo main（`f57e163`）+ XPolicyLab `0075cc9`，从全新 `install.sh` 开始，5 个任务 × 2 layout × 2 种感知，共 20 局 | 20/20 局经标准 `eval.sh` 正常结束，成败以 RoboDojo `_result.json` 为准，适配层没有报错；两种感知整局表现无可分辨差异。全新 `install.sh` 一次通过（23.7 min，含本次修复的 conda 服务条款步骤）。这批只验证功能，不作为成绩 |
@@ -105,7 +111,7 @@ v5 是 Auriga 在 Isaac 进程旁边起一个 worker 直接驱动仿真。提交
 
 ## 7. 复核方法
 
-1. **Auriga 改动**：`git diff 3e1be75..5563f83`，应只涉及 §2 列出的文件。
+1. **Auriga 改动**：`git diff 3e1be75..7fabe90 -- . ':!docs'`，应只涉及 §2 列出的文件。
 2. **adapter**：看 StellarEdge-AI/XPolicyLab 分支 `policy/auriga` 相对 upstream `0075cc9` 的 diff，应只新增 `policy/Auriga/`。
 3. **静态检查**：在 XPolicyLab checkout 里运行
    `bash check_adapter.sh <XPolicyLab checkout> Auriga upstream/main`。

@@ -53,7 +53,7 @@ bash download_assets.sh
 ## Limitations / notes
 - The model endpoint is provided by the Auriga team: we send the base URL and key privately with the evaluation application. They are read from `AURIGA_API_BASE_URL` and `AURIGA_API_KEY` (or `AURIGA_API_KEY_FILE`); the repository holds no key and `config.env.example` leaves both empty. The endpoint speaks the OpenAI Responses API.
 - One environment per policy server (`eval_batch: false`). Wall-clock time per episode is dominated by model latency: typically 25–40 minutes, longer while the endpoint is retrying.
-- GPU memory on the policy GPU: about 17.4 GB measured for the cuRobo planner (about 2.7 GB) and the perception service together, up to about 18.3 GB after long runs; a 24 GB GPU is enough. `VGGT_GPU` moves the perception service to another GPU.
+- GPU memory on the policy GPU: the cuRobo planner (about 2.5–2.7 GB) and the perception service together take 11.1 GB at start and 17.5 GB measured after a batch of perception requests; a 24 GB GPU is enough. `VGGT_GPU` moves the perception service to another GPU.
 - Disk: about 12 GB of perception environments and 8.1 GB of weights under `VGGT_HOME`, besides the conda env.
 - Camera calibration comes from frozen constants of the stock `arx_x5` cell and forward kinematics of the measured joints; no depth is used.
 - Each episode starts with an empty cross-episode memory; nothing carries over between episodes.
