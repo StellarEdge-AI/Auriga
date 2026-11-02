@@ -618,8 +618,12 @@ def object_table(req):
             requested.append(dict(pixel=[float(u), float(v)], status="ok", index=found, match="reused",
                                   reuse_iou=None if best is None else round(best, 3)))
             continue
-        if pmask is not None and pix_mask is not None and not segments:
-            if pix_mask[pmask].mean() >= cfg["robot_frac"]:
+        # The caller's robot pixel mask is cut from a point mask even when robot segments are supplied (the 3D+2D
+        # segment check of screen() does not run on this path); too little left means no object. Without it a click on
+        # or next to the gripper returned the arm itself as the requested object.
+        if pmask is not None and pix_mask is not None:
+            pmask = pmask & ~pix_mask
+            if pmask.sum() < cfg["min_area"]:
                 pmask = None
         st = object_stats(rec, pmask, support_z, T, K, cfg["floating"], explicit=True) if pmask is not None else None
         if st is None:
