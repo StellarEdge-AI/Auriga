@@ -10,7 +10,7 @@
 |---|---|---|
 | 公开版 | StellarEdge-AI/Auriga `main` @ `3e1be75` | 开源发布版。代码树等于内部仓库 Daedalus `9b3ad08`，差别只有目录和命名 |
 | v5 私有版 | 内部仓库 Daedalus `94f5e45`（= tag `v0.0.3`）+ fill_pen_holder 任务文本 override，模型请求上限 170 | v5 三 seed 结果（6300 局）主体的模型可见版本 |
-| 提交版 | Auriga：本分支 `robodojo-leaderboard` @ `7fabe90`（= `3e1be75` + `1d219c7` + `5563f83` + 文档 commit + `7fabe90`）<br>XPolicyLab：StellarEdge-AI/XPolicyLab 分支 `policy/auriga` @ `67e8df8`（单个 commit），目录 `policy/Auriga/` | `policy/Auriga/deploy.yml` 的 `auriga_commit` 钉在 `7fabe90` |
+| 提交版 | Auriga：本分支 `robodojo-leaderboard` @ `ced0335`（= `3e1be75` + `1d219c7` + `5563f83` + `7fabe90` + `ced0335`，另有文档 commit）<br>XPolicyLab：StellarEdge-AI/XPolicyLab 分支 `policy/auriga` @ `9e1a580`（单个 commit；PR XPolicyLab/XPolicyLab#223），目录 `policy/Auriga/` | `policy/Auriga/deploy.yml` 的 `auriga_commit` 钉在 `ced0335` |
 
 v5 主体以外的偏离格：G4 有 1000 局的记忆模型配成了 gpt-6-sol，G2 seed 0 有 380 局多带一个未合入的 PR，G2 有 4 格开了 self-briefing。这些格子任何单一冻结版本都复现不了，提交版也不去对齐它们。提交版对齐的是 v5 主体。
 
@@ -42,10 +42,11 @@ v5 主体以外的偏离格：G4 有 1000 局的记忆模型配成了 gpt-6-sol�
 
 这两处都不改模型可见内容，prompt、developer instructions、工具定义、任务文本都不受影响。
 
-### 2.3 `7fabe90`：感知服务点选 mask 扣除机器人像素
+### 2.3 `7fabe90` + `ced0335`：感知服务点选 mask 扣除机器人像素
 
 - `services/vggt_height/vggt_height_service.py`：`/object_table` 的点选路径在客户端同时发送 `robot_mask_b64` 和 `robot_segments_m` 时，原来不使用像素 mask（只在没有 segments 时用），而 `screen()` 的 3D+2D segment 检查也不在这条路径上，所以点在夹爪上或旁边时，会把手臂当作被点的物体返回。现在只要有像素 mask，就从点选 mask 里扣掉机器人像素，剩余不足 `min_area`（40 px）时回 `no_object_mask`。这是 v5 hp 版的做法。文本 mask 和自动 mask 路径不变，health 版本字符串不变。
 - 问题由 Auriga `b1adc51` 引入，v5 G4 的 1500 局带着这个问题跑。
+- `ced0335`：扣除后如果点击本身落在机器人 mask 上、且点选 mask 只剩不到 10%（`robot_click_cut` = 0.90），回 `no_object_mask`。针对 pointfix2 发现的 4 个夹爪周边残片；按该次数据离线推算，`no_object_mask` 为 27（v5 31，配对 7 对 3，p = 0.34）。这条规则加上后没有再跑服务验证（用户决定）。
 
 ## 3. 相对 v5 私有版的差异
 
