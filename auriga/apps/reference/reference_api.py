@@ -53,19 +53,32 @@ def upstream():
     for name, info in provenance["files"].items():
         if hashlib.sha256((source / name).read_bytes()).hexdigest() != info["sha256"]:
             raise ValueError("reference_source_digest_mismatch:" + name)
-    if "XPolicyLab" in sys.modules:
-        raise RuntimeError("reference_requires_its_own_process_namespace")
-    package = types.ModuleType("XPolicyLab")
-    package.__path__ = [str(source)]
-    sys.modules["XPolicyLab"] = package
-    prefix = "XPolicyLab.policy.RoboDojo_Agent_L3_Inspect"
-    return types.SimpleNamespace(
-        joint=importlib.import_module(prefix + ".policy"),
-        eef=importlib.import_module(prefix + "_EEF.policy"),
-        docs=importlib.import_module(prefix + "_EEF.docs"),
-        responses=importlib.import_module("XPolicyLab.utils.openai_responses"),
-        provenance=provenance,
-    )
+    # The vendored modules import each other as XPolicyLab.*; they bind those imports at module
+    # load. A host process that already imported the real XPolicyLab package (an XPolicyLab policy
+    # server) keeps it: the vendored package is loaded in its place, then the host's modules are
+    # restored. Without such a host package the vendored one stays registered as before.
+    def owned(name):
+        return name == "XPolicyLab" or name.startswith("XPolicyLab.")
+    host_modules = {name: module for name, module in sys.modules.items() if owned(name)}
+    for name in host_modules:
+        del sys.modules[name]
+    try:
+        package = types.ModuleType("XPolicyLab")
+        package.__path__ = [str(source)]
+        sys.modules["XPolicyLab"] = package
+        prefix = "XPolicyLab.policy.RoboDojo_Agent_L3_Inspect"
+        return types.SimpleNamespace(
+            joint=importlib.import_module(prefix + ".policy"),
+            eef=importlib.import_module(prefix + "_EEF.policy"),
+            docs=importlib.import_module(prefix + "_EEF.docs"),
+            responses=importlib.import_module("XPolicyLab.utils.openai_responses"),
+            provenance=provenance,
+        )
+    finally:
+        if host_modules:
+            for name in [name for name in sys.modules if owned(name)]:
+                del sys.modules[name]
+            sys.modules.update(host_modules)
 
 
 class ResponsesClient:

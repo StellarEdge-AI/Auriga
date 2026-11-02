@@ -67,7 +67,17 @@ class RoboDojoAdapter:
     robot_binding = get_robodojo_robot()
     robot_description = robot_binding.robot
 
-    def __init__(self, arguments):
+    def __init__(self, arguments, environment=None):
+        """Bind the adapter to a native RoboDojo environment.
+
+        ``environment`` is None for the worker process, which launches Isaac and
+        owns the native EvalEnv, its evaluator and its version provenance. A host
+        that already owns an environment passes an object with ``env``, ``app``
+        (``close()``), ``layout_acceptance`` and ``versions``, and optionally
+        ``robot_binding``, ``image_settings`` and ``motion_thresholds``. The
+        planning, execution and observation code below is the same in both
+        cases; an injected environment never initializes or exposes an evaluator.
+        """
         self.tracking_guard_enabled = bool(getattr(arguments, "tracking_guard", False))
         self.joint_replan_enabled = bool(getattr(arguments, "joint_replan", False))
         self.motion_safety_guard_enabled = bool(getattr(arguments, "motion_safety_guard", True))
@@ -77,35 +87,46 @@ class RoboDojoAdapter:
             raise ValueError("invalid_motion_execution_mode")
         if self.motion_execution_mode == "feedback" and self.tracking_guard_enabled:
             raise ValueError("feedback_requires_tracking_guard_disabled")
-        self.robot_binding = get_robodojo_robot(getattr(arguments, "robot_model_id", "arx-x5"))
+        injected = environment is not None
+        self.robot_binding = (getattr(environment, "robot_binding", None) if injected else None) or \
+            get_robodojo_robot(getattr(arguments, "robot_model_id", "arx-x5"))
         self.robot_description = self.robot_binding.robot
-        self.app = launch_application(arguments.gpu)
+        self.app = environment.app if injected else launch_application(arguments.gpu)
         import numpy as np
 
         self.np, self.directory = np, Path(arguments.run_dir)
         self.root, self.task = Path(arguments.robodojo_root), arguments.task
         self.observation_profile = arguments.observation_profile
-        # The parent serialized its resolved run settings; do not overlay host
-        # configuration again inside the worker, especially during resume.
-        self.image_settings = image_settings(json.loads(os.environ["AURIGA_IMAGE_SETTINGS"])) if "AURIGA_IMAGE_SETTINGS" in os.environ else image_settings()
         from auriga.core.config import motion_thresholds
-        self.motion_thresholds = (
-            motion_thresholds(json.loads(os.environ["AURIGA_MOTION_THRESHOLDS"]))
-            if "AURIGA_MOTION_THRESHOLDS" in os.environ
-            else motion_thresholds()
-        )
-        # A parent imported before the image upgrade still expects PNG-only IPC.
-        # New RobotBackend always supplies the frozen settings environment field.
-        self.legacy_png_ipc = "AURIGA_IMAGE_SETTINGS" not in os.environ
+        if injected:
+            # The host passes its resolved run settings directly (no IPC boundary).
+            self.image_settings = image_settings(environment.image_settings)
+            self.motion_thresholds = motion_thresholds(environment.motion_thresholds)
+            self.legacy_png_ipc = False
+        else:
+            # The parent serialized its resolved run settings; do not overlay host
+            # configuration again inside the worker, especially during resume.
+            self.image_settings = image_settings(json.loads(os.environ["AURIGA_IMAGE_SETTINGS"])) if "AURIGA_IMAGE_SETTINGS" in os.environ else image_settings()
+            self.motion_thresholds = (
+                motion_thresholds(json.loads(os.environ["AURIGA_MOTION_THRESHOLDS"]))
+                if "AURIGA_MOTION_THRESHOLDS" in os.environ
+                else motion_thresholds()
+            )
+            # A parent imported before the image upgrade still expects PNG-only IPC.
+            # New RobotBackend always supplies the frozen settings environment field.
+            self.legacy_png_ipc = "AURIGA_IMAGE_SETTINGS" not in os.environ
         self.recording, self.recorded_frames = False, []
         self.episode_index, self.evaluator_actions = 0, 0
         self.directory.mkdir(parents=True, exist_ok=True)
         root = self.root
-        # Keep this alias call compatible with hd_replay's camera override.
-        config = native_eval_config(root, arguments.task, arguments.seed, arguments.layout_id,
-                                    self.observation_profile, robot_binding=self.robot_binding)
-        self.env, self.layout_acceptance = create_environment(
-            arguments, self.app, self.directory, config, self.robot_binding)
+        if injected:
+            self.env, self.layout_acceptance = environment.env, dict(environment.layout_acceptance)
+        else:
+            # Keep this alias call compatible with hd_replay's camera override.
+            config = native_eval_config(root, arguments.task, arguments.seed, arguments.layout_id,
+                                        self.observation_profile, robot_binding=self.robot_binding)
+            self.env, self.layout_acceptance = create_environment(
+                arguments, self.app, self.directory, config, self.robot_binding)
         self.robot, self.obs = self.env.robot_manager, self.env.obs_manager
         self.goals = {"left": 1.0, "right": 1.0}
         self.last_dispatched_goals = dict(self.goals)
@@ -140,11 +161,16 @@ class RoboDojoAdapter:
                 self.observe(video_only=True)
             return result
         self.env.step = tracked_step
-        self.versions = self._versions(root)
+        self.versions = dict(environment.versions) if injected else self._versions(root)
         from auriga.robot.model.robot_model import urdf_manifest
         self.robot_model = urdf_manifest(root / self.robot_binding.urdf_path) if has_calibration(self.observation_profile) else None
         self.seed, self.layout_id = arguments.seed, arguments.layout_id
-        self._initialize_evaluator()
+        if injected:
+            # The environment owner keeps task predicates and scoring; evaluate() refuses.
+            self.evaluator_actions = int(self.env.take_action_cnt[0])
+            self.evaluator_failure = "native_evaluator_owned_by_environment_host"
+        else:
+            self._initialize_evaluator()
         self.camera_calibration = self._camera_calibration() if has_calibration(self.observation_profile) else None
         self._segment_plan_cache = {}
         from auriga.robot.backends.robodojo.scene_truth import make_recorder as make_scene_truth_recorder
