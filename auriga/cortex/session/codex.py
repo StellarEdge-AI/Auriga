@@ -763,7 +763,7 @@ class CodexSession:
             raise ValueError("resume_model_budget_semantics_changed: choose a fresh run")
         used = previous.get("completed_calls", 0)
         previous_attempts = previous.get("http_attempt_count", 0)
-        if used >= 180:
+        if used >= 170:
             raise ValueError("episode_model_request_limit_exhausted")
         self.model_limit_reached.clear()
         # A resumed run keeps the recovery policy it started with (none if it predates one).
@@ -780,7 +780,7 @@ class CodexSession:
                 self.store.set_state("runtime", "image_context_epoch", event.get("logical_call_id"))
             value = dict(completed_calls=used + self.model_proxy.request_count,
                          http_attempt_count=previous_attempts + self.model_proxy.attempt_count,
-                         counting=MODEL_COMPLETION_COUNTING, limit=180,
+                         counting=MODEL_COMPLETION_COUNTING, limit=170,
                          timeout_s=None, max_retries=DEFAULT_MAX_RETRIES, retry_policy=RETRY_POLICY,
                          transport_blocked=self.model_proxy.transport_blocked,
                          transport_error=self.model_proxy.blocked_error,
@@ -789,7 +789,7 @@ class CodexSession:
             self.store.event("model." + event["kind"], event, source="private_model_transport")
         self.model_proxy = ModelRequestProxy(upstream_url,
             upstream_auth_headers=upstream_auth,
-            max_requests=180-used, request_timeout_s=None, max_retries=DEFAULT_MAX_RETRIES, on_event=request_event,
+            max_requests=170-used, request_timeout_s=None, max_retries=DEFAULT_MAX_RETRIES, on_event=request_event,
             image_reuse=self.image_settings["reuse_exact_images"],
             image_trim=self.image_settings["trim_oversized_requests"],
             max_inline_images=self.image_settings["trim_max_inline_images"],

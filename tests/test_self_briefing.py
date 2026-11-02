@@ -102,8 +102,8 @@ class SelfBriefingStartupCheck(unittest.IsolatedAsyncioTestCase):
         await workbench.close()
         return workbench, prompt, instructions, manifest
 
-    async def test_default_on_and_disabled_or_failed_leaves_prompt_unchanged(self):
-        self.assertTrue(Config().features.self_briefing)
+    async def test_default_off_and_disabled_or_failed_leaves_prompt_unchanged(self):
+        self.assertFalse(Config().features.self_briefing)
         with tempfile.TemporaryDirectory() as first, tempfile.TemporaryDirectory() as second:
             _, off_prompt, off_instructions, off_manifest = await self.start(first, enabled=False)
             self.assertEqual(FakeAgent.instances, [])

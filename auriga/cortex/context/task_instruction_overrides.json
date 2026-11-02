@@ -1,5 +1,5 @@
 {
-  "version": "task_instruction_overrides_v2_public_20261030",
+  "version": "task_instruction_overrides_v3_fill_pen_holder_20261031",
   "scope": "Public-source corrections only: RoboDojo native instruction text, official task documentation, and upstream public issues. No evaluator thresholds, asset dimensions or values read from evaluator source or task configuration.",
   "aliases": {
     "arrange_largest_number_random": "arrange_largest_number"
@@ -26,6 +26,19 @@
       "sources": [
         "https://github.com/RoboDojo-Benchmark/RoboDojo/issues/72",
         "https://robodojo-benchmark.com/doc/sim-tasks/arrange-largest-number/ (Scoring table)"
+      ]
+    },
+    "fill_pen_holder": {
+      "instruction": "Place all four pens into the upright pen holder with their non-clip ends pointing down. Then return the robot to its initial position.",
+      "replace_sections": {
+        "Instruction": "Place all four pens into the upright pen holder with their non-clip ends pointing down. Then return the robot to its initial position.",
+        "Description": "There are four pens and a pen holder on the table. Place all four pens into the holder, keeping the holder upright.",
+        "Scoring": "Partial scores require both grippers to be open. Correct insertion requires the non-clip end to point down.\n\n| Score | Condition |\n| --- | --- |\n| 0 | No pen is correctly inserted into the pen holder. |\n| 10 | Any one pen is correctly inserted with its non-clip end pointing down into the upright pen holder. |\n| 25 | Any two pens are correctly inserted into the pen holder. |\n| 40 | Any three pens are correctly inserted into the pen holder. |\n| 90 | All four pens are inserted into the upright pen holder, but the robot has not returned to origin yet. |\n| 100 | All four pens are inserted, the pen holder is upright, and the robot returns to origin. |"
+      },
+      "reason": "User-approved correction: remove mandatory holder-grasping procedure, correct insertion orientation, and state the partial-score release condition.",
+      "sources": [
+        "docs/robodojo_prompt_vs_code_audit.md at fe84f7e",
+        "RoboDojo tasks/fill_pen_holder.py; pen asset audit; user-approved minimal wording 2026-10-31"
       ]
     }
   }

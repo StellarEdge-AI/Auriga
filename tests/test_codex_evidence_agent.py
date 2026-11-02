@@ -436,7 +436,7 @@ class NativeEvidenceAgentTest(unittest.TestCase):
             self.assertEqual(headers.get("thread-id"), result["thread_id"], headers)
             self.assertEqual(session.model_proxy.request_count, 2)
             self.assertEqual((session.codex_home / "config.toml").read_bytes(), actor_config)
-            self.assertEqual(store.read_state("runtime", "model_requests")["limit"], 180)
+            self.assertEqual(store.read_state("runtime", "model_requests")["limit"], 170)
             owners = [event["payload"] for event in store.events() if event["type"].endswith("model_thread_registered")]
             self.assertTrue(any(item.get("source") == "sol_visual_review" and item.get("caller_request_id") == "native-fixture" for item in owners))
 

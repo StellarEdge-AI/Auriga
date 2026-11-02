@@ -105,7 +105,7 @@ class FeaturesConfig(Section):
     task_instruction_overrides: bool = True
     # One task-independent pre-action call to the actor model that writes short
     # operating notes appended to the initial task text (auriga/cortex/context/self_briefing.py).
-    self_briefing: bool = True
+    self_briefing: bool = False
     vision_compare: bool = True
     robotic_view: bool = False
     stereo_guide: bool = False

@@ -131,14 +131,14 @@ class ModelProxyTest(unittest.TestCase):
                 self.assertEqual(proxy.max_retries, 12)
                 self.assertIsNone(proxy.request_timeout_s)
                 payload = b'{"input":"literal \\u4e2d", "stream":true}'
-                for index in range(180):
+                for index in range(170):
                     self.assertEqual(self.request(proxy, payload), complete_payload(index+1))
                 for _ in range(2):
                     with self.assertRaises(HTTPError) as rejected:
                         self.request(proxy)
                     self.assertEqual(rejected.exception.code, 429)
-                self.assert_completed_calls(proxy, 180)
-            self.assertEqual(len(self.requests), 180)
+                self.assert_completed_calls(proxy, 170)
+            self.assertEqual(len(self.requests), 170)
             self.assertEqual(self.requests[0][:2], ('/v1/responses', payload))
             self.assertEqual(self.requests[0][2]['Authorization'], 'Bearer fixture-private')
             self.assertEqual(len(limits), 1)
@@ -152,7 +152,7 @@ class ModelProxyTest(unittest.TestCase):
             self.assertEqual(phases[0]['body_bytes'], len(payload))
             self.assertEqual([e['wall_time'] for e in phases], sorted(e['wall_time'] for e in phases))
             finished = [e for e in events if e['kind'] == 'model_request_finished']
-            self.assertEqual(len(finished), 180)
+            self.assertEqual(len(finished), 170)
             self.assertTrue(all(e['transport_complete'] and not e['timed_out'] and e['usage_known'] for e in finished))
             self.assertEqual(metrics.stat().st_mode & 0o777, 0o600)
 

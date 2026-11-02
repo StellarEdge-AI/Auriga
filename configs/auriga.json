@@ -10,7 +10,7 @@
     "tool_catalog_profile": "full_v1",
     "default_task_notes": true,
     "task_instruction_overrides": true,
-    "self_briefing": true,
+    "self_briefing": false,
     "vision_compare": true,
     "robotic_view": false,
     "stereo_guide": false,
@@ -120,7 +120,7 @@
     "terminal": true
   },
   "model": {
-    "name": "gpt-6.1-sol",
+    "name": "gpt-6-astra",
     "effort": "high",
     "codex_home": "~/.codex",
     "price_card": null,

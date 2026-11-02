@@ -19,7 +19,7 @@ from test_completion_guidance import saved_observation
 
 ORGANIZE_NATIVE = ("Place the alarm clock on the drawer, put the figurine on the stand, "
                    "place the mouse on the mouse pad, and push the keyboard into the frame.")
-LISTED = ("organize_table", "arrange_largest_number", "arrange_largest_number_random")
+LISTED = ("organize_table", "arrange_largest_number", "arrange_largest_number_random", "fill_pen_holder")
 THRESHOLD = re.compile(r"\d+(\.\d+)? ?(cm|mm|m|deg|degrees|°)\b|\b\d+ ?x ?\d+\b", re.I)
 
 
@@ -37,13 +37,23 @@ class OverrideCatalogTest(unittest.TestCase):
                 self.assertEqual(task_instruction_override(task)["status"], "applied")
                 instruction, text = delivered(task)
                 # The native first line is kept and the official scoring table stays verbatim.
-                self.assertEqual(instruction, "native")
-                self.assertTrue(text.endswith(public_task_rules(task)["public_rules"][-1]))
+                if task != "fill_pen_holder":
+                    self.assertEqual(instruction, "native")
+                    self.assertTrue(text.endswith(public_task_rules(task)["public_rules"][-1]))
                 # Public sources only: no numeric threshold or dimension beyond the official text.
                 official = actor_task_rules_text(public_task_rules(task))
                 self.assertEqual(sorted(m.group(0) for m in THRESHOLD.finditer(text)),
                                  sorted(m.group(0) for m in THRESHOLD.finditer(official)))
                 self.assertNotIn("Scoring details", text)
+
+    def test_minimal_pen_rules_remove_conflicting_native_instruction(self):
+        native = "Hold the pen holder with one hand, place all pens into it with the other hand, then put it back down."
+        instruction, text = delivered("fill_pen_holder", native)
+        self.assertIn("non-clip ends pointing down", instruction)
+        self.assertIn("both grippers to be open", text)
+        self.assertNotIn("tip-up", text)
+        self.assertNotIn("Hold the pen holder", instruction + text)
+        self.assertNotIn("with the other hand", instruction + text)
 
     def test_organize_table_drops_drawer_clause(self):
         rules = public_task_rules("organize_table")
@@ -159,6 +169,17 @@ class GatewayPromptTest(unittest.IsolatedAsyncioTestCase):
         self.assertIn("cortex/context/task_instruction_overrides.json", manifest["source_sha256"])
         self.assertEqual(record["native_instruction"], ORGANIZE_NATIVE)
         self.assertEqual(record["task_instruction_override"]["status"], "applied")
+
+    async def test_minimal_pen_rules_reach_gateway_without_stale_rules(self):
+        native = public_task_rules("fill_pen_holder")["public_rules"][0].split("\n\n", 1)[1]
+        prompt, manifest, record = await self.initial_prompt("fill_pen_holder", native)
+        instruction, rules = delivered("fill_pen_holder", native)
+        self.assertTrue(prompt.startswith(f"Complete the following native RoboDojo task: {instruction}\n"))
+        self.assertIn(rules, prompt)
+        self.assertEqual(record["native_instruction"], native)
+        self.assertEqual(manifest["task_instruction_override"]["status"], "applied")
+        self.assertNotIn("tip-up", prompt)
+        self.assertNotIn("Hold the pen holder with one hand", prompt)
 
     async def test_disabled_and_unlisted_tasks_keep_historic_prompt(self):
         cases = (("organize_table", ORGANIZE_NATIVE, False, "disabled"),

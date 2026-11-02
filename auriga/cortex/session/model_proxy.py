@@ -189,7 +189,7 @@ def _http_worker():
 
 
 class ModelRequestProxy:
-    def __init__(self, upstream_url, *, max_requests=180, request_timeout_s=None, max_retries=None,
+    def __init__(self, upstream_url, *, max_requests=170, request_timeout_s=None, max_retries=None,
                  on_event=None, on_limit=None, metrics_path=None, image_reuse=False,
                  image_trim=True, request_projection=None, upstream_auth_headers=None, request_context=None,
                  max_inline_images=0, transport_recovery=None, recovery_gate=None):

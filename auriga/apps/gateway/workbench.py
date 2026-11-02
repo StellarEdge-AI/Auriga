@@ -505,7 +505,7 @@ class Workbench(WorkbenchRoutes):
                             task=self.task, seed=self.seed, layout_id=self.layout_id,
                             max_actions=self.harness.max_actions if isinstance(self.harness, Harness) else None,
                             actor_wait_budget_s=wall_budget_s,
-                            runtime_protocol="robodojo-native-v1", model_request_limit=180,
+                            runtime_protocol="robodojo-native-v1", model_request_limit=170,
                             model_request_count_basis="delivered usable completed actor, visual-helper and compaction responses; failed/incomplete attempts excluded",
                             model_attempt_max_retries=DEFAULT_MAX_RETRIES,
                             model_request_timeout_s=None, model_auto_retries=DEFAULT_MAX_RETRIES, model_retry_policy=RETRY_POLICY,
