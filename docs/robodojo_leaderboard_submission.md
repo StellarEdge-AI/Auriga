@@ -81,7 +81,7 @@ v5 是 Auriga 在 Isaac 进程旁边起一个 worker 直接驱动仿真。提交
 | 运行时 `auriga_xpl/runtime.py` | 等价于 Auriga 的 `serve --benchmark`：官方任务文本、override、completion hook 全部注入。每局串行执行，每局开始都新建空 grasp memory、复位 planner | 配置三层叠加：Auriga 默认值、所钉 commit 的 `configs/auriga.json`、`auriga_eval.json`（只放部署项：sandbox、视频、PTY、scene_truth 关闭） |
 | 规划器 `vendor/robodojo_planner/` | vendored RoboDojo 自己的 `CuroboPlanner` 和 ARX X5 机器人描述，cuRobo 用 RoboDojo 钉的 `d17b54c`。加了一个 NumPy 2 兼容子类，按 NumPy 1 的类型提升规则重算目标四元数 | 与仿真内 planner 逐点相同（见 §5） |
 | 标定 `assets/arx_x5_calibration.json` + `auriga_xpl/calibration.py` | 头相机用冻结常量；腕相机用常量加 URDF 正运动学，输入是实测关节角 | 与 worker 输出的 `calibration_id` 相同 |
-| 感知 `auriga_xpl/perception.py` | policy server 自己启动、做 health 检查、停止 VGGT-Omega 和 SAM 3.1 服务。服务代码是所钉 Auriga commit 里的 `services/vggt_height`（点选和文本 mask 都走 SAM 3.1），启动参数与它的 `start.sh` 相同；adapter 里不放服务代码 | 与 v5 G4（1500 局）所用版本相同；v5 G1–G3 用的是 hp 版（点选走 SAM 2.1），对比见 §5。hp 版提交分支（`b59af89`）不在公开仓库，内部存档为 git bundle |
+| 感知 `auriga_xpl/perception.py` | policy server 自己启动、做 health 检查、停止 VGGT-Omega 和 SAM 3.1 服务。服务代码是所钉 Auriga commit 里的 `services/vggt_height`（点选和文本 mask 都走 SAM 3.1），启动参数与它的 `start.sh` 相同；adapter 里不放服务代码 | 在 v5 G4（1500 局）所用版本上加了点选扣除机器人像素的修复（§2.3）；v5 G1–G3 用的是 hp 版（点选走 SAM 2.1），对比见 §5。hp 版提交分支（`b59af89`）不在公开仓库，内部存档为 git bundle |
 | 模型 API | 每个 server 写一份私有 Codex provider 配置，走 Responses API，key 只从环境变量或 0600 文件读，不写进任何文件 | endpoint 和 key 由我们提供，仓库里留空 |
 | 安装 | `install.sh` 依次完成：clone 钉好的 Auriga，安装 XPolicyLab（editable），装 planner，从 HF 固定 revision 下载机器人 mesh，安装感知环境，下载 8.1 GB 权重（VGGT-Omega + SAM 3.1）；所有下载都做 SHA-256 校验 | — |
 
@@ -96,7 +96,7 @@ v5 是 Auriga 在 Isaac 进程旁边起一个 worker 直接驱动仿真。提交
 | 执行层等价性 | 不调用模型，把 12 个任务（覆盖 5 个维度）的 v5 真实工具调用按原顺序分别送进 v5 私有版和提交版 | 闭源重放 12/12 复现原局的评分和动作数（说明重放方法可靠）。提交版对 v5 私有版：12/12 评分和动作数相同，机器人测量状态逐步相同（最大差 0），native step 逐步相同。初始 prompt 和 20 个工具定义逐字相同。工具返回只在感知字段有出入，v5 私有版自己跑两遍也一样有 |
 | 感知两版离线精度 | 230 帧初始布局图，按仿真真值对比 hp 版和 Auriga 仓库版 | 两版总体持平。hp 版错检更少、点选长尾误差更小；仓库版按物体名查找的召回更高、mask 略贴合 |
 | 操作中途点选对比 | v5 G3 中途帧上模型实际点击的约 1200 个像素，按 FK 投影的机械臂轮廓判定返回 mask 是否落在机械臂上 | 中途结果（580 个配对点击）：返回机械臂 mask 的比例 hp 版 0%、仓库版 2.8%（16 个，全部单向，p≈3e-5）。只出现在离机械臂 10 px 以内的点击（这类点击占 10%）且都在头相机；点在机械臂上时 hp 版多回 no_object，仓库版多返回夹爪 mask，报出的高度与夹爪顶差约 3 cm。其余情况两版持平。据此选用 3.1-only |
-| 点选修复验证 | 同一批 800 个中途点击、530 个请求，用 `7fabe90` 的服务全量重跑，与未修 repo 版、v5 hp 版逐点击对比 | 返回机械臂 mask：21 → 2（v5 为 0；剩下 2 个点击落在已由文本或自动 mask 找到的物体上，走复用路径，不经过点选检查）。`no_object_mask`：5 → 23（v5 为 31，对 v5 配对 11 对 3，p = 0.057）。另有 108 个点击保留物体但扣掉了部分机器人像素。selfcheck 通过。先试的整块拒绝方案把 `no_object_mask` 推到 40，弃用 |
+| 点选修复验证 | 同一批 800 个中途点击、530 个请求，用 `7fabe90` 的服务全量重跑，与未修 repo 版、v5 hp 版逐点击对比；`ced0335` 的残片规则只做了离线推算 | 返回机械臂 mask：21 → 2（v5 为 0；剩下 2 个点击落在已由文本或自动 mask 找到的物体上，走复用路径，不经过点选检查）。`no_object_mask`：5 → 23（v5 为 31，对 v5 配对 11 对 3，p = 0.057）。另有 108 个点击保留物体但扣掉了部分机器人像素。selfcheck 通过。先试的整块拒绝方案把 `no_object_mask` 推到 40，弃用 |
 | XPolicyLab debug 闭环 | `EVAL_ENV_TYPE=debug`，plain 和 `DEBUG_OBS_ENCODED=1` 各一次 | 都到 `[MAIN] eval finished`，0 traceback |
 | 真实闭环 smoke | 标准 `eval.sh`（`EVAL_ENV_TYPE=sim`）+ 真实模型，跑 4 局 | 4/4 跑通。同一 server 连续多局后无进程、显存、fd 泄漏 |
 | 端到端验证 | 未改动的上游 RoboDojo main（`f57e163`）+ XPolicyLab `0075cc9`，从全新 `install.sh` 开始，5 个任务 × 2 layout × 2 种感知，共 20 局 | 20/20 局经标准 `eval.sh` 正常结束，成败以 RoboDojo `_result.json` 为准，适配层没有报错；两种感知整局表现无可分辨差异。全新 `install.sh` 一次通过（23.7 min，含本次修复的 conda 服务条款步骤）。这批只验证功能，不作为成绩 |
@@ -109,10 +109,11 @@ v5 是 Auriga 在 Isaac 进程旁边起一个 worker 直接驱动仿真。提交
 - 感知精度只测了初始布局帧，没有覆盖抓取后、物体被移动、手里拿着物体的情况。
 - 显存数据只在 RTX 4090 上测过（数字见 adapter README）。
 - 3.1-only 分支没有再跑真实评测局：评测主流程未改，端到端验证里 repo 版 10 局走的就是同一套感知代码；改动后只做了安装脚本、服务启动、health、真实请求、显存、debug 闭环与静态检查。
+- `ced0335` 的残片规则没有在服务上实际跑过：只做了语法检查，效果（`no_object_mask` 23 → 27）是按 pointfix2 的数据离线推算的。
 
 ## 7. 复核方法
 
-1. **Auriga 改动**：`git diff 3e1be75..7fabe90 -- . ':!docs'`，应只涉及 §2 列出的文件。
+1. **Auriga 改动**：`git diff 3e1be75..ced0335 -- . ':!docs'`，应只涉及 §2 列出的文件。
 2. **adapter**：看 StellarEdge-AI/XPolicyLab 分支 `policy/auriga` 相对 upstream `0075cc9` 的 diff，应只新增 `policy/Auriga/`。
 3. **静态检查**：在 XPolicyLab checkout 里运行
    `bash check_adapter.sh <XPolicyLab checkout> Auriga upstream/main`。
