@@ -89,7 +89,7 @@ v5 是 Auriga 在 Isaac 进程旁边起一个 worker 直接驱动仿真。提交
 | 感知两版离线精度 | 230 帧初始布局图，按仿真真值对比 hp 版和 Auriga 仓库版 | 两版总体持平。hp 版错检更少、点选长尾误差更小；仓库版按物体名查找的召回更高、mask 略贴合。提交 hp 版，与 v5 主体一致 |
 | XPolicyLab debug 闭环 | `EVAL_ENV_TYPE=debug`，plain 和 `DEBUG_OBS_ENCODED=1` 各一次 | 都到 `[MAIN] eval finished`，0 traceback |
 | 真实闭环 smoke | 标准 `eval.sh`（`EVAL_ENV_TYPE=sim`）+ 真实模型，跑 4 局 | 4/4 跑通。同一 server 连续多局后无进程、显存、fd 泄漏 |
-| 端到端验证 | 未改动的上游 RoboDojo main（`f57e163`）+ XPolicyLab `0075cc9`，从全新 `install.sh` 开始，5 个任务 × 2 layout × 2 种感知，共 20 局 | 进行中。截至写作时 17/20 局正常结束，适配层没有报错。这批只验证功能，不作为成绩 |
+| 端到端验证 | 未改动的上游 RoboDojo main（`f57e163`）+ XPolicyLab `0075cc9`，从全新 `install.sh` 开始，5 个任务 × 2 layout × 2 种感知，共 20 局 | 20/20 局经标准 `eval.sh` 正常结束，成败以 RoboDojo `_result.json` 为准，适配层没有报错；两种感知整局表现无可分辨差异。全新 `install.sh` 一次通过（23.7 min，含本次修复的 conda 服务条款步骤）。这批只验证功能，不作为成绩 |
 | 静态检查 | `check_adapter.sh`：CONTRIBUTING 规定的检查，加 key 和私有引用扫描、CRLF、文件大小、README 模板 | 通过。剩下两类人工判定的提示：感知服务内部解码自己的 HTTP 图像数据（不是 XPolicyLab 观测）；Isaac 版本号 `5.1.0.0` 被识别成 IP 形字符串 |
 
 ## 6. 没有覆盖到的
