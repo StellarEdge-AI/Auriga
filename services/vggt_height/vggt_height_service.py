@@ -241,7 +241,7 @@ def pick_mask(masks, iou, u, v):
 # -> drop support / background / robot masks -> per mask VGGT points -> centre, top, bottom, footprint (PCA yaw,
 # length, width), principal-axis tilt, support relation, depth confidence, plausibility flags. No names, no truth.
 OT_VERSION = "object-table-v5-hp1"
-OT = dict(stride=8, min_above=0.004, bg_height=0.45, max_area_frac=0.08, min_area=40, iou=0.50, stab=0.80, min_relief=0.004,
+OT = dict(stride=8, min_above=0.004, bg_height=0.45, max_area_frac=0.08, min_area=40, robot_click_cut=0.90, iou=0.50, stab=0.80, min_relief=0.004,
           above_frac=0.6, overlap=0.3, batch=64, robot_radius=0.05, robot_frac=0.5, cluster_frac=0.6,
           contact_margin=0.03, max_object_height=0.30, low_conf_rank=0.25, support_gap=0.02, order="area",
           floating=0.03, reanchor=1, reanchor_mode="thickness", reanchor_margin=0.0, reuse_iou=0.5, mask_core=0,
@@ -621,9 +621,13 @@ def object_table(req):
         # The caller's robot pixel mask is cut from a point mask even when robot segments are supplied (the 3D+2D
         # segment check of screen() does not run on this path); too little left means no object. Without it a click on
         # or next to the gripper returned the arm itself as the requested object.
+        # A click on the robot whose mask is almost all robot pixels targeted the robot: the few pixels left after the
+        # cut are fragments around the gripper, not an object.
         if pmask is not None and pix_mask is not None:
+            area_before = int(pmask.sum())
             pmask = pmask & ~pix_mask
-            if pmask.sum() < cfg["min_area"]:
+            left = int(pmask.sum())
+            if left < cfg["min_area"] or (pix_mask[vi, ui] and left <= (1.0 - cfg["robot_click_cut"]) * area_before):
                 pmask = None
         st = object_stats(rec, pmask, support_z, T, K, cfg["floating"], explicit=True) if pmask is not None else None
         if st is None:
