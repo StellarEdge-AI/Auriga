@@ -14,7 +14,7 @@
 
 v5 主体以外的偏离格：G4 有 1000 局的记忆模型配成了 gpt-6-sol，G2 seed 0 有 380 局多带一个未合入的 PR，G2 有 4 格开了 self-briefing。这些格子任何单一冻结版本都复现不了，提交版也不去对齐它们。提交版对齐的是 v5 主体。
 
-本地结果表（2026-11-03）：交给评测方的 `robodojo.sh summarize` 结果是 **57.3% SR / 63.6 Score**，也是 PR 正文的参考值。它由 v5 的逐局结果转换成 RoboDojo 原生 `_result.json` 树后，用官方 summarize（RoboDojo `f57e163`）生成：126 格、6300 局，未评分的 5 局按失败、0 分计。和对外汇报的 57.7% / 64.0 只差在 G2 † 4 格：这 4 格的重跑没有逐局数据，改用 G2 原结果。其中 G4 ◆ 8 格取自 G4 在 bjgpu02 上的 muze 重测目录，G1 fill_pen_holder s1/s2 取自 G1 HF 的 minimal-rules 导出。转换脚本、逐局表和逐格来源在 `release/xpolicylab_auriga/local_results/`，不在本仓库。
+本地结果表（2026-11-03）：交给评测方的 `robodojo.sh summarize` 结果是 **57.3% SR / 63.6 Score**，也是 PR 正文的参考值。它由 v5 的逐局结果转换成 RoboDojo 原生 `_result.json` 树后，用官方 summarize（RoboDojo `f57e163`）生成：126 格、6300 局，未评分的 5 局按失败、0 分计。和对外汇报的 57.7% / 64.0 只差在 G2 † 4 格：这 4 格的重跑没有逐局数据，改用 G2 原结果。其中 G4 ◆ 8 格取自 G4 的重测运行目录，G1 fill_pen_holder s1/s2 取自 G1 HF 的 minimal-rules 导出。转换脚本、逐局表和逐格来源在 `release/xpolicylab_auriga/local_results/`，不在本仓库。
 
 ## 2. 相对公开版的改动（Auriga 仓库，3 个代码 commit）
 
