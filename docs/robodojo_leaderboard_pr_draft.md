@@ -38,7 +38,7 @@ Auriga is an agent harness. A language model (`gpt-6-astra`, reasoning effort `h
 
 - [x] Simulator eval: the adapter was run end to end with `eval.sh` (`EVAL_ENV_TYPE=sim`, real model endpoint) on an unmodified RoboDojo main checkout (`f57e163`) and XPolicyLab main (`0075cc9`) after a fresh `install.sh`.
 
-  Reference result (our runs, three seeds, 6,300 episodes): 57.7% SR / 64.0 Score.
+  Reference result (our runs, three seeds, 6,300 episodes): 57.3% SR / 63.6 Score.
 
 ## Checkpoint (required for leaderboard evaluation)
 No policy checkpoint. The only downloaded files are the robot meshes and the perception weights, fetched by `install.sh` and checked against pinned SHA-256 digests (no Hugging Face token needed):
