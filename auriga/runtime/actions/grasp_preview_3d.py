@@ -21,6 +21,50 @@ from ...perception.external.pose_skill import (
     closure_yaws,
     nearest,
 )
+from ...perception.external.virtual_field import VirtualSpatialField, flange_pose_to_grasp_pose
+
+
+def _resolve_robot_state(harness, obs_id):
+    """从 harness 当前观测或历史观测归档中提取实测 robot_state。"""
+    obs = None
+    cur_fn = getattr(harness, "current_observation", None)
+    if callable(cur_fn):
+        try:
+            cand = cur_fn()
+            if isinstance(cand, dict) and (not obs_id or cand.get("observation_id") == obs_id):
+                obs = cand
+        except Exception:
+            obs = None
+    if obs is None and obs_id and getattr(harness, "scene", None) is not None:
+        try:
+            obs = harness.scene.observation(getattr(harness, "identity", {}), obs_id)
+        except Exception:
+            obs = None
+    if not isinstance(obs, dict):
+        return None
+    if isinstance(obs.get("robot_state"), dict):
+        return obs["robot_state"]
+    ref = obs.get("robot_state_ref")
+    if ref:
+        resolve_json = getattr(getattr(harness, "scene", None), "resolve_json", None)
+        if callable(resolve_json):
+            try:
+                res = resolve_json(ref)
+                if isinstance(res, dict):
+                    return res
+            except Exception:
+                pass
+        resolve_art = getattr(getattr(harness, "store", None), "resolve_artifact", None)
+        if callable(resolve_art):
+            try:
+                import json
+                _, raw = resolve_art(ref)
+                res = json.loads(raw)
+                if isinstance(res, dict):
+                    return res
+            except Exception:
+                pass
+    return None
 
 
 def _stage_pose_for_arm(stage, arm):
@@ -30,6 +74,14 @@ def _stage_pose_for_arm(stage, arm):
         gp = gp[arm]
     if isinstance(gp, dict) and "position_m" in gp and "angles_deg" in gp:
         return gp
+    waypoints = ((own.get("path") or {}).get("waypoints")) if isinstance(own.get("path"), dict) else None
+    if isinstance(waypoints, list) and waypoints:
+        wp = waypoints[-1]
+        if isinstance(wp, dict) and arm in wp and isinstance(wp[arm], dict):
+            wp = wp[arm]
+        if isinstance(wp, dict) and "position_m" in wp and "quaternion_xyzw" in wp:
+            conv = flange_pose_to_grasp_pose(wp["position_m"], wp["quaternion_xyzw"])
+            return dict(position_m=conv["grasp_position_m"], angles_deg=conv["angles_deg"])
     return None
 
 
@@ -87,6 +139,8 @@ def _extract_closing_grasp_stages(action):
                     arm=arm,
                     position_m=[float(v) for v in gp["position_m"]],
                     angles_deg=[float(v) for v in gp["angles_deg"]],
+                    contact_region=str(gp.get("contact_region") or stage.get("contact_region") or "pad_center"),
+                    contact_depth_m=gp.get("contact_depth_m") if gp.get("contact_depth_m") is not None else stage.get("contact_depth_m"),
                     grip_guard=guard,
                 )
             )
@@ -125,7 +179,7 @@ def _match_object_row(table, gx, gy):
 
 
 def audit_batch_grasp_3d(harness, action, observation_id=None):
-    """对批次中的闭合抓取阶段执行 3D 几何与门禁审计；无缓存 object_table 时返回 (None, [])。"""
+    """对批次中的闭合抓取阶段与搬运轨迹执行 3D 几何与门禁审计；无缓存 object_table 时返回 (None, [])。"""
     obs_id = observation_id or (action or {}).get("based_on_observation_id")
     if not obs_id:
         return None, []
@@ -133,9 +187,10 @@ def audit_batch_grasp_3d(harness, action, observation_id=None):
     if not isinstance(table, dict) or not table.get("rows"):
         return None, []
     closing_stages = _extract_closing_grasp_stages(action)
-    if not closing_stages:
-        return None, []
     support_z = table.get("table_z")
+    robot_state = _resolve_robot_state(harness, obs_id)
+    vf = VirtualSpatialField(objects=table, table_z=support_z, robot_state=robot_state)
+    sim_report = vf.simulate_stages((action or {}).get("stages") or [])
     stage_audits, targets_3d, warnings = [], [], []
     for item in closing_stages:
         gx, gy, gz = item["position_m"]
@@ -200,7 +255,42 @@ def audit_batch_grasp_3d(harness, action, observation_id=None):
                 f"{oid} estimated width={width*1000:.1f}mm and may false-pause; consider non_empty (1.5mm) or rigid_object (2.0mm)."
             )
 
-        stage_risk_flags = [s for s in (axis_status, height_status, guard_status) if s != "ok"]
+        # 调用虚拟空间模拟场执行双指三维实体干涉与咬合体积评估
+        grasp_eval = vf.evaluate_grasp(
+            arm=item["arm"],
+            position_m=[gx, gy, gz],
+            angles_deg=[pitch, roll, yaw],
+            target_id=oid,
+            contact_region=item.get("contact_region", "pad_center"),
+            contact_depth_m=item.get("contact_depth_m"),
+        )
+        colliding_neighbors = grasp_eval.get("colliding_neighbor_ids") or []
+        neighbor_clearance = grasp_eval.get("neighbor_clearance_m")
+        opt_pose = grasp_eval.get("optimal_grasp_pose")
+        finger_collision_status = "ok"
+        if colliding_neighbors and isinstance(neighbor_clearance, (int, float)) and neighbor_clearance < -0.005:
+            finger_collision_status = "warn_finger_collides_neighbor"
+            stage_warnings.append(
+                f"Stage '{item['stage_id']}' open jaws collide with neighboring object(s) {', '.join(colliding_neighbors)} "
+                f"(clearance={neighbor_clearance*1000:.1f}mm); candidate grasp pose is "
+                f"position_m={opt_pose['position_m']}, angles_deg={opt_pose['angles_deg']}."
+            )
+
+        bite_status = "ok"
+        reasons = grasp_eval.get("failure_reasons") or []
+        lat_ecc = grasp_eval.get("lateral_eccentricity_m") or 0.0
+        if height_status == "ok" and axis_status == "ok" and (
+            "grasp_misses_target_footprint" in reasons or "excessive_lateral_eccentricity" in reasons
+        ):
+            bite_status = "warn_lateral_eccentricity"
+            stage_warnings.append(
+                f"Stage '{item['stage_id']}' grasp lateral eccentricity={lat_ecc*1000:.1f}mm causes open finger to strike "
+                f"or miss {oid}; align grasp XY closer to {opt_pose['position_m'] if opt_pose else centre}."
+            )
+
+        stage_risk_flags = [
+            s for s in (axis_status, height_status, guard_status, finger_collision_status, bite_status) if s != "ok"
+        ]
         warnings.extend(stage_warnings)
         stage_audits.append(
             dict(
@@ -220,6 +310,14 @@ def audit_batch_grasp_3d(harness, action, observation_id=None):
                 recommended_pad_z_m=round(pad_z, 4),
                 height_check=height_status,
                 grip_guard_check=guard_status,
+                finger_collision_check=finger_collision_status,
+                bite_check=bite_status,
+                theoretically_graspable=grasp_eval["theoretically_graspable"],
+                vertical_bite_m=grasp_eval["vertical_bite_m"],
+                lateral_eccentricity_m=grasp_eval["lateral_eccentricity_m"],
+                neighbor_clearance_m=neighbor_clearance,
+                colliding_neighbor_ids=colliding_neighbors,
+                optimal_grasp_pose=opt_pose,
                 risk_flags=stage_risk_flags,
                 warnings=stage_warnings,
             )
@@ -234,14 +332,33 @@ def audit_batch_grasp_3d(harness, action, observation_id=None):
                 top_z_m=float(top_z) if isinstance(top_z, (int, float)) else centre[2],
             )
         )
-    if not stage_audits:
-        return None, []
     all_risk_flags = [flag for stage in stage_audits for flag in stage.get("risk_flags", [])]
+    for sr in sim_report.get("stage_reports") or []:
+        if sr.get("status") == "path_collision" and (sr.get("path_clearance_m") or 0.0) < -0.005:
+            col_objs = sr.get("colliding_objects") or []
+            rec_z = sr.get("recommended_safe_z_m")
+            if "warn_transport_collision" not in all_risk_flags:
+                all_risk_flags.append("warn_transport_collision")
+            warnings.append(
+                f"Stage '{sr['stage_id']}' transport trajectory collides with 3D object(s) {', '.join(col_objs)} "
+                f"(clearance={sr['path_clearance_m']*1000:.1f}mm); raise transit z to at least {rec_z:.3f}m."
+            )
+    if not stage_audits and not warnings:
+        return None, []
     review = dict(
         observation_id=obs_id,
         status="warnings_detected" if warnings else "aligned",
         risk_flags=all_risk_flags,
         stages=stage_audits,
         warnings=warnings,
+        virtual_field_simulation=dict(
+            status=sim_report["status"],
+            theoretically_valid=sim_report["theoretically_valid"],
+            min_path_clearance_m=sim_report["min_path_clearance_m"],
+            transport_clearance_m=sim_report["min_path_clearance_m"],
+            stage_reports=sim_report["stage_reports"],
+            virtual_world_after=sim_report["virtual_world_after"],
+            suggested_fixes=sim_report["suggested_fixes"],
+        ),
     )
     return review, targets_3d
