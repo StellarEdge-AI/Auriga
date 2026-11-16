@@ -178,6 +178,7 @@ def episode_summary(store, identity, session, harness, *, benchmark, final_statu
               "actor_continuation_count": getattr(harness, "actor_continuation_count", 0),
               "actor_stall": getattr(harness, "actor_stall", None),
               "native_episode": store.read_state("runtime", "native_episode"),
+              "policy_delegation": store.read_state("runtime", "policy_delegation"),
               "model_requests": store.read_state("runtime", "model_requests"),
               "model_budget_exhausted": model_budget_exhausted(session),
               "visual_review_usage": [dict(model=value["model"], usage=value.get("usage")) for value in reviews],
