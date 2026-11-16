@@ -167,6 +167,7 @@ def summarize(root, price_card=None):
                 task_success=summary.get("task_success"), normalized_score=summary.get("normalized_score"),
                 action_count=summary.get("action_count"), elapsed_wall_s=summary.get("elapsed_wall_s"),
                 native_episode=summary.get("native_episode"), model_requests=summary.get("model_requests"),
+                policy_delegation=summary.get("policy_delegation"),
                 termination_reason=summary.get("termination_reason"),
                 termination_authority=summary.get("termination_authority"),
                 actor_stall=summary.get("actor_stall"),
